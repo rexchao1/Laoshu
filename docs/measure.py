@@ -84,7 +84,10 @@ def main():
     for f in fields:
         out(f'| `{f}` | {differing[f]} |')
     out('')
-    out('They differ only in `part_of_speech`, which the app never shows, so collapsing loses nothing on screen.')
+    assert all(v == 0 for v in differing.values()), (
+        'a duplicate group differs in a field the app displays; the collapse rule is unsafe')
+    out('They differ only in `part_of_speech`, which the app never shows, so collapsing loses '
+        'nothing on screen. This script asserts it rather than asserting it in prose.')
     out('')
 
     out('## Words per level, against the published HSK 3.0 standard')
@@ -98,8 +101,15 @@ def main():
         cum += counts[lvl]
         out(f'| {lvl} | {counts[lvl]} | {cum} | {official[lvl]} |')
     out('')
-    out(f'An exact match at every level. Levels 7-9 are one undifferentiated bucket of '
-        f'{sum(1 for r in all_rows if r["level"] == "7-9")} words and are filtered out.')
+    assert all(counts[l] for l in range(1, 7)), 'a level came out empty'
+    running = 0
+    for lvl in range(1, 7):
+        running += counts[lvl]
+        assert running == official[lvl], (
+            f'level {lvl} cumulative {running} does not match the published standard {official[lvl]}')
+    out(f'An exact match at every level, asserted by this script. Levels 7-9 are one '
+        f'undifferentiated bucket of {sum(1 for r in all_rows if r["level"] == "7-9")} words '
+        f'and are filtered out.')
     out('')
 
     out('## `word_index` blocks')
@@ -110,9 +120,14 @@ def main():
         idx = [int(r['word_index']) for r in words if int(r['level']) == lvl]
         out(f'| {lvl} | {min(idx)} | {max(idx)} |')
     out('')
-    out('Each level owns a contiguous block of `word_index`, and within a block the order is '
-        'alphabetical by pinyin. After the collapse every word sits in its own level\'s block, '
-        'so ascending `word_index` inside a level is alphabetical with no carried-up words leading.')
+    for lvl in range(1, 7):
+        idx = sorted(int(r['word_index']) for r in words if int(r['level']) == lvl)
+        assert idx == list(range(idx[0], idx[-1] + 1)), f'level {lvl} block is not contiguous'
+    out('Each level owns a contiguous block of `word_index`, asserted by this script. Within a '
+        'block the order is pinyin dictionary order, syllable first and then tone, matching '
+        '`pinyin_numbered`: `word_index` 3 to 6 are 爸爸 bàba, 吧 ba, 白天 báitiān, 百 bǎi, which '
+        'a plain alphabetical sort would not produce. After the collapse every word sits in its '
+        'own level\'s block, so no word carried up from a lower level leads a level.')
     out('')
 
     out('## Definition cleanup rule')
@@ -152,7 +167,8 @@ def main():
 
     out('## Speech synthesis: hanzi versus pinyin')
     out('')
-    out('macOS voice Tingting, the same speech stack as iOS `AVSpeechSynthesizer`, 2026-09-07:')
+    out('Hand-recorded on 2026-09-07, not derived from the source file by this script. macOS '
+        'voice Tingting, the same speech stack as iOS `AVSpeechSynthesizer`:')
     out('')
     out('| input | rendered duration |')
     out('| --- | --- |')

@@ -18,7 +18,7 @@ Duplicate groups differing in a field the app displays:
 | `definition_cc-cedict` | 0 |
 | `traditional_cc-cedict` | 0 |
 
-They differ only in `part_of_speech`, which the app never shows, so collapsing loses nothing on screen.
+They differ only in `part_of_speech`, which the app never shows, so collapsing loses nothing on screen. This script asserts it rather than asserting it in prose.
 
 ## Words per level, against the published HSK 3.0 standard
 
@@ -31,7 +31,7 @@ They differ only in `part_of_speech`, which the app never shows, so collapsing l
 | 5 | 1600 | 3600 | 3600 |
 | 6 | 1800 | 5400 | 5400 |
 
-An exact match at every level. Levels 7-9 are one undifferentiated bucket of 5622 words and are filtered out.
+An exact match at every level, asserted by this script. Levels 7-9 are one undifferentiated bucket of 5622 words and are filtered out.
 
 ## `word_index` blocks
 
@@ -44,7 +44,7 @@ An exact match at every level. Levels 7-9 are one undifferentiated bucket of 562
 | 5 | 2001 | 3600 |
 | 6 | 3601 | 5400 |
 
-Each level owns a contiguous block of `word_index`, and within a block the order is alphabetical by pinyin. After the collapse every word sits in its own level's block, so ascending `word_index` inside a level is alphabetical with no carried-up words leading.
+Each level owns a contiguous block of `word_index`, asserted by this script. Within a block the order is pinyin dictionary order, syllable first and then tone, matching `pinyin_numbered`: `word_index` 3 to 6 are 爸爸 bàba, 吧 ba, 白天 báitiān, 百 bǎi, which a plain alphabetical sort would not produce. After the collapse every word sits in its own level's block, so no word carried up from a lower level leads a level.
 
 ## Definition cleanup rule
 
@@ -71,7 +71,7 @@ The worst single form is `shì`: 是 (to be), 事 (matter), 市 (market; city), 
 
 ## Speech synthesis: hanzi versus pinyin
 
-macOS voice Tingting, the same speech stack as iOS `AVSpeechSynthesizer`, 2026-09-07:
+Hand-recorded on 2026-09-07, not derived from the source file by this script. macOS voice Tingting, the same speech stack as iOS `AVSpeechSynthesizer`:
 
 | input | rendered duration |
 | --- | --- |
