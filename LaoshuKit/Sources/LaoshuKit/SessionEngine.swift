@@ -1,5 +1,6 @@
 import Foundation
 import GRDB
+import Observation
 
 /// Which way a card was swiped.
 public enum SwipeDirection: Sendable {
@@ -36,6 +37,7 @@ public struct Card: Sendable, Equatable {
 /// D22: session state lives only in memory. Closing the app abandons
 /// whatever is left in the queue; the swipes already logged to `ReviewLog`
 /// stand regardless.
+@Observable
 public final class Session {
     private let reviewLog: ReviewLog
     private var queue: [Card]
@@ -45,6 +47,13 @@ public final class Session {
     public let drawnCount: Int
     public private(set) var finishedCount = 0
     public private(set) var parkedCount = 0
+
+    /// How many of `drawnCount` were swiped right the first time they were
+    /// shown, never having gone left first (D27).
+    public private(set) var firstAttemptRightCount = 0
+
+    /// Words parked by a third left swipe, in the order they parked (D27).
+    public private(set) var parkedWords: [Word] = []
 
     init(words: [Word], reviewLog: ReviewLog) {
         self.reviewLog = reviewLog
@@ -76,18 +85,29 @@ public final class Session {
         case .right:
             try reviewLog.record(wordIndex: card.word.wordIndex, grade: .good)
             finishedCount += 1
+            if card.leftSwipeCount == 0 {
+                firstAttemptRightCount += 1
+            }
 
         case .left:
             try reviewLog.record(wordIndex: card.word.wordIndex, grade: .again)
             card.requeued()
             if card.leftSwipeCount >= 3 {
                 parkedCount += 1
+                parkedWords.append(card.word)
             } else {
                 let insertIndex = min(3, queue.count)
                 queue.insert(card, at: insertIndex)
             }
         }
     }
+}
+
+/// A level as it appears on the level list: its number and how many words
+/// the catalogue holds for it, regardless of review state (D3).
+public struct LevelSummary: Sendable, Equatable {
+    public let level: Int
+    public let wordCount: Int
 }
 
 /// Decides which words come next and hands out sessions.
@@ -98,6 +118,19 @@ public final class SessionEngine {
     public init(dbQueue: DatabaseQueue) {
         self.dbQueue = dbQueue
         self.reviewLog = ReviewLog(dbQueue: dbQueue)
+    }
+
+    /// The six levels in the catalogue, in level order, each with its total
+    /// word count. Counts the whole level, not what is left unseen.
+    public func levelSummaries() throws -> [LevelSummary] {
+        try dbQueue.read { db in
+            try Row.fetchAll(
+                db,
+                sql: "SELECT level, COUNT(*) AS word_count FROM cat.word GROUP BY level ORDER BY level ASC;"
+            ).map { row in
+                LevelSummary(level: row["level"], wordCount: row["word_count"])
+            }
+        }
     }
 
     /// Draws the eight lowest `word_index` words in `level` that have never

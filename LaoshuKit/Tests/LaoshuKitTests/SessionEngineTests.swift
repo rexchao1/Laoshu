@@ -105,6 +105,45 @@ import Testing
     #expect(seen == [1, 2, 3, 4, 5])
 }
 
+@Test func testLevelSummariesReportsPerLevelCounts() throws {
+    let dbQueue = try TestFixtures.makeDatabase(levelCounts: [1: 3, 2: 2, 3: 5])
+    let engine = SessionEngine(dbQueue: dbQueue)
+
+    let summaries = try engine.levelSummaries()
+
+    #expect(summaries == [
+        LevelSummary(level: 1, wordCount: 3),
+        LevelSummary(level: 2, wordCount: 2),
+        LevelSummary(level: 3, wordCount: 5),
+    ])
+}
+
+@Test func testFirstAttemptRightCountOnlyCountsCleanSwipes() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 3)
+    let engine = SessionEngine(dbQueue: dbQueue)
+    let session = try engine.startSession(level: 1)
+
+    try session.swipe(.right) // word 1: right first try
+    try session.swipe(.left)  // word 2: goes left once
+    try session.swipe(.right) // word 3: right first try
+    try session.swipe(.right) // word 2 comes back, now right after a left
+
+    #expect(session.finishedCount == 3)
+    #expect(session.firstAttemptRightCount == 2)
+}
+
+@Test func testParkedWordsRecordsTheWordThatParked() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 1)
+    let engine = SessionEngine(dbQueue: dbQueue)
+    let session = try engine.startSession(level: 1)
+
+    try session.swipe(.left)
+    try session.swipe(.left)
+    try session.swipe(.left)
+
+    #expect(session.parkedWords.map(\.wordIndex) == [1])
+}
+
 @Test func testRequeuedCardIsPresentedFrontSide() throws {
     let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
     let engine = SessionEngine(dbQueue: dbQueue)
