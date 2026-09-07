@@ -10,6 +10,7 @@ struct SessionView: View {
     @State private var session: Session?
     @State private var loadError: String?
     @State private var dragOffset: CGSize = .zero
+    @State private var swipeError: String?
     private let speaker = SpeechSpeaker()
 
     private let swipeThreshold: CGFloat = 100
@@ -63,17 +64,25 @@ struct SessionView: View {
             .animation(.interactiveSpring(), value: dragOffset)
 
             VStack(spacing: 6) {
-                Text("tap to flip")
-                    .font(.footnote)
+                if let swipeError {
+                    Text(swipeError)
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                } else {
+                    Text("tap to flip")
+                        .font(.footnote)
+                        .foregroundStyle(.tertiary)
+                    HStack {
+                        Text("forgot")
+                        Spacer()
+                        Text("knew")
+                    }
+                    .font(.caption)
                     .foregroundStyle(.tertiary)
-                HStack {
-                    Text("forgot")
-                    Spacer()
-                    Text("knew")
+                    .padding(.horizontal, 48)
                 }
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-                .padding(.horizontal, 48)
             }
 
             Spacer()
@@ -94,6 +103,23 @@ struct SessionView: View {
         return Double(session.finishedCount + session.parkedCount) / Double(session.drawnCount)
     }
 
+    /// Writes the swipe to the review log and surfaces a failure on the card.
+    ///
+    /// A swipe that could not be recorded is never treated as recorded: the
+    /// session only advances when `swipe` returns, so a throw leaves the same
+    /// card in place. The message matters because the review log is the only
+    /// durable output of a session and the scheduler in a later checkpoint
+    /// replays it; a swipe that vanished silently would leave that schedule
+    /// wrong with nothing to show for it.
+    private func record(session: Session, _ direction: SwipeDirection) {
+        do {
+            swipeError = nil
+            try session.swipe(direction)
+        } catch {
+            swipeError = "That swipe was not saved. \(error.localizedDescription)"
+        }
+    }
+
     /// Ignores the gesture entirely while the card is still showing its
     /// front (D26): no movement, no advance, no write.
     private func dragGesture(session: Session, card: Card) -> some Gesture {
@@ -109,10 +135,10 @@ struct SessionView: View {
                 }
                 if value.translation.width > swipeThreshold {
                     dragOffset = .zero
-                    try? session.swipe(.right)
+                    record(session: session, .right)
                 } else if value.translation.width < -swipeThreshold {
                     dragOffset = .zero
-                    try? session.swipe(.left)
+                    record(session: session, .left)
                 } else {
                     dragOffset = .zero
                 }
