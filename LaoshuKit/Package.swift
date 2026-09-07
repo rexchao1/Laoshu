@@ -10,9 +10,15 @@ let package = Package(
     platforms: [.iOS(.v26), .macOS(.v14)],
     products: [
         .library(name: "LaoshuKit", targets: ["LaoshuKit"]),
+        .executable(name: "laoshu-build-db", targets: ["laoshu-build-db"]),
     ],
     targets: [
         .target(name: "LaoshuKit"),
+        .executableTarget(
+            name: "laoshu-build-db",
+            dependencies: ["LaoshuKit"],
+            linkerSettings: [.linkedLibrary("sqlite3")]
+        ),
         .testTarget(name: "LaoshuKitTests", dependencies: ["LaoshuKit"]),
     ]
 )
