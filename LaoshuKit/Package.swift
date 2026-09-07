@@ -12,13 +12,19 @@ let package = Package(
         .library(name: "LaoshuKit", targets: ["LaoshuKit"]),
         .executable(name: "laoshu-build-db", targets: ["laoshu-build-db"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/groue/GRDB.swift.git", from: "6.29.0"),
+    ],
     targets: [
-        .target(name: "LaoshuKit"),
+        .target(name: "LaoshuKit", dependencies: [.product(name: "GRDB", package: "GRDB.swift")]),
         .executableTarget(
             name: "laoshu-build-db",
             dependencies: ["LaoshuKit"],
             linkerSettings: [.linkedLibrary("sqlite3")]
         ),
-        .testTarget(name: "LaoshuKitTests", dependencies: ["LaoshuKit"]),
+        .testTarget(
+            name: "LaoshuKitTests",
+            dependencies: ["LaoshuKit", .product(name: "GRDB", package: "GRDB.swift")]
+        ),
     ]
 )
