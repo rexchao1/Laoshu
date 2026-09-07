@@ -8,6 +8,13 @@ import GRDB
 /// expects, without touching the app bundle or Application Support.
 enum TestFixtures {
     static func makeDatabase(wordCount: Int = 20, level: Int = 1) throws -> DatabaseQueue {
+        try makeDatabase(levelCounts: [level: wordCount])
+    }
+
+    /// Builds a throwaway catalogue with one contiguous block of `word_index`
+    /// per level, levels visited in ascending order, for tests that need more
+    /// than one level present (e.g. the level list's per-level counts).
+    static func makeDatabase(levelCounts: [Int: Int]) throws -> DatabaseQueue {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -25,14 +32,19 @@ enum TestFixtures {
                     definition TEXT NOT NULL
                 );
                 """)
-            for index in 1...max(wordCount, 1) where index <= wordCount {
-                try db.execute(
-                    sql: """
-                    INSERT INTO word (word_index, level, hanzi, pinyin, pinyin_numbered, definition)
-                    VALUES (?, ?, ?, ?, ?, ?);
-                    """,
-                    arguments: [index, level, "字\(index)", "zi\(index)", "zi4\(index)", "word \(index)"]
-                )
+            var index = 1
+            for level in levelCounts.keys.sorted() {
+                let count = levelCounts[level] ?? 0
+                for _ in 0..<count {
+                    try db.execute(
+                        sql: """
+                        INSERT INTO word (word_index, level, hanzi, pinyin, pinyin_numbered, definition)
+                        VALUES (?, ?, ?, ?, ?, ?);
+                        """,
+                        arguments: [index, level, "字\(index)", "zi\(index)", "zi4\(index)", "word \(index)"]
+                    )
+                    index += 1
+                }
             }
         }
         // Release the catalogue's own connection before the primary connection

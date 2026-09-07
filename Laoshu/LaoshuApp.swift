@@ -4,7 +4,7 @@ import SwiftUI
 struct LaoshuApp: App {
     var body: some Scene {
         WindowGroup {
-            PlaceholderView()
+            RootView()
         }
     }
 }
