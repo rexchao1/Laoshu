@@ -1,48 +1,77 @@
 # Laoshu measurements
 
-All figures derived from `data/hsk_word_list.tsv` at the commit that carries this file.
-Regenerate with `python3 docs/measure.py`.
+Derived from `data/hsk_word_list.tsv`. Regenerate with `python3 docs/measure.py > docs/measurements.md`.
 
-## Words per level, and cumulative against the published HSK 3.0 standard
+## Rows, words, and the collapse
+
+- Rows in source: 11105
+- Rows at levels 1-6: 5483
+- `word_index` values appearing more than once: 81, accounting for 83 extra rows
+- Distinct words after collapsing to the lowest level: **5400**
+
+Duplicate groups differing in a field the app displays:
+
+| field | groups differing |
+| --- | --- |
+| `word` | 0 |
+| `pinyin` | 0 |
+| `definition_cc-cedict` | 0 |
+| `traditional_cc-cedict` | 0 |
+
+They differ only in `part_of_speech`, which the app never shows, so collapsing loses nothing on screen.
+
+## Words per level, against the published HSK 3.0 standard
 
 | level | words | cumulative | official cumulative |
 | --- | --- | --- | --- |
 | 1 | 300 | 300 | 300 |
-| 2 | 204 | 504 | 500 |
-| 3 | 507 | 1011 | 1000 |
-| 4 | 1019 | 2030 | 2000 |
-| 5 | 1638 | 3668 | 3600 |
-| 6 | 1815 | 5483 | 5400 |
+| 2 | 200 | 500 | 500 |
+| 3 | 500 | 1000 | 1000 |
+| 4 | 1000 | 2000 | 2000 |
+| 5 | 1600 | 3600 | 3600 |
+| 6 | 1800 | 5400 | 5400 |
 
-Levels 7-9 ship as one undifferentiated bucket of 5622 words and are filtered out.
-Total rows in source: 11105. Levels 1-6 kept: 5483.
+An exact match at every level. Levels 7-9 are one undifferentiated bucket of 5622 words and are filtered out.
 
-## Definition cleanup rule, over levels 1-6
+## `word_index` blocks
+
+| level | lowest | highest |
+| --- | --- | --- |
+| 1 | 1 | 300 |
+| 2 | 301 | 500 |
+| 3 | 501 | 1000 |
+| 4 | 1001 | 2000 |
+| 5 | 2001 | 3600 |
+| 6 | 3601 | 5400 |
+
+Each level owns a contiguous block of `word_index`, and within a block the order is alphabetical by pinyin. After the collapse every word sits in its own level's block, so ascending `word_index` inside a level is alphabetical with no carried-up words leading.
+
+## Definition cleanup rule
 
 | | median | p90 | max |
 | --- | --- | --- | --- |
-| raw | 39 | 112 | 545 |
-| cleaned | 22 | 46 | 90 |
+| raw | 39 | 109 | 545 |
+| cleaned | 22 | 45 | 90 |
 
-Rows cleaning to empty across levels 1-6: **0**
+Rows cleaning to empty across all 5400 shipped words: **0**
 
 ## Pinyin collisions on exact toned pinyin
 
 | level range | words | sharing pinyin with another | share |
 | --- | --- | --- | --- |
 | 1-1 | 300 | 16 | 5.3% |
-| 1-3 | 1011 | 123 | 12.2% |
-| 1-6 | 5483 | 830 | 15.1% |
+| 1-3 | 1000 | 103 | 10.3% |
+| 1-6 | 5400 | 708 | 13.1% |
 
-The worst single form is `shì`, covering 是 (to be), 事 (matter), 市 (market; city), 室 (room), 试 (to test).
+The worst single form is `shì`: 是 (to be), 事 (matter), 市 (market; city), 室 (room), 试 (to test).
 
 ## Source-side disambiguation suffixes
 
-90 rows carry a trailing digit, e.g. 本1, 点1, 点1, 和1, 会1, 两1, 喂1, 别1, 打1, 等1. Stripped at build time; a zh-CN voice otherwise pronounces the digit.
+61 shipped words carry a trailing digit, e.g. 本1, 点1, 和1, 会1, 两1, 喂1, 别1, 打1, 等1, 点2. Stripped at build time; a zh-CN voice otherwise pronounces the digit.
 
 ## Speech synthesis: hanzi versus pinyin
 
-macOS voice Tingting, same speech stack as iOS AVSpeechSynthesizer, 2026-09-07:
+macOS voice Tingting, the same speech stack as iOS `AVSpeechSynthesizer`, 2026-09-07:
 
 | input | rendered duration |
 | --- | --- |
