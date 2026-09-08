@@ -12,22 +12,34 @@ public enum SwipeDirection: Sendable {
 ///
 /// D20: a requeued card is a new presentation, so `isFlipped` resets to
 /// `false` whenever the card goes back into the queue after a left swipe.
+///
+/// D26a: flipping is free in both directions, so `isFlipped` says only which
+/// face is showing right now. What gates a swipe is `hasBeenRevealed`, which
+/// turns true on the first flip to the back and stays true until a requeue.
+/// The two differ as soon as the card is flipped back to re-read the pinyin.
 public struct Card: Sendable, Equatable {
     public let word: Word
     public private(set) var leftSwipeCount = 0
     public private(set) var isFlipped = false
+
+    /// Whether the meaning has been shown at least once in this presentation.
+    public private(set) var hasBeenRevealed = false
 
     init(word: Word) {
         self.word = word
     }
 
     mutating func flip() {
-        isFlipped = true
+        isFlipped.toggle()
+        if isFlipped {
+            hasBeenRevealed = true
+        }
     }
 
     mutating func requeued() {
         leftSwipeCount += 1
         isFlipped = false
+        hasBeenRevealed = false
     }
 }
 
@@ -67,6 +79,7 @@ public final class Session {
 
     public var currentCard: Card? { queue.first }
 
+    /// Turns the current card over, in either direction (D26a).
     public func flipCurrentCard() {
         guard !queue.isEmpty else { return }
         queue[0].flip()

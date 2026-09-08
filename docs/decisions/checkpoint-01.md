@@ -86,3 +86,13 @@ The manual pass on the phone is Mickey's to run, after this closure task merges,
 6. Swiping left returns that card later in the same session.
 7. The session ends after eight new words with a summary.
 8. Tapping level 1 again shows words 9 through 16, not 1 through 8.
+
+## Amendments after the simulator pass, 2026-09-07
+
+The frozen plan is final, so these are recorded as amendments rather than edits to the decisions above. Both came from Mickey watching the app run in the iPhone 17 Pro simulator.
+
+D7a. Amends D7. The speaker glyph sits on the **front**, under the pinyin and hanzi, not on the back. Auto-play still fires once, on the first flip to the meaning, and not on any later turn of the same presentation. Cited: review answer 2026-09-07, "I want the speaker button on the front with the pinyin, not the back". The speaker is a button inside the card's tap area, so it takes its own taps and replaying never flips the card.
+
+D26a. Amends D26. Flipping is free in both directions and unlimited within a presentation, so a word can be looked at again as often as wanted. The swipe gate moves from "is showing the back" to "has shown the back at least once in this presentation", tracked by `Card.hasBeenRevealed`. A requeue clears it along with `isFlipped`, so a card coming back around must be recalled again before it can be graded. Cited: review answer 2026-09-07, "I want to be able to flip it as much as possible. Like if I wanted to see the word again". D26's reason survives intact: a card whose meaning was never shown still cannot write a review row, which is what protects the evidence D16 hands to checkpoint 2.
+
+Manual step 4 above now reads: swiping a card that has never been flipped does nothing, and swiping one flipped back to its front after a look at the meaning does grade it.

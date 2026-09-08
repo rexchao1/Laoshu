@@ -162,3 +162,44 @@ import Testing
     #expect(session.currentCard?.word.wordIndex == 1)
     #expect(session.currentCard?.isFlipped == false)
 }
+
+@Test func testFlipTurnsTheCardBothWays() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let engine = SessionEngine(dbQueue: dbQueue)
+    let session = try engine.startSession(level: 1)
+
+    #expect(session.currentCard?.isFlipped == false)
+    #expect(session.currentCard?.hasBeenRevealed == false)
+
+    session.flipCurrentCard()
+    #expect(session.currentCard?.isFlipped == true)
+    #expect(session.currentCard?.hasBeenRevealed == true)
+
+    // D26a: flipping back shows the pinyin again without un-revealing the
+    // meaning, which is what keeps the card gradable.
+    session.flipCurrentCard()
+    #expect(session.currentCard?.isFlipped == false)
+    #expect(session.currentCard?.hasBeenRevealed == true)
+
+    session.flipCurrentCard()
+    #expect(session.currentCard?.isFlipped == true)
+    #expect(session.currentCard?.hasBeenRevealed == true)
+}
+
+@Test func testRequeueTakesBackTheReveal() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let engine = SessionEngine(dbQueue: dbQueue)
+    let session = try engine.startSession(level: 1)
+
+    session.flipCurrentCard()
+    try session.swipe(.left)
+
+    try session.swipe(.right) // word 2
+    try session.swipe(.right) // word 3
+    try session.swipe(.right) // word 4
+
+    // A requeued card is a fresh presentation, so it must be recalled again
+    // before it can be graded (D20, D26a).
+    #expect(session.currentCard?.word.wordIndex == 1)
+    #expect(session.currentCard?.hasBeenRevealed == false)
+}

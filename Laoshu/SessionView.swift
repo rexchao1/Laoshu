@@ -51,8 +51,15 @@ struct SessionView: View {
                 card: card,
                 voiceAvailable: speaker.voiceAvailable,
                 onFlip: {
+                    // Auto-play belongs to the reveal, not to every turn of
+                    // the card (D7a). `card` is this presentation's state
+                    // before the flip, so both flags being false means this
+                    // tap is the first look at the meaning.
+                    let isFirstReveal = !card.isFlipped && !card.hasBeenRevealed
                     session.flipCurrentCard()
-                    speaker.speak(card.word.hanzi)
+                    if isFirstReveal {
+                        speaker.speak(card.word.hanzi)
+                    }
                 },
                 onReplay: {
                     speaker.speak(card.word.hanzi)
@@ -120,16 +127,20 @@ struct SessionView: View {
         }
     }
 
-    /// Ignores the gesture entirely while the card is still showing its
-    /// front (D26): no movement, no advance, no write.
+    /// Ignores the gesture entirely until the meaning has been shown once
+    /// (D26, D26a): no movement, no advance, no write. The gate is
+    /// `hasBeenRevealed` rather than `isFlipped`, so flipping back to re-read
+    /// the pinyin does not take away the ability to grade a word already
+    /// seen, while a card whose answer was never shown still cannot be
+    /// graded.
     private func dragGesture(session: Session, card: Card) -> some Gesture {
         DragGesture()
             .onChanged { value in
-                guard card.isFlipped else { return }
+                guard card.hasBeenRevealed else { return }
                 dragOffset = value.translation
             }
             .onEnded { value in
-                guard card.isFlipped else {
+                guard card.hasBeenRevealed else {
                     dragOffset = .zero
                     return
                 }
