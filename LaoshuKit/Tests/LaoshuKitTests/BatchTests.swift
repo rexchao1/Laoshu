@@ -1,0 +1,126 @@
+import Foundation
+import Testing
+@testable import LaoshuKit
+
+/// Drives `TodayProvider` with a fixed clock instead of waiting on the
+/// system one, so an eight-day ladder is testable in a single run (D21).
+private let testCalendar: Calendar = {
+    var calendar = Calendar(identifier: .gregorian)
+    calendar.timeZone = TimeZone(identifier: "UTC")!
+    return calendar
+}()
+
+private func date(_ year: Int, _ month: Int, _ day: Int, hour: Int = 12) -> Date {
+    testCalendar.date(from: DateComponents(year: year, month: month, day: day, hour: hour))!
+}
+
+private func provider(at instant: Date) -> TodayProvider {
+    TodayProvider(calendar: testCalendar, clock: { instant })
+}
+
+private func localDate(_ year: Int, _ month: Int, _ day: Int) -> LocalDate {
+    LocalDate(year: year, month: month, day: day)
+}
+
+@Test func testBatchIsNotUpTheDayItIsCreatedAndIsUpTheNextDay() throws {
+    let day0 = localDate(2026, 1, 1)
+    let day1 = localDate(2026, 1, 2)
+
+    let batch = BatchScheduler.createBatch(level: 1, today: provider(at: date(2026, 1, 1)))
+
+    #expect(batch.createdOn == day0)
+    #expect(batch.nextLookOn == day1)
+    #expect(batch.isDue(on: day0) == false)
+    #expect(batch.isDue(on: day1) == true)
+}
+
+@Test func testBatchIsNotUpAgainUntilDayEightAfterAnOnTimeFirstLook() throws {
+    let day1 = localDate(2026, 1, 2)
+    let batch = BatchScheduler.createBatch(level: 1, today: provider(at: date(2026, 1, 1)))
+
+    let afterFirstLook = batch.lookTaken(on: day1)
+
+    #expect(afterFirstLook.nextLookOn == localDate(2026, 1, 9)) // day 8
+
+    for offset in 2...7 {
+        let notYetDue = localDate(2026, 1, 1).addingDays(offset)
+        #expect(afterFirstLook.isDue(on: notYetDue) == false, "should not be due on day \(offset)")
+    }
+    #expect(afterFirstLook.isDue(on: localDate(2026, 1, 9)) == true)
+}
+
+@Test func testSecondLookIsAnchoredToWhenTheFirstLookWasActuallyTaken() throws {
+    let batch = BatchScheduler.createBatch(level: 1, today: provider(at: date(2026, 1, 1)))
+
+    // The day-1 look isn't taken until day 4, not on the day it was due.
+    let lookTakenOnDay4 = localDate(2026, 1, 1).addingDays(4)
+    let afterFirstLook = batch.lookTaken(on: lookTakenOnDay4)
+
+    // Anchored to day 4, so day 4 + 7 = day 11, not day 0's day 8.
+    #expect(afterFirstLook.nextLookOn == localDate(2026, 1, 1).addingDays(11))
+    #expect(afterFirstLook.nextLookOn != localDate(2026, 1, 1).addingDays(8))
+}
+
+@Test func testEarlyMorningSessionFloorsTheFirstLookToTheDayAfterTheWallClockDay() throws {
+    // A session at 01:00 on calendar day 2. The 04:00 boundary (D9) makes
+    // this business day 1, but D4a floors the first look against the raw
+    // wall-clock day (day 2) instead, so it lands on day 3.
+    let earlyMorningOnDay2 = date(2026, 1, 2, hour: 1)
+    let batch = BatchScheduler.createBatch(level: 1, today: provider(at: earlyMorningOnDay2))
+
+    #expect(batch.nextLookOn == localDate(2026, 1, 3))
+
+    // Not up later that same calendar day...
+    let sameDayAt9am = date(2026, 1, 2, hour: 9)
+    #expect(batch.isDue(on: provider(at: sameDayAt9am).today()) == false)
+
+    // ...but up the next calendar day.
+    let nextDayNoon = date(2026, 1, 3, hour: 12)
+    #expect(batch.isDue(on: provider(at: nextDayNoon).today()) == true)
+}
+
+@Test func testBatchRetiresAfterItsSecondLookAndNeverComesUpAgain() throws {
+    let batch = BatchScheduler.createBatch(level: 1, today: provider(at: date(2026, 1, 1)))
+    let day1 = localDate(2026, 1, 2)
+
+    let afterFirstLook = batch.lookTaken(on: day1)
+    #expect(afterFirstLook.isRetired == false)
+
+    let afterSecondLook = afterFirstLook.lookTaken(on: afterFirstLook.nextLookOn!)
+    #expect(afterSecondLook.isRetired == true)
+    #expect(afterSecondLook.nextLookOn == nil)
+
+    for offset in 0...30 {
+        let future = localDate(2026, 1, 1).addingDays(offset)
+        #expect(afterSecondLook.isDue(on: future) == false, "a retired batch must never come up again")
+    }
+}
+
+@Test func testBatchStoreCreatesAndAdvancesAPersistedBatch() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let store = BatchStore(dbQueue: dbQueue)
+
+    let day0 = provider(at: date(2026, 1, 1))
+    let created = try store.createBatch(level: 1, wordIndices: [1, 2, 3], today: day0)
+    let batchID = try #require(created.id)
+
+    #expect(created.nextLookOn == localDate(2026, 1, 2))
+    #expect(try store.dueBatches(today: day0).isEmpty)
+
+    let day1 = provider(at: date(2026, 1, 2))
+    #expect(try store.dueBatches(today: day1).map(\.id) == [batchID])
+
+    let afterFirstLook = try store.recordLook(batchID: batchID, today: day1)
+    #expect(afterFirstLook.lookNumber == 1)
+    #expect(afterFirstLook.nextLookOn == localDate(2026, 1, 9))
+    #expect(try store.dueBatches(today: day1).isEmpty)
+
+    let day8 = provider(at: date(2026, 1, 9))
+    let afterSecondLook = try store.recordLook(batchID: batchID, today: day8)
+    #expect(afterSecondLook.lookNumber == 2)
+    #expect(afterSecondLook.isRetired == true)
+    #expect(try store.dueBatches(today: day8).isEmpty)
+
+    let fetched = try #require(try store.fetchBatch(id: batchID))
+    #expect(fetched.isRetired == true)
+}

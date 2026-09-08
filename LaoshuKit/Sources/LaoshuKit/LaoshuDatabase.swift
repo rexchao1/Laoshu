@@ -38,21 +38,55 @@ public enum LaoshuDatabase {
 
         let dbQueue = try DatabaseQueue(path: reviewLogURL.path)
 
-        try dbQueue.write { db in
-            try db.execute(sql: """
-                CREATE TABLE IF NOT EXISTS review (
-                    word_index INTEGER NOT NULL,
-                    reviewed_at REAL NOT NULL,
-                    grade TEXT NOT NULL
-                );
-                """)
-            try db.execute(sql: "CREATE INDEX IF NOT EXISTS review_word_index ON review(word_index);")
+        try migrator.migrate(dbQueue)
 
+        try dbQueue.write { db in
             let escapedPath = catalogueURL.path.replacingOccurrences(of: "'", with: "''")
             try db.execute(sql: "ATTACH DATABASE 'file:\(escapedPath)?mode=ro' AS cat;")
         }
 
         return dbQueue
+    }
+
+    /// The review log's schema, as an ordered list of versioned migrations
+    /// GRDB applies in order and records in `grdb_migrations`, rather than
+    /// bare `CREATE TABLE IF NOT EXISTS` statements that cannot tell a fresh
+    /// database from one a later version needs to alter.
+    private static var migrator: DatabaseMigrator {
+        var migrator = DatabaseMigrator()
+
+        migrator.registerMigration("v1_review_log") { db in
+            try db.execute(sql: """
+                CREATE TABLE review (
+                    word_index INTEGER NOT NULL,
+                    reviewed_at REAL NOT NULL,
+                    grade TEXT NOT NULL
+                );
+                """)
+            try db.execute(sql: "CREATE INDEX review_word_index ON review(word_index);")
+        }
+
+        migrator.registerMigration("v2_batch_tables") { db in
+            try db.execute(sql: """
+                CREATE TABLE batch (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    level INTEGER NOT NULL,
+                    created_on TEXT NOT NULL,
+                    next_look_on TEXT,
+                    look_number INTEGER NOT NULL
+                );
+                """)
+            try db.execute(sql: "CREATE INDEX batch_next_look_on ON batch(next_look_on);")
+            try db.execute(sql: """
+                CREATE TABLE batch_word (
+                    batch_id INTEGER NOT NULL REFERENCES batch(id),
+                    word_index INTEGER NOT NULL,
+                    PRIMARY KEY (batch_id, word_index)
+                );
+                """)
+        }
+
+        return migrator
     }
 
     /// The catalogue's location inside the app bundle. Only the app target
