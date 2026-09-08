@@ -124,3 +124,54 @@ private func localDate(_ year: Int, _ month: Int, _ day: Int) -> LocalDate {
     let fetched = try #require(try store.fetchBatch(id: batchID))
     #expect(fetched.isRetired == true)
 }
+
+/// D14: introduced is decided by batch membership, not by a review row —
+/// this is what fixes the word a session parks by three left swipes never
+/// coming back as new.
+@Test func testIsIntroducedReflectsBatchMembershipNotReviewRows() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let store = BatchStore(dbQueue: dbQueue)
+
+    #expect(try store.isIntroduced(wordIndex: 5) == false)
+
+    try store.createBatch(level: 1, wordIndices: [5], today: provider(at: date(2026, 1, 1)))
+
+    #expect(try store.isIntroduced(wordIndex: 5) == true)
+    #expect(try store.isIntroduced(wordIndex: 6) == false)
+}
+
+@Test func testHasBatchCreatedTodayIsPerDayAcrossLevels() throws {
+    let dbQueue = try TestFixtures.makeDatabase(levelCounts: [1: 8, 2: 8])
+    let store = BatchStore(dbQueue: dbQueue)
+
+    let day0 = provider(at: date(2026, 1, 1))
+    #expect(try store.hasBatchCreatedToday(today: day0) == false)
+
+    try store.createBatch(level: 2, wordIndices: [9], today: day0)
+
+    #expect(try store.hasBatchCreatedToday(today: day0) == true)
+
+    let day1 = provider(at: date(2026, 1, 2))
+    #expect(try store.hasBatchCreatedToday(today: day1) == false)
+}
+
+@Test func testHasActiveBatchIsTrueUntilTheBatchRetires() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let store = BatchStore(dbQueue: dbQueue)
+
+    #expect(try store.hasActiveBatch(level: 1) == false)
+
+    let day0 = provider(at: date(2026, 1, 1))
+    let created = try store.createBatch(level: 1, wordIndices: [1], today: day0)
+    let batchID = try #require(created.id)
+
+    #expect(try store.hasActiveBatch(level: 1) == true)
+
+    let day1 = provider(at: date(2026, 1, 2))
+    try store.recordLook(batchID: batchID, today: day1)
+    #expect(try store.hasActiveBatch(level: 1) == true)
+
+    let day8 = provider(at: date(2026, 1, 9))
+    try store.recordLook(batchID: batchID, today: day8)
+    #expect(try store.hasActiveBatch(level: 1) == false)
+}

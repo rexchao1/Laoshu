@@ -49,16 +49,48 @@ public struct Card: Sendable, Equatable {
 /// D22: session state lives only in memory. Closing the app abandons
 /// whatever is left in the queue; the swipes already logged to `ReviewLog`
 /// stand regardless.
+///
+/// D3, D7: the words are drawn up front, but the batch they came from (if
+/// any is due) only advances its ladder, and the batch of new words among
+/// them only gets written, on the session's first swipe — never on a mere
+/// draw. That first swipe writes both in the same transaction as its review
+/// row, so a session entered and abandoned without a swipe leaves no trace
+/// and spends no allowance.
 @Observable
 public final class Session {
-    private let reviewLog: ReviewLog
+    /// Why a session drew zero cards — the three states a caller needs to
+    /// tell apart to show something other than an empty queue (D13).
+    public enum EmptyReason: Sendable, Equatable {
+        /// Unseen words remain, but another level already spent today's
+        /// allowance of eight, and this level has no batch due today.
+        case allowanceSpent
+        /// Every word in the level has been introduced, and at least one
+        /// batch is still on the ladder, waiting for a look that isn't due
+        /// yet.
+        case waitingOnLadder
+        /// Every word in the level has been introduced and every batch has
+        /// retired — there is nothing left to teach or bring back.
+        case levelComplete
+    }
+
+    private let dbQueue: DatabaseQueue
+    private let today: TodayProvider
+    private let level: Int
+    private let newWordIndices: [Int]
+    private let dueBatchIDs: [Int64]
+    private var hasWrittenFirstSwipe = false
     private var queue: [Card]
 
-    /// How many words this session actually drew — eight, unless the level
-    /// had fewer unseen words left (D20).
+    /// How many words this session actually drew: every due batch's words
+    /// plus up to eight new ones (D6), unless the level had fewer of either
+    /// left (D20).
     public let drawnCount: Int
     public private(set) var finishedCount = 0
     public private(set) var parkedCount = 0
+
+    /// Set only when `drawnCount == 0`, explaining which of the three empty
+    /// states this is (D13).
+    public let emptyReason: EmptyReason?
 
     /// How many of `drawnCount` were swiped right the first time they were
     /// shown, never having gone left first (D27).
@@ -67,10 +99,23 @@ public final class Session {
     /// Words parked by a third left swipe, in the order they parked (D27).
     public private(set) var parkedWords: [Word] = []
 
-    init(words: [Word], reviewLog: ReviewLog) {
-        self.reviewLog = reviewLog
+    init(
+        words: [Word],
+        dbQueue: DatabaseQueue,
+        today: TodayProvider,
+        level: Int,
+        newWordIndices: [Int],
+        dueBatchIDs: [Int64],
+        emptyReason: EmptyReason? = nil
+    ) {
+        self.dbQueue = dbQueue
+        self.today = today
+        self.level = level
+        self.newWordIndices = newWordIndices
+        self.dueBatchIDs = dueBatchIDs
         self.queue = words.map(Card.init)
         self.drawnCount = words.count
+        self.emptyReason = emptyReason
     }
 
     /// D20: the session ends once every drawn word has been swiped right
@@ -90,20 +135,37 @@ public final class Session {
     /// swipe requeues it at least three cards later (D20's `min(3, ...)`
     /// placement below), or parks it without requeuing on the third left
     /// swipe.
+    ///
+    /// The first swipe of a session also writes the batch of new words it
+    /// drew (if any) and advances every due batch it drew from, all inside
+    /// the same transaction as this swipe's review row (D7, D7a).
     public func swipe(_ direction: SwipeDirection) throws {
         guard !queue.isEmpty else { return }
         var card = queue.removeFirst()
+        let grade: Grade = direction == .right ? .good : .again
+
+        try dbQueue.write { db in
+            try ReviewLog.record(db, wordIndex: card.word.wordIndex, grade: grade, at: Date())
+
+            if !self.hasWrittenFirstSwipe {
+                if !self.newWordIndices.isEmpty {
+                    try BatchStore.createBatch(db, level: self.level, wordIndices: self.newWordIndices, today: self.today)
+                }
+                for batchID in self.dueBatchIDs {
+                    try BatchStore.recordLook(db, batchID: batchID, today: self.today)
+                }
+            }
+        }
+        hasWrittenFirstSwipe = true
 
         switch direction {
         case .right:
-            try reviewLog.record(wordIndex: card.word.wordIndex, grade: .good)
             finishedCount += 1
             if card.leftSwipeCount == 0 {
                 firstAttemptRightCount += 1
             }
 
         case .left:
-            try reviewLog.record(wordIndex: card.word.wordIndex, grade: .again)
             card.requeued()
             if card.leftSwipeCount >= 3 {
                 parkedCount += 1
@@ -127,15 +189,23 @@ public struct LevelSummary: Sendable, Equatable {
 public final class SessionEngine {
     private let dbQueue: DatabaseQueue
     public let reviewLog: ReviewLog
+    private let batchStore: BatchStore
+    private let today: TodayProvider
 
     /// Where the shuffle in `startSession` gets its randomness (D17a). The
     /// app leaves this at the system generator; tests pass a seeded one so a
     /// draw is reproducible.
     private var rng: any RandomNumberGenerator
 
-    public init(dbQueue: DatabaseQueue, rng: any RandomNumberGenerator = SystemRandomNumberGenerator()) {
+    public init(
+        dbQueue: DatabaseQueue,
+        today: TodayProvider = TodayProvider(),
+        rng: any RandomNumberGenerator = SystemRandomNumberGenerator()
+    ) {
         self.dbQueue = dbQueue
         self.reviewLog = ReviewLog(dbQueue: dbQueue)
+        self.batchStore = BatchStore(dbQueue: dbQueue)
+        self.today = today
         self.rng = rng
     }
 
@@ -152,32 +222,62 @@ public final class SessionEngine {
         }
     }
 
-    /// Draws eight words at random from those in `level` that have never been
-    /// reviewed (D17a, D18). Returns fewer than eight — reported by the
-    /// session's `drawnCount` — if the level has fewer unseen words left.
+    /// Composes a session on `level`: every batch on `level` whose look is
+    /// due on or before today, plus up to eight new words if the day's
+    /// allowance hasn't been spent by another level (D5, D6, D7), all
+    /// shuffled together into one pool (D6) with the injectable generator
+    /// (D17a).
     ///
-    /// The unseen pool is read as bare `word_index` values, shuffled here,
-    /// and only the chosen eight are fetched as rows. Shuffling in Swift
-    /// rather than with SQLite's `RANDOM()` is what makes the draw
-    /// reproducible under a seeded generator; the pool is at most 1,800
-    /// integers, so reading all of it costs nothing.
+    /// A word counts as introduced once it belongs to any batch, not once a
+    /// review row exists (D14) — a word parked by three left swipes is in
+    /// its batch's `batch_word` rows already, so it is never drawn as new
+    /// again. Neither the new batch nor any due batch's advance is written
+    /// here: that happens on the session's first swipe (D3, D7).
+    ///
+    /// Returns a session with `drawnCount == 0` and `emptyReason` set when
+    /// there is nothing to draw — see `Session.EmptyReason`.
     public func startSession(level: Int) throws -> Session {
-        let pool = try dbQueue.read { db in
+        let dueBatches = try batchStore.dueBatches(level: level, today: today)
+        let dueBatchIDs = dueBatches.compactMap(\.id)
+        let dueWordIndices = try batchStore.wordIndices(batchIDs: dueBatchIDs)
+
+        // The unseen pool is read as bare `word_index` values, shuffled
+        // here, and only the drawn rows are fetched. Shuffling in Swift
+        // rather than with SQLite's `RANDOM()` is what makes the draw
+        // reproducible under a seeded generator; the pool is at most 1,800
+        // integers, so reading all of it costs nothing.
+        let unseenPool = try dbQueue.read { db in
             try Int.fetchAll(
                 db,
                 sql: """
                 SELECT w.word_index
                 FROM cat.word w
-                LEFT JOIN review r ON r.word_index = w.word_index
-                WHERE w.level = ? AND r.word_index IS NULL;
+                WHERE w.level = ?
+                AND NOT EXISTS (SELECT 1 FROM batch_word bw WHERE bw.word_index = w.word_index);
                 """,
                 arguments: [level]
             )
         }
 
-        let chosen = Array(pool.shuffled(using: &rng).prefix(8))
+        let allowanceSpent = try batchStore.hasBatchCreatedToday(today: today)
+        let newWordIndices = allowanceSpent ? [] : Array(unseenPool.shuffled(using: &rng).prefix(8))
+
+        var chosen = dueWordIndices + newWordIndices
+        chosen.shuffle(using: &rng)
+
         guard !chosen.isEmpty else {
-            return Session(words: [], reviewLog: reviewLog)
+            let reason: Session.EmptyReason
+            if !unseenPool.isEmpty {
+                reason = .allowanceSpent
+            } else if try batchStore.hasActiveBatch(level: level) {
+                reason = .waitingOnLadder
+            } else {
+                reason = .levelComplete
+            }
+            return Session(
+                words: [], dbQueue: dbQueue, today: today, level: level,
+                newWordIndices: [], dueBatchIDs: [], emptyReason: reason
+            )
         }
 
         let placeholders = databaseQuestionMarks(count: chosen.count)
@@ -197,6 +297,9 @@ public final class SessionEngine {
         // the shuffle. Put them back into the drawn order.
         let byIndex = Dictionary(uniqueKeysWithValues: rows.map { ($0.wordIndex, $0) })
         let words = chosen.compactMap { byIndex[$0] }
-        return Session(words: words, reviewLog: reviewLog)
+        return Session(
+            words: words, dbQueue: dbQueue, today: today, level: level,
+            newWordIndices: newWordIndices, dueBatchIDs: dueBatchIDs, emptyReason: nil
+        )
     }
 }
