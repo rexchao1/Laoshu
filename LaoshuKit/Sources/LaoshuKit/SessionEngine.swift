@@ -128,9 +128,15 @@ public final class SessionEngine {
     private let dbQueue: DatabaseQueue
     public let reviewLog: ReviewLog
 
-    public init(dbQueue: DatabaseQueue) {
+    /// Where the shuffle in `startSession` gets its randomness (D17a). The
+    /// app leaves this at the system generator; tests pass a seeded one so a
+    /// draw is reproducible.
+    private var rng: any RandomNumberGenerator
+
+    public init(dbQueue: DatabaseQueue, rng: any RandomNumberGenerator = SystemRandomNumberGenerator()) {
         self.dbQueue = dbQueue
         self.reviewLog = ReviewLog(dbQueue: dbQueue)
+        self.rng = rng
     }
 
     /// The six levels in the catalogue, in level order, each with its total
@@ -146,24 +152,51 @@ public final class SessionEngine {
         }
     }
 
-    /// Draws the eight lowest `word_index` words in `level` that have never
-    /// been reviewed (D17, D18). Returns fewer than eight — reported by the
+    /// Draws eight words at random from those in `level` that have never been
+    /// reviewed (D17a, D18). Returns fewer than eight — reported by the
     /// session's `drawnCount` — if the level has fewer unseen words left.
+    ///
+    /// The unseen pool is read as bare `word_index` values, shuffled here,
+    /// and only the chosen eight are fetched as rows. Shuffling in Swift
+    /// rather than with SQLite's `RANDOM()` is what makes the draw
+    /// reproducible under a seeded generator; the pool is at most 1,800
+    /// integers, so reading all of it costs nothing.
     public func startSession(level: Int) throws -> Session {
-        let words = try dbQueue.read { db in
-            try Word.fetchAll(
+        let pool = try dbQueue.read { db in
+            try Int.fetchAll(
                 db,
                 sql: """
-                SELECT w.word_index, w.level, w.hanzi, w.pinyin, w.pinyin_numbered, w.definition
+                SELECT w.word_index
                 FROM cat.word w
                 LEFT JOIN review r ON r.word_index = w.word_index
-                WHERE w.level = ? AND r.word_index IS NULL
-                ORDER BY w.word_index ASC
-                LIMIT 8;
+                WHERE w.level = ? AND r.word_index IS NULL;
                 """,
                 arguments: [level]
             )
         }
+
+        let chosen = Array(pool.shuffled(using: &rng).prefix(8))
+        guard !chosen.isEmpty else {
+            return Session(words: [], reviewLog: reviewLog)
+        }
+
+        let placeholders = databaseQuestionMarks(count: chosen.count)
+        let rows = try dbQueue.read { db in
+            try Word.fetchAll(
+                db,
+                sql: """
+                SELECT word_index, level, hanzi, pinyin, pinyin_numbered, definition
+                FROM cat.word
+                WHERE word_index IN (\(placeholders));
+                """,
+                arguments: StatementArguments(chosen)
+            )
+        }
+
+        // `IN` returns rows in whatever order SQLite likes, which would undo
+        // the shuffle. Put them back into the drawn order.
+        let byIndex = Dictionary(uniqueKeysWithValues: rows.map { ($0.wordIndex, $0) })
+        let words = chosen.compactMap { byIndex[$0] }
         return Session(words: words, reviewLog: reviewLog)
     }
 }

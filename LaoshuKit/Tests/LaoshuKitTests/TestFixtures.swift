@@ -55,3 +55,30 @@ enum TestFixtures {
         return try LaoshuDatabase.open(catalogueURL: catalogueURL, reviewLogURL: reviewLogURL)
     }
 }
+
+/// A deterministic generator so a shuffled draw (D17a) is reproducible in
+/// tests. SplitMix64, chosen because it is a few lines and its sequence does
+/// not depend on the platform's random source.
+struct SeededGenerator: RandomNumberGenerator {
+    private var state: UInt64
+
+    init(seed: UInt64) {
+        state = seed
+    }
+
+    mutating func next() -> UInt64 {
+        state &+= 0x9E37_79B9_7F4A_7C15
+        var z = state
+        z = (z ^ (z >> 30)) &* 0xBF58_476D_1CE4_E5B9
+        z = (z ^ (z >> 27)) &* 0x94D0_49BB_1331_11EB
+        return z ^ (z >> 31)
+    }
+}
+
+extension TestFixtures {
+    /// An engine whose draw is reproducible. Every test that cares about
+    /// which words come out uses this rather than the system generator.
+    static func makeEngine(dbQueue: DatabaseQueue, seed: UInt64 = 42) -> SessionEngine {
+        SessionEngine(dbQueue: dbQueue, rng: SeededGenerator(seed: seed))
+    }
+}
