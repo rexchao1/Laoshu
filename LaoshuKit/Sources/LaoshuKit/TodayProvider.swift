@@ -26,4 +26,12 @@ public struct TodayProvider: Sendable {
     public func wallClockToday() -> LocalDate {
         LocalDate.calendarDay(for: clock(), calendar: calendar)
     }
+
+    /// The business day `date` falls in, on the same 04:00 basis as
+    /// `today()`. Replay (D18) uses this to turn a review log's stored Unix
+    /// timestamps into the local day they group by, on this provider's
+    /// calendar rather than the arithmetic one `LocalDate` uses internally.
+    public func businessDay(for date: Date) -> LocalDate {
+        LocalDate.businessDay(for: date, calendar: calendar)
+    }
 }

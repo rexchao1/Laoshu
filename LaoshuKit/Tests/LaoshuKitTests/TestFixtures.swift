@@ -15,6 +15,15 @@ enum TestFixtures {
     /// per level, levels visited in ascending order, for tests that need more
     /// than one level present (e.g. the level list's per-level counts).
     static func makeDatabase(levelCounts: [Int: Int]) throws -> DatabaseQueue {
+        let (directory, catalogueURL) = try makeCatalogue(levelCounts: levelCounts)
+        let reviewLogURL = directory.appendingPathComponent("review.sqlite")
+        return try LaoshuDatabase.open(catalogueURL: catalogueURL, reviewLogURL: reviewLogURL)
+    }
+
+    /// Builds a throwaway catalogue database with one contiguous block of
+    /// `word_index` per level, and returns its containing directory (for a
+    /// caller to also place a review log in) alongside its URL.
+    static func makeCatalogue(levelCounts: [Int: Int]) throws -> (directory: URL, catalogueURL: URL) {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -51,8 +60,44 @@ enum TestFixtures {
         // opens it read-only; SQLite handles concurrent readers fine, but
         // nothing here needs the write handle open any longer.
 
-        let reviewLogURL = directory.appendingPathComponent("review.sqlite")
-        return try LaoshuDatabase.open(catalogueURL: catalogueURL, reviewLogURL: reviewLogURL)
+        return (directory, catalogueURL)
+    }
+
+    /// Writes a review log already on the pre-batch schema (`review` table
+    /// only, D16) with the given rows already in it — what an app upgrading
+    /// into this checkpoint finds on disk before its first launch replays it
+    /// (D18). The `v1_review_log` migration is applied for real, through
+    /// GRDB's own migrator, rather than by hand: a real pre-upgrade database
+    /// already has that migration recorded in `grdb_migrations`, and without
+    /// that record `LaoshuDatabase.open`'s migrator would try to create the
+    /// `review` table a second time. Callers then open the result for real
+    /// through `LaoshuDatabase.open` to exercise the actual upgrade path.
+    static func makePreUpgradeReviewLog(
+        at reviewLogURL: URL,
+        rows: [(wordIndex: Int, reviewedAt: Date, grade: Grade)]
+    ) throws {
+        var migrator = DatabaseMigrator()
+        migrator.registerMigration("v1_review_log") { db in
+            try db.execute(sql: """
+                CREATE TABLE review (
+                    word_index INTEGER NOT NULL,
+                    reviewed_at REAL NOT NULL,
+                    grade TEXT NOT NULL
+                );
+                """)
+            try db.execute(sql: "CREATE INDEX review_word_index ON review(word_index);")
+        }
+
+        let dbQueue = try DatabaseQueue(path: reviewLogURL.path)
+        try migrator.migrate(dbQueue)
+        try dbQueue.write { db in
+            for row in rows {
+                try db.execute(
+                    sql: "INSERT INTO review (word_index, reviewed_at, grade) VALUES (?, ?, ?);",
+                    arguments: [row.wordIndex, row.reviewedAt.timeIntervalSince1970, row.grade.rawValue]
+                )
+            }
+        }
     }
 }
 

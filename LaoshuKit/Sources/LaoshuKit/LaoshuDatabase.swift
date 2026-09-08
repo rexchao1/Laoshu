@@ -23,10 +23,14 @@ public enum LaoshuDatabase {
     /// this is the first launch), attaches the catalogue at `catalogueURL`
     /// read-only as `cat`, and returns the one connection both live on.
     ///
+    /// `today` drives the D18 replay migration, which needs the clock to
+    /// decide how far to wind a historical batch forward; every other caller
+    /// can leave it at the real one.
+    ///
     /// Throws if the catalogue is missing or either database cannot be
     /// opened. There is no fallback: an in-memory review log would make the
     /// introduced-check lie about what has actually been shown.
-    public static func open(catalogueURL: URL, reviewLogURL: URL) throws -> DatabaseQueue {
+    public static func open(catalogueURL: URL, reviewLogURL: URL, today: TodayProvider = TodayProvider()) throws -> DatabaseQueue {
         guard FileManager.default.fileExists(atPath: catalogueURL.path) else {
             throw LaoshuDatabaseError.catalogueNotFound(path: catalogueURL.path)
         }
@@ -38,12 +42,15 @@ public enum LaoshuDatabase {
 
         let dbQueue = try DatabaseQueue(path: reviewLogURL.path)
 
-        try migrator.migrate(dbQueue)
-
+        // Attached before migrating, not after: the replay migration below
+        // joins against `cat.word` for a word's level, so the catalogue has
+        // to already be in scope by the time migrations run.
         try dbQueue.write { db in
             let escapedPath = catalogueURL.path.replacingOccurrences(of: "'", with: "''")
             try db.execute(sql: "ATTACH DATABASE 'file:\(escapedPath)?mode=ro' AS cat;")
         }
+
+        try migrator(today: today).migrate(dbQueue)
 
         return dbQueue
     }
@@ -52,7 +59,7 @@ public enum LaoshuDatabase {
     /// GRDB applies in order and records in `grdb_migrations`, rather than
     /// bare `CREATE TABLE IF NOT EXISTS` statements that cannot tell a fresh
     /// database from one a later version needs to alter.
-    private static var migrator: DatabaseMigrator {
+    private static func migrator(today: TodayProvider) -> DatabaseMigrator {
         var migrator = DatabaseMigrator()
 
         migrator.registerMigration("v1_review_log") { db in
@@ -84,6 +91,16 @@ public enum LaoshuDatabase {
                     PRIMARY KEY (batch_id, word_index)
                 );
                 """)
+        }
+
+        // D18: replaying the pre-batch review log runs as a migration on
+        // purpose. `DatabaseMigrator` already wraps each migration in one
+        // transaction and only records it as applied — in that same
+        // transaction — once the block returns without throwing, which is
+        // exactly the "one transaction, marker written with it, retried if
+        // interrupted, never run twice" contract this migration needs.
+        migrator.registerMigration("v3_replay_review_log_into_batches") { db in
+            try ReviewLogReplay.run(db: db, today: today)
         }
 
         return migrator

@@ -49,6 +49,16 @@ public struct LocalDate: Sendable, Equatable, Hashable, Comparable, CustomString
         return LocalDate(year: components.year!, month: components.month!, day: components.day!)
     }
 
+    /// How many whole days after `other` this date falls — negative if it
+    /// falls before. Used by replay (D18) to tell how far behind schedule an
+    /// overdue look is.
+    public func daysSince(_ other: LocalDate) -> Int {
+        let calendar = Self.arithmeticCalendar
+        let otherDate = calendar.date(from: DateComponents(year: other.year, month: other.month, day: other.day))!
+        let selfDate = calendar.date(from: DateComponents(year: year, month: month, day: day))!
+        return calendar.dateComponents([.day], from: otherDate, to: selfDate).day!
+    }
+
     /// The plain calendar date `date` falls on in `calendar`'s timezone, with
     /// no day-boundary adjustment — the raw wall-clock day (D4a).
     public static func calendarDay(for date: Date, calendar: Calendar) -> LocalDate {

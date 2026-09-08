@@ -39,6 +39,16 @@ public struct Batch: Sendable, Equatable {
         next.nextLookOn = next.lookNumber >= 2 ? nil : today.addingDays(7)
         return next
     }
+
+    /// Gives up on this batch's outstanding look without counting it as
+    /// taken. Replay (D18) calls this when a second look has fallen more
+    /// than seven days behind — there is nothing left to show that would not
+    /// be absurdly late, so the ladder retires it instead of leaving it due.
+    public func retiredForStaleness() -> Batch {
+        var next = self
+        next.nextLookOn = nil
+        return next
+    }
 }
 
 /// Builds a freshly introduced batch (D2, D4a).
@@ -54,5 +64,27 @@ public enum BatchScheduler {
         let firstLookOn = max(createdOn.addingDays(1), earliestFirstLook)
 
         return Batch(level: level, createdOn: createdOn, nextLookOn: firstLookOn, lookNumber: 0)
+    }
+
+    /// Rebuilds the batch a replayed group of reviews (D18) would be at by
+    /// `today`, as if every due look before then had been taken exactly on
+    /// schedule. There is no live session moment to floor the first look
+    /// against here (D4a is about a session actually running, not a
+    /// historical group), so it simply falls the day after `createdOn`. A
+    /// second look still due but more than seven days behind `today` is
+    /// retired rather than left due — replay has no way to make good on a
+    /// look that stale.
+    public static func replayBatch(level: Int, createdOn: LocalDate, today: LocalDate) -> Batch {
+        var batch = Batch(level: level, createdOn: createdOn, nextLookOn: createdOn.addingDays(1), lookNumber: 0)
+
+        if let firstLook = batch.nextLookOn, firstLook <= today {
+            batch = batch.lookTaken(on: firstLook)
+        }
+
+        if let secondLook = batch.nextLookOn, secondLook <= today, today.daysSince(secondLook) > 7 {
+            batch = batch.retiredForStaleness()
+        }
+
+        return batch
     }
 }
