@@ -78,7 +78,13 @@ struct SeededGenerator: RandomNumberGenerator {
 extension TestFixtures {
     /// An engine whose draw is reproducible. Every test that cares about
     /// which words come out uses this rather than the system generator.
-    static func makeEngine(dbQueue: DatabaseQueue, seed: UInt64 = 42) -> SessionEngine {
-        SessionEngine(dbQueue: dbQueue, rng: SeededGenerator(seed: seed))
+    /// `today` defaults to the real clock; tests that need to control which
+    /// day it is (batches due, the daily allowance) pass a fixed one.
+    static func makeEngine(
+        dbQueue: DatabaseQueue,
+        seed: UInt64 = 42,
+        today: TodayProvider = TodayProvider()
+    ) -> SessionEngine {
+        SessionEngine(dbQueue: dbQueue, today: today, rng: SeededGenerator(seed: seed))
     }
 }

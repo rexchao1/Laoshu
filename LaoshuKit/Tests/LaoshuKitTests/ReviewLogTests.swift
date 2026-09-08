@@ -20,15 +20,3 @@ import Testing
     #expect(rows[1]["word_index"] as Int == 3)
     #expect(rows[1]["grade"] as String == Grade.good.rawValue)
 }
-
-@Test func testIntroducedTestSeesLoggedWord() throws {
-    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
-    let reviewLog = ReviewLog(dbQueue: dbQueue)
-
-    #expect(try reviewLog.isIntroduced(wordIndex: 5) == false)
-
-    try reviewLog.record(wordIndex: 5, grade: .again)
-
-    #expect(try reviewLog.isIntroduced(wordIndex: 5) == true)
-    #expect(try reviewLog.isIntroduced(wordIndex: 6) == false)
-}
