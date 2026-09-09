@@ -6,12 +6,19 @@ import LaoshuKit
 struct RootView: View {
     @State private var engine: SessionEngine?
     @State private var preferenceStore: PreferenceStore?
+    @State private var streakReader: StreakReader?
+    @State private var progressStore: ProgressStore?
     @State private var openError: String?
 
     var body: some View {
         Group {
-            if let engine, let preferenceStore {
-                LevelListView(engine: engine, preferenceStore: preferenceStore)
+            if let engine, let preferenceStore, let streakReader, let progressStore {
+                LevelListView(
+                    engine: engine,
+                    preferenceStore: preferenceStore,
+                    streakReader: streakReader,
+                    progressStore: progressStore
+                )
             } else if let openError {
                 DatabaseErrorView(message: openError)
             } else {
@@ -33,6 +40,8 @@ struct RootView: View {
             let dbQueue = try LaoshuDatabase.open(catalogueURL: catalogueURL, reviewLogURL: reviewLogURL)
             engine = SessionEngine(dbQueue: dbQueue)
             preferenceStore = PreferenceStore(dbQueue: dbQueue)
+            streakReader = StreakReader(dbQueue: dbQueue)
+            progressStore = ProgressStore(dbQueue: dbQueue)
         } catch {
             openError = "\(error)"
         }

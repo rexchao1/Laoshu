@@ -6,6 +6,7 @@ import LaoshuKit
 enum LevelDestination: Hashable {
     case study(Int)
     case browse(Int)
+    case progress
 }
 
 /// The six levels, each with its word count. Tapping a row opens a session
@@ -14,12 +15,15 @@ enum LevelDestination: Hashable {
 struct LevelListView: View {
     let engine: SessionEngine
     let preferenceStore: PreferenceStore
+    let streakReader: StreakReader
+    let progressStore: ProgressStore
 
     @State private var summaries: [LevelSummary] = []
     @State private var loadError: String?
     @State private var path: [LevelDestination] = []
     @State private var showPlacementTest = false
     @State private var direction: StudyDirection = .receptive
+    @State private var streak: Streak?
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -74,12 +78,28 @@ struct LevelListView: View {
                             SessionView(engine: engine, level: level)
                         case .browse(let level):
                             LevelBrowseView(level: level, engine: engine)
+                        case .progress:
+                            ProgressScreen(streakReader: streakReader, progressStore: progressStore)
                         }
                     }
                 }
             }
             .navigationTitle("Laoshu")
             .toolbar {
+                if loadError == nil {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button {
+                            path.append(.progress)
+                        } label: {
+                            if let streak, streak.days > 0 {
+                                Label("\(streak.days)", systemImage: "flame")
+                            } else {
+                                Image(systemName: "flame")
+                            }
+                        }
+                        .accessibilityLabel(progressAccessibilityLabel)
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         showPlacementTest = true
@@ -113,6 +133,7 @@ struct LevelListView: View {
                 loadSummaries()
                 checkPlacementGate()
                 loadDirection()
+                loadStreak()
             }
         }
         // D11: presented over the level list rather than replacing it — the
@@ -176,6 +197,26 @@ struct LevelListView: View {
             direction = try preferenceStore.direction()
         } catch {
             loadError = "\(error)"
+        }
+    }
+
+    /// A failed streak read leaves the bare flame rather than failing the
+    /// whole level list — the streak is decoration on this screen, not its
+    /// content.
+    private func loadStreak() {
+        do {
+            streak = try streakReader.read()
+        } catch {
+            // Intentionally swallowed: the toolbar falls back to the bare flame.
+        }
+    }
+
+    /// D19, copied exactly.
+    private var progressAccessibilityLabel: String {
+        switch streak?.days ?? 0 {
+        case 0: return "Progress, no days yet"
+        case 1: return "Progress, 1 day studied"
+        case let n: return "Progress, \(n) days studied"
         }
     }
 
