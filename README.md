@@ -2,9 +2,10 @@
 
 A personal iPhone app for learning Chinese vocabulary.
 
-Pick an HSK level, swipe through its words, and meet each day's eight new
-words again the next day and again a week after that. Offline, no account,
-one user.
+Pick an HSK level and swipe through a graded session of its words, meeting
+each day's eight new words again the next day and again a week after that;
+or browse a level's row to look back over everything already met there,
+without being tested. Offline, no account, one user.
 
 A placement test on first launch, and any time after from the level list's
 toolbar, walks up and down the levels and marks the words the user already
