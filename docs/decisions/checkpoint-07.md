@@ -147,10 +147,22 @@ Every test named in the frozen plan's acceptance checks is present, by that exac
 
 The frozen plan's own flow, in the user's words, "a half-done day is not lost": draw a session, swipe some right and some left, kill the app, reopen it, tap the same level, and find the same cards still to do with the counts that were there. The plan itself says why this is not run here: "There is no UI test target here and checkpoint 1 D10 forbids an automated check depending on a simulator, so this flow is run by hand at step 9 against a seeded database." This task did not run it and does not claim to have.
 
-The plan's five screens (a session part way through; the same level reopened after a kill, with "Picking up where you left off"; the same screen after one swipe, the line gone; the summary of a resumed session showing the full drawn count; a level whose live session was created on an earlier business day, reopened) are likewise read at step 9 of the light factory's chain, by the planning session, on a Mac with Xcode and a booted simulator, after every pebble merges and before the checkpoint is called built. This task took no screenshots and drove no simulator, since there is no UI test target in this repository and checkpoint 1 D10 says no automated check may depend on a simulator.
-
 Route line 9 and route line 13 are out of this task's scope, as the pebble that cut it says, and are not addressed here.
+
+## Screens
+
+The plan's five screens were read at step 9 on 2026-09-09 by the planning session, on a Mac with Xcode and a booted iPhone 17 Pro simulator, after every pebble merged. Four were photographed and one was read from the code, because it cannot be photographed. Against a database carrying rows from earlier checkpoints, the v7 migration applied in place and the app launched: `grdb_migrations` listed all seven identifiers and the earlier `batch` and `placement` rows survived.
+
+1. A session part way through. The bar stood at 3 of 8 with the card on its prompt face. The prompt was the English, because the stored preference is the reverse direction, which is D25 visible rather than only enforced.
+2. The same level reopened. The app was terminated and reinstalled between the two reads, so the process really did end. The same card came back at the same bar position with "Picking up where you left off" under the bar. The two screenshots differ in that line and in nothing else.
+3. The same screen after one swipe, the line gone. This one cannot be photographed. Under D20a the line's lifetime is a `@State` flag owned by the view, seeded from `Session.isResumed` and cleared in the view's own swipe handler, so only a real gesture clears it and there is no way to send a gesture here. It was read from the code instead: `Laoshu/SessionView.swift` sets `showsResumedNotice = started.isResumed` at `startSession`, and sets it false immediately after a successful `session.swipe(direction)` and on a bonus draw. It is not claimed as a screenshot.
+4. The summary of a resumed session. It read "6 of 8 right the first time", the whole session rather than the four cards swiped after resuming, which is D23. It named the return date the batch holds and offered "Draw 8 more", the live setting under D25a.
+5. A level whose live session was created on an earlier business day. A fresh session was drawn, the bar at zero, no resumed line, a different word on the card.
+
+Screens 1 and 2 together are the plan's flow, "a half-done day is not lost", carried out: a session drawn and swiped part way, the app ended, the level reopened, the same cards still to do with the counts that were there. It was driven from a temporary root view rather than by tapping, because the screen-recording permission this machine would need to send gestures was declined, and that root view was reverted afterwards.
 
 ## Defects
 
-Scoped to what the checks run here could show: none. Every command above ran and every named test passed. What these checks cannot show — the resumed flow itself, the "Picking up where you left off" line's appearance and disappearance, and the summary and allowance-spent screens as drawn on a device — is unread by this task; step 9's screen read is where a defect in any of those would surface, and this record makes no claim about them either way.
+None. Every command ran, every named test passed, and all five screens matched when they were read at step 9.
+
+Three things the screens showed that no command here could. The stale-session read left the database holding one row, id 3, marked `abandoned`, and no new row beside it, because the fresh session had not been swiped yet: D11a's retirement write happening alone is what D11 promises, seen rather than asserted. The resumed session that was swiped to its end was marked `done` with all eight cards settled, which is D16 on a device. And the resume itself survived a real process death, since the app was terminated and reinstalled between screens 1 and 2 rather than merely backgrounded.
