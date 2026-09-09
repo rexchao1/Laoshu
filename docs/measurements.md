@@ -65,6 +65,22 @@ Rows cleaning to empty across all 5400 shipped words: **0**
 
 The worst single form is `shì`: 是 (to be), 事 (matter), 市 (market; city), 室 (room), 试 (to test).
 
+## Definition and pinyin collisions by level
+
+A word collides with another when they share a cleaned definition, or when they share toned pinyin. "Catalogue" counts a collision against any of the 5400 shipped words. "Level" counts a collision only against other words at the same level, since a session draws from one level only.
+
+| level | words | def. collisions (catalogue) | def. share (catalogue) | def. collisions (level) | def. share (level) | pinyin collisions (catalogue) | pinyin share (catalogue) | pinyin collisions (level) | pinyin share (level) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | 300 | 25 | 8.3% | 12 | 4.0% | 76 | 25.3% | 16 | 5.3% |
+| 2 | 200 | 16 | 8.0% | 2 | 1.0% | 51 | 25.5% | 8 | 4.0% |
+| 3 | 500 | 24 | 4.8% | 4 | 0.8% | 87 | 17.4% | 31 | 6.2% |
+| 4 | 1000 | 47 | 4.7% | 14 | 1.4% | 126 | 12.6% | 37 | 3.7% |
+| 5 | 1600 | 87 | 5.4% | 33 | 2.1% | 193 | 12.1% | 80 | 5.0% |
+| 6 | 1800 | 75 | 4.2% | 24 | 1.3% | 175 | 9.7% | 57 | 3.2% |
+| all | 5400 | 274 | 5.1% | 89 | 1.6% | 708 | 13.1% | 229 | 4.2% |
+
+The all-levels row sums the per-level counts: 274 definition collisions and 708 pinyin collisions counted catalogue-wide, 89 and 229 counted inside the level. This is the measurement decision D9/D9a/D10 rests on: within a level, both kinds of collision stay well under the catalogue-wide rate, which is why the app asks for the Chinese from the English rather than the reverse.
+
 ## Source-side disambiguation suffixes
 
 61 shipped words carry a trailing digit, e.g. 本1, 点1, 和1, 会1, 两1, 喂1, 别1, 打1, 等1, 点2. Stripped at build time; a zh-CN voice otherwise pronounces the digit.
