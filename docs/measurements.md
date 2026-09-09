@@ -55,6 +55,8 @@ Each level owns a contiguous block of `word_index`, asserted by this script. Wit
 
 Rows cleaning to empty across all 5400 shipped words: **0**
 
+Cleaned definitions at or under the 40-character gloss limit: **4600** of 5400. Checkpoint 8 decision D2 rests on this number.
+
 ## Pinyin collisions on exact toned pinyin
 
 | level range | words | sharing pinyin with another | share |
@@ -69,21 +71,47 @@ The worst single form is `shì`: 是 (to be), 事 (matter), 市 (market; city), 
 
 A word collides with another when they share a cleaned definition, or when they share toned pinyin. "Catalogue" counts a collision against any of the 5400 shipped words. "Level" counts a collision only against other words at the same level, since a session draws from one level only.
 
-| level | words | def. collisions (catalogue) | def. share (catalogue) | def. collisions (level) | def. share (level) | pinyin collisions (catalogue) | pinyin share (catalogue) | pinyin collisions (level) | pinyin share (level) |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 300 | 25 | 8.3% | 12 | 4.0% | 76 | 25.3% | 16 | 5.3% |
-| 2 | 200 | 16 | 8.0% | 2 | 1.0% | 51 | 25.5% | 8 | 4.0% |
-| 3 | 500 | 24 | 4.8% | 4 | 0.8% | 87 | 17.4% | 31 | 6.2% |
-| 4 | 1000 | 47 | 4.7% | 14 | 1.4% | 126 | 12.6% | 37 | 3.7% |
-| 5 | 1600 | 87 | 5.4% | 33 | 2.1% | 193 | 12.1% | 80 | 5.0% |
-| 6 | 1800 | 75 | 4.2% | 24 | 1.3% | 175 | 9.7% | 57 | 3.2% |
-| all | 5400 | 274 | 5.1% | 89 | 1.6% | 708 | 13.1% | 229 | 4.2% |
+| level | words | def. collisions (catalogue) | def. share (catalogue) | def. collisions (level) | def. share (level) | pinyin collisions (catalogue) | pinyin share (catalogue) | pinyin collisions (level) | pinyin share (level) | gloss collisions (catalogue) | gloss collisions (level) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | 300 | 25 | 8.3% | 12 | 4.0% | 76 | 25.3% | 16 | 5.3% | 53 | 22 |
+| 2 | 200 | 16 | 8.0% | 2 | 1.0% | 51 | 25.5% | 8 | 4.0% | 29 | 4 |
+| 3 | 500 | 24 | 4.8% | 4 | 0.8% | 87 | 17.4% | 31 | 6.2% | 61 | 18 |
+| 4 | 1000 | 47 | 4.7% | 14 | 1.4% | 126 | 12.6% | 37 | 3.7% | 104 | 30 |
+| 5 | 1600 | 87 | 5.4% | 33 | 2.1% | 193 | 12.1% | 80 | 5.0% | 140 | 46 |
+| 6 | 1800 | 75 | 4.2% | 24 | 1.3% | 175 | 9.7% | 57 | 3.2% | 124 | 42 |
+| all | 5400 | 274 | 5.1% | 89 | 1.6% | 708 | 13.1% | 229 | 4.2% | 511 | 162 |
 
-The all-levels row sums the per-level counts: 274 definition collisions and 708 pinyin collisions counted catalogue-wide, 89 and 229 counted inside the level. Inside a level, a cleaned definition is shared with another word 1.6% of the time and toned pinyin 4.2%. Checkpoint 11 decisions D9, D9a and D10 rest on these four numbers.
+The all-levels row sums the per-level counts: 274 definition collisions and 708 pinyin collisions counted catalogue-wide, 89 and 229 counted inside the level. Inside a level, a cleaned definition is shared with another word 1.6% of the time and toned pinyin 4.2%. Checkpoint 11 decisions D9, D9a and D10 rest on these four numbers. The gloss columns recount the same catalogue against `data/glosses.tsv` instead of the cleaned definition: 511 words share a gloss with another word catalogue-wide, 162 inside their own level. Checkpoint 8 decision D4b rests on these two numbers.
 
 ## Source-side disambiguation suffixes
 
 61 shipped words carry a trailing digit, e.g. 本1, 点1, 和1, 会1, 两1, 喂1, 别1, 打1, 等1, 点2. Stripped at build time; a zh-CN voice otherwise pronounces the digit.
+
+## Gloss source signals
+
+A word is flagged when its cleaned CC-CEDICT definition still carries a signal a rule can check mechanically: bracketed pinyin, a hanzi character, a bare "surname" tag, a "(bound form)" tag, a "variant of" tag, a definition `clean()` truncated with a trailing "...", or the word's own hanzi repeated back in its definition. None of these can be trusted to a rule, which is why checkpoint 8 decision D5 has every gloss written by a model pass instead of falling back to the cleaned definition.
+
+| level | words | flagged by any signal | share |
+| --- | --- | --- | --- |
+| 1 | 300 | 26 | 8.7% |
+| 2 | 200 | 23 | 11.5% |
+| 3 | 500 | 30 | 6.0% |
+| 4 | 1000 | 41 | 4.1% |
+| 5 | 1600 | 48 | 3.0% |
+| 6 | 1800 | 46 | 2.6% |
+| all | 5400 | 214 | 4.0% |
+
+| signal | words |
+| --- | --- |
+| bracketed pinyin | 83 |
+| hanzi | 73 |
+| surname | 61 |
+| (bound form) | 45 |
+| variant of | 37 |
+| trailing ellipsis | 32 |
+| own hanzi | 59 |
+
+214 of 5400 words are flagged by at least one signal, 26 of them at level 1. Checkpoint 8 decision D5 rests on these eight numbers: the total and each of the seven signals above.
 
 ## Speech synthesis: hanzi versus pinyin
 
