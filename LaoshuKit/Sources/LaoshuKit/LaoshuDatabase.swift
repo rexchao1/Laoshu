@@ -156,6 +156,21 @@ public enum LaoshuDatabase {
             try db.execute(sql: "INSERT INTO preference (id, direction) VALUES (1, 'receptive');")
         }
 
+        // D9, D10, D11: the two settings the draw reads alongside direction,
+        // added as columns on the same row rather than a second table —
+        // there is still exactly one of each, seeded to the constants they
+        // replace.
+        migrator.registerMigration("v6_settings") { db in
+            try db.execute(sql: """
+                ALTER TABLE preference ADD COLUMN new_words_per_day INTEGER NOT NULL DEFAULT 8
+                    CHECK (new_words_per_day BETWEEN 4 AND 20);
+                """)
+            try db.execute(sql: """
+                ALTER TABLE preference ADD COLUMN speak_on_flip INTEGER NOT NULL DEFAULT 1
+                    CHECK (speak_on_flip IN (0, 1));
+                """)
+        }
+
         return migrator
     }
 

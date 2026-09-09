@@ -109,9 +109,17 @@ public final class Session {
     /// value, so a session's direction cannot change once it has started.
     public let direction: StudyDirection
 
+    /// The `new_words_per_day` setting as it stood at the draw — not the
+    /// count of new words the draw actually took, which can fall short when
+    /// the level runs out of unseen words (D13c).
+    public let newWordsPerDay: Int
+
+    /// The `speak_on_flip` setting as it stood at the draw.
+    public let speakOnFlip: Bool
+
     /// How many words this session actually drew: every due batch's words
-    /// plus up to eight new ones (D6), unless the level had fewer of either
-    /// left (D20).
+    /// plus up to `newWordsPerDay` new ones (D6), unless the level had fewer
+    /// of either left (D20).
     public let drawnCount: Int
     public private(set) var finishedCount = 0
     public private(set) var parkedCount = 0
@@ -149,6 +157,8 @@ public final class Session {
         newWordIndices: [Int],
         dueBatchIDs: [Int64],
         direction: StudyDirection,
+        newWordsPerDay: Int,
+        speakOnFlip: Bool,
         emptyReason: EmptyReason? = nil,
         hasUnseenWordsRemaining: Bool = false,
         nextBatchReturnOn: LocalDate? = nil
@@ -159,6 +169,8 @@ public final class Session {
         self.newWordIndices = newWordIndices
         self.dueBatchIDs = dueBatchIDs
         self.direction = direction
+        self.newWordsPerDay = newWordsPerDay
+        self.speakOnFlip = speakOnFlip
         self.queue = words.map { Card(word: $0, direction: direction) }
         self.drawnCount = words.count
         self.emptyReason = emptyReason
@@ -342,7 +354,7 @@ public final class SessionEngine {
     /// Returns a session with `drawnCount == 0` and `emptyReason` set when
     /// there is nothing to draw — see `Session.EmptyReason`.
     public func startSession(level: Int) throws -> Session {
-        let direction = try preferenceStore.direction()
+        let preferences = try preferenceStore.preferences()
         let dueBatches = try batchStore.dueBatches(level: level, today: today)
         let dueBatchIDs = dueBatches.compactMap(\.id)
         let dueWordIndices = try batchStore.wordIndices(batchIDs: dueBatchIDs)
@@ -350,7 +362,7 @@ public final class SessionEngine {
         let unseenPool = try batchStore.unseenWordIndices(level: level)
 
         let allowanceSpent = try batchStore.hasBatchCreatedToday(today: today)
-        let newWordIndices = allowanceSpent ? [] : Array(unseenPool.shuffled(using: &rng).prefix(8))
+        let newWordIndices = allowanceSpent ? [] : Array(unseenPool.shuffled(using: &rng).prefix(preferences.newWordsPerDay))
         let hasUnseenWordsRemaining = unseenPool.count > newWordIndices.count
 
         var chosen = dueWordIndices + newWordIndices
@@ -369,7 +381,9 @@ public final class SessionEngine {
             }
             return Session(
                 words: [], dbQueue: dbQueue, today: today, level: level,
-                newWordIndices: [], dueBatchIDs: [], direction: direction, emptyReason: reason,
+                newWordIndices: [], dueBatchIDs: [], direction: preferences.direction,
+                newWordsPerDay: preferences.newWordsPerDay, speakOnFlip: preferences.speakOnFlip,
+                emptyReason: reason,
                 hasUnseenWordsRemaining: hasUnseenWordsRemaining, nextBatchReturnOn: nextBatchReturnOn
             )
         }
@@ -377,7 +391,9 @@ public final class SessionEngine {
         let words = try Word.fetch(indices: chosen, dbQueue: dbQueue)
         return Session(
             words: words, dbQueue: dbQueue, today: today, level: level,
-            newWordIndices: newWordIndices, dueBatchIDs: dueBatchIDs, direction: direction, emptyReason: nil,
+            newWordIndices: newWordIndices, dueBatchIDs: dueBatchIDs, direction: preferences.direction,
+            newWordsPerDay: preferences.newWordsPerDay, speakOnFlip: preferences.speakOnFlip,
+            emptyReason: nil,
             hasUnseenWordsRemaining: hasUnseenWordsRemaining, nextBatchReturnOn: nil
         )
     }
@@ -387,9 +403,9 @@ public final class SessionEngine {
     /// batch, so its first swipe writes only a second batch on `level`
     /// dated today; nothing here advances a ladder.
     public func startBonusSession(level: Int) throws -> Session {
-        let direction = try preferenceStore.direction()
+        let preferences = try preferenceStore.preferences()
         let unseenPool = try batchStore.unseenWordIndices(level: level)
-        let newWordIndices = Array(unseenPool.shuffled(using: &rng).prefix(8))
+        let newWordIndices = Array(unseenPool.shuffled(using: &rng).prefix(preferences.newWordsPerDay))
         let hasUnseenWordsRemaining = unseenPool.count > newWordIndices.count
 
         // The button that calls this is hidden when a level has no unseen
@@ -408,7 +424,9 @@ public final class SessionEngine {
             }
             return Session(
                 words: [], dbQueue: dbQueue, today: today, level: level,
-                newWordIndices: [], dueBatchIDs: [], direction: direction, emptyReason: reason,
+                newWordIndices: [], dueBatchIDs: [], direction: preferences.direction,
+                newWordsPerDay: preferences.newWordsPerDay, speakOnFlip: preferences.speakOnFlip,
+                emptyReason: reason,
                 hasUnseenWordsRemaining: false, nextBatchReturnOn: nextBatchReturnOn
             )
         }
@@ -416,7 +434,9 @@ public final class SessionEngine {
         let words = try Word.fetch(indices: newWordIndices, dbQueue: dbQueue)
         return Session(
             words: words, dbQueue: dbQueue, today: today, level: level,
-            newWordIndices: newWordIndices, dueBatchIDs: [], direction: direction, emptyReason: nil,
+            newWordIndices: newWordIndices, dueBatchIDs: [], direction: preferences.direction,
+            newWordsPerDay: preferences.newWordsPerDay, speakOnFlip: preferences.speakOnFlip,
+            emptyReason: nil,
             hasUnseenWordsRemaining: hasUnseenWordsRemaining, nextBatchReturnOn: nil
         )
     }

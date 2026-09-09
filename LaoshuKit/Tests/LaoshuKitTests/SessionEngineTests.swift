@@ -849,6 +849,111 @@ private struct WriteSnapshot: Equatable {
     #expect(result.words.count == 8)
 }
 
+// MARK: - D9, D10, D13c: drawing the configured number of new words
+
+@Test func testSessionDrawsTheConfiguredNumberOfUnseenWords() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 20)
+    try PreferenceStore(dbQueue: dbQueue).setNewWordsPerDay(4)
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+
+    let session = try engine.startSession(level: 1)
+
+    #expect(session.drawnCount == 4)
+}
+
+@Test func testSessionDrawsTwentyAtTheHighEndOfTheSetting() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 40)
+    try PreferenceStore(dbQueue: dbQueue).setNewWordsPerDay(20)
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+
+    let session = try engine.startSession(level: 1)
+
+    #expect(session.drawnCount == 20)
+}
+
+@Test func testBonusSessionDrawsTheConfiguredNumberOfUnseenWords() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 40)
+    try PreferenceStore(dbQueue: dbQueue).setNewWordsPerDay(20)
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+
+    let bonus = try engine.startBonusSession(level: 1)
+
+    #expect(bonus.drawnCount == 20)
+}
+
+@Test func testSessionDrawsWhatIsLeftWhenTheLevelHasFewerUnseenWordsThanTheSetting() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 5)
+    try PreferenceStore(dbQueue: dbQueue).setNewWordsPerDay(20)
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+
+    let session = try engine.startSession(level: 1)
+
+    #expect(session.drawnCount == 5)
+}
+
+@Test func testSessionCarriesTheSizeAndSpeakOnFlipItWasDrawnWith() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 20)
+    let store = PreferenceStore(dbQueue: dbQueue)
+    try store.setNewWordsPerDay(12)
+    try store.setSpeakOnFlip(false)
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+
+    let session = try engine.startSession(level: 1)
+    #expect(session.newWordsPerDay == 12)
+    #expect(session.speakOnFlip == false)
+
+    // Writing the settings underneath an already-drawn session must not
+    // move what it already carries (D13c).
+    try store.setNewWordsPerDay(4)
+    try store.setSpeakOnFlip(true)
+    #expect(session.newWordsPerDay == 12)
+    #expect(session.speakOnFlip == false)
+}
+
+@Test func testSessionCarriesSpeakOnFlipTrueWhenSetThatWay() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    try PreferenceStore(dbQueue: dbQueue).setSpeakOnFlip(true)
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+
+    let session = try engine.startSession(level: 1)
+
+    #expect(session.speakOnFlip == true)
+}
+
+@Test func testAllowanceSpentEmptySessionStillCarriesTheConfiguredSizeRatherThanZero() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    try store.createBatch(level: 1, wordIndices: [1, 2, 3], today: day0)
+    try PreferenceStore(dbQueue: dbQueue).setNewWordsPerDay(12)
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day0)
+    let session = try engine.startSession(level: 1)
+
+    #expect(session.drawnCount == 0)
+    #expect(session.emptyReason == .allowanceSpent)
+    #expect(session.newWordsPerDay == 12)
+}
+
+@Test func testAllowanceIsStillOneBatchADayRegardlessOfARaisedSettingAfterTheDraw() throws {
+    let dbQueue = try TestFixtures.makeDatabase(levelCounts: [1: 8, 2: 20])
+    let store = PreferenceStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day0)
+
+    // Draw at the default of eight and swipe once, so the batch is written.
+    let first = try engine.startSession(level: 1)
+    #expect(first.drawnCount == 8)
+    try first.swipe(.right)
+
+    // Raise the setting after the allowance is already spent for the day.
+    try store.setNewWordsPerDay(20)
+
+    let second = try engine.startSession(level: 2)
+    #expect(second.drawnCount == 0)
+    #expect(second.emptyReason == .allowanceSpent)
+}
+
 @Test func testBrowseReadsADatabaseWrittenByThePreviousVersion() throws {
     let (directory, catalogueURL) = try TestFixtures.makeCatalogue(levelCounts: [1: 8])
     let reviewLogURL = directory.appendingPathComponent("review.sqlite")
