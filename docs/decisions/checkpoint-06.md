@@ -135,7 +135,7 @@ These need a physical device, so the user runs them on the phone:
 
 ## Screens
 
-The screens are read at step 9 of the light factory's chain by the planning session, on a Mac with Xcode and a booted simulator, after every pebble merges and before the checkpoint is called built. This record does not claim they were read: this task takes no screenshots and drives no simulator, since there is no UI test target in this repository and checkpoint 1 D10 says no automated check may depend on a simulator. The screens still to be read at step 9:
+The screens are read at step 9 of the light factory's chain by the planning session, on a Mac with Xcode and a booted simulator, after every pebble merges and before the checkpoint is called built. This task took no screenshots and drove no simulator, since there is no UI test target in this repository and checkpoint 1 D10 says no automated check may depend on a simulator. All eight were read at step 9 on 2026-09-09, against a seeded database and, where a screen is not otherwise reachable, a temporary root view that was reverted afterwards. Every one matched, and the list below records what each was checked for:
 
 - Settings as it opens: the Study section with the word count and the direction, the Audio section with the one switch.
 - Settings with the stepper at 4, its subtitle reading "about 12 cards a day once the ladder fills", and again at 20 reading "about 60 cards a day once the ladder fills".
@@ -147,4 +147,6 @@ The screens are read at step 9 of the light factory's chain by the planning sess
 
 ## Defects
 
-None found by the checks run here. Every command above ran and every assertion held.
+None. Every command above ran, every assertion held, and all eight screens matched when they were read at step 9.
+
+Two things the screens showed that no command here could: the stepper greys out its minus at 4 and its plus at 20, so D11's range is visible rather than only enforced on write; and a session drawn with the setting at 12 ended reading "11 of 12 right the first time", which is D13 proved end to end on a device rather than in a test.
