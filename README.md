@@ -6,6 +6,10 @@ Pick an HSK level, swipe through its words, and meet each day's eight new
 words again the next day and again a week after that. Offline, no account,
 one user.
 
+A placement test on first launch, and any time after from the level list's
+toolbar, walks up and down the levels and marks the words the user already
+knows so they are never taught as new.
+
 ## Shape
 
 - `LaoshuKit/` — a pure Swift package holding the vocabulary catalogue, the
