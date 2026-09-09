@@ -81,11 +81,13 @@ All commands below were run on a machine with Xcode installed, which D14's compi
 
 ## Defects found and fixed while building this checkpoint
 
-Two crashes at launch, both reaching only a device that already held data, and both invisible to a test suite whose databases all start empty.
+Two crashes at launch, both reaching only a device that already held data, and both invisible to a test suite whose databases all start empty. Then one layout defect on the result screen, invisible to every test because no test looks at a screen.
 
 1. Carried over from checkpoint 2, fixed at commit 6b1b765. Checkpoint 1 created the review table with bare `CREATE TABLE IF NOT EXISTS` and recorded nothing; checkpoint 2 introduced a migrator, which found no row saying v1 was applied, ran it against a database that already had the table, and threw "table review already exists". The pre-upgrade fixture had been built through a `DatabaseMigrator`, which stamped a migration row a real checkpoint 1 database never carried, so 58 tests passed against a shape the app never produced. D14 exists because of this.
 
 2. In this checkpoint's own placement read, fixed before PR #13 merged. A phone seeded as placed by D13a carries a null recommended level, which was decoded into a non-optional `Int` and trapped inside GRDB on the first frame after the level list appeared. A fresh install and a completed test both took safe branches, so the suite and the compile gate stayed green. The level is now optional, which is what the seeded row means, and the bad state no longer compiles.
+
+3. The placement result screen, fixed at commit 50785de, found by driving the built app in the simulator during this verification. A walk that reaches the ceiling of D7b marks up to twenty-five words, and a definition wraps over two lines, so the list is taller than a phone. The screen had no scroll view, so the stack squeezed the rows and slid "Start studying" off the bottom edge: the screen acceptance step 5 asks the user to read, with no way to leave it. Its heading also sat under the status bar, because the parent puts a background behind it with `ignoresSafeArea`, which expands the stack around it. Both are fixed and both were checked against a screenshot of a twenty-five word result.
 
 The rule D14 states covers migrations. Neither of these was caught by a migration test alone: the second was a read. Any later checkpoint that reads seeded state on a launch path should be tested against a database built the way the previously shipped version built it, not one built by the code under test.
 
