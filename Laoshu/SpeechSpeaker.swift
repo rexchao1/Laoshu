@@ -19,4 +19,9 @@ final class SpeechSpeaker {
         utterance.voice = AVSpeechSynthesisVoice(language: "zh-CN")
         synthesizer.speak(utterance)
     }
+
+    /// Cuts off whatever is speaking, for a screen that is going away.
+    func stop() {
+        synthesizer.stopSpeaking(at: .immediate)
+    }
 }

@@ -71,7 +71,7 @@ struct LevelListView: View {
                         case .study(let level):
                             SessionView(engine: engine, level: level)
                         case .browse(let level):
-                            LevelBrowseView(level: level)
+                            LevelBrowseView(level: level, engine: engine)
                         }
                     }
                 }
