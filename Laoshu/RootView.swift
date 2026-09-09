@@ -5,12 +5,13 @@ import LaoshuKit
 /// level list, or shows the named-file error screen if it cannot be opened.
 struct RootView: View {
     @State private var engine: SessionEngine?
+    @State private var preferenceStore: PreferenceStore?
     @State private var openError: String?
 
     var body: some View {
         Group {
-            if let engine {
-                LevelListView(engine: engine)
+            if let engine, let preferenceStore {
+                LevelListView(engine: engine, preferenceStore: preferenceStore)
             } else if let openError {
                 DatabaseErrorView(message: openError)
             } else {
@@ -31,6 +32,7 @@ struct RootView: View {
             let reviewLogURL = try LaoshuDatabase.defaultReviewLogURL()
             let dbQueue = try LaoshuDatabase.open(catalogueURL: catalogueURL, reviewLogURL: reviewLogURL)
             engine = SessionEngine(dbQueue: dbQueue)
+            preferenceStore = PreferenceStore(dbQueue: dbQueue)
         } catch {
             openError = "\(error)"
         }
