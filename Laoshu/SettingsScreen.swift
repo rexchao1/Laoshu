@@ -10,7 +10,13 @@ struct SettingsScreen: View {
     @State private var newWordsPerDay: Int = 8
     @State private var direction: StudyDirection = .receptive
     @State private var speakOnFlip: Bool = true
+    @State private var voiceIdentifier: String?
+    @State private var speechRate: Double = 0.5
     @State private var loadError: String?
+
+    /// Read once, not through `PreferenceStore`: this is AVFoundation's own
+    /// list of what the device has installed, which the kit cannot see.
+    private let availableVoices = SpeechSpeaker.mandarinVoices()
 
     var body: some View {
         Group {
@@ -50,6 +56,40 @@ struct SettingsScreen: View {
                             .onChange(of: speakOnFlip) {
                                 writeSpeakOnFlip()
                             }
+
+                        if availableVoices.isEmpty {
+                            Text("No Mandarin voice is installed on this device.")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            if availableVoices.count > 1 {
+                                Picker("Voice", selection: $voiceIdentifier) {
+                                    Text("Default").tag(nil as String?)
+                                    ForEach(availableVoices) { voice in
+                                        Text(voice.name).tag(voice.id as String?)
+                                    }
+                                }
+                                .onChange(of: voiceIdentifier) {
+                                    writeVoiceIdentifier()
+                                }
+                            }
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Speed")
+                                HStack {
+                                    Text("slower")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                    Slider(value: $speechRate, in: 0...1)
+                                    Text("faster")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .onChange(of: speechRate) {
+                                writeSpeechRate()
+                            }
+                        }
                     }
                 }
                 .listStyle(.plain)
@@ -70,6 +110,8 @@ struct SettingsScreen: View {
             newWordsPerDay = preferences.newWordsPerDay
             direction = preferences.direction
             speakOnFlip = preferences.speakOnFlip
+            voiceIdentifier = preferences.voiceIdentifier
+            speechRate = preferences.speechRate
         } catch {
             loadError = "\(error)"
         }
@@ -99,6 +141,24 @@ struct SettingsScreen: View {
         do {
             try preferenceStore.setSpeakOnFlip(speakOnFlip)
             speakOnFlip = try preferenceStore.preferences().speakOnFlip
+        } catch {
+            // Intentionally swallowed, per D8.
+        }
+    }
+
+    private func writeVoiceIdentifier() {
+        do {
+            try preferenceStore.setVoiceIdentifier(voiceIdentifier)
+            voiceIdentifier = try preferenceStore.preferences().voiceIdentifier
+        } catch {
+            // Intentionally swallowed, per D8.
+        }
+    }
+
+    private func writeSpeechRate() {
+        do {
+            try preferenceStore.setSpeechRate(speechRate)
+            speechRate = try preferenceStore.preferences().speechRate
         } catch {
             // Intentionally swallowed, per D8.
         }

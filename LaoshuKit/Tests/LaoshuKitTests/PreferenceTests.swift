@@ -304,3 +304,88 @@ private func runScriptedSession(direction: StudyDirection, seed: UInt64) throws 
 
     #expect(preferences == Preferences(direction: .receptive, newWordsPerDay: 8, speakOnFlip: true))
 }
+
+// MARK: - Route line 13: the voice and its speed
+
+@Test func testVoiceAndRateDefaultOnAFreshDatabase() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+
+    let preferences = try PreferenceStore(dbQueue: dbQueue).preferences()
+
+    #expect(preferences.voiceIdentifier == nil)
+    #expect(preferences.speechRate == 0.5)
+}
+
+@Test func testVoiceAndRateWritersRoundTrip() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let store = PreferenceStore(dbQueue: dbQueue)
+
+    try store.setVoiceIdentifier("com.apple.voice.enhanced.zh-CN.Tingting")
+    try store.setSpeechRate(0.35)
+
+    let preferences = try store.preferences()
+    #expect(preferences.voiceIdentifier == "com.apple.voice.enhanced.zh-CN.Tingting")
+    #expect(preferences.speechRate == 0.35)
+}
+
+@Test func testClearingTheVoiceIdentifierGoesBackToLettingTheAppChoose() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let store = PreferenceStore(dbQueue: dbQueue)
+    try store.setVoiceIdentifier("some.voice")
+
+    try store.setVoiceIdentifier(nil)
+
+    #expect(try store.preferences().voiceIdentifier == nil)
+}
+
+@Test func testSpeechRateCheckConstraintRejectsOutOfRangeValues() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+
+    #expect(throws: (any Error).self) {
+        try dbQueue.write { db in
+            try db.execute(sql: "UPDATE preference SET speech_rate = -0.1 WHERE id = 1;")
+        }
+    }
+    #expect(throws: (any Error).self) {
+        try dbQueue.write { db in
+            try db.execute(sql: "UPDATE preference SET speech_rate = 1.1 WHERE id = 1;")
+        }
+    }
+}
+
+/// This fixture is built on the schema checkpoint 11 actually shipped
+/// (before checkpoint 6's `new_words_per_day`/`speak_on_flip` columns and
+/// this checkpoint's own two existed), the same convention every other
+/// migration test here follows.
+@Test func testMigrationAddsVoiceAndRateToADatabaseBuiltTheWayCheckpoint11Shipped() throws {
+    let (directory, catalogueURL) = try TestFixtures.makeCatalogue(levelCounts: [1: 8])
+    let reviewLogURL = directory.appendingPathComponent("review.sqlite")
+
+    try TestFixtures.makeCheckpoint11ReviewLog(
+        at: reviewLogURL,
+        batches: [(level: 1, createdOn: localDate(2026, 1, 1), nextLookOn: localDate(2026, 1, 2), lookNumber: 0, wordIndices: [1, 2, 3])],
+        reviewRows: [(wordIndex: 4, reviewedAt: Date(), grade: .good)],
+        placementStatus: "taken",
+        placementRecommendedLevel: nil,
+        direction: "reverse"
+    )
+
+    let dbQueue = try LaoshuDatabase.open(catalogueURL: catalogueURL, reviewLogURL: reviewLogURL)
+
+    let preferences = try PreferenceStore(dbQueue: dbQueue).preferences()
+    #expect(preferences.direction == .reverse)
+    #expect(preferences.newWordsPerDay == 8)
+    #expect(preferences.speakOnFlip == true)
+    #expect(preferences.voiceIdentifier == nil)
+    #expect(preferences.speechRate == 0.5)
+
+    // The failure with the most to lose here is not a missing setting but a
+    // migration that adds one and drops weeks of study on the way.
+    let counts = try dbQueue.read { db -> (Int, Int, Int) in
+        let batch = try Int.fetchOne(db, sql: "SELECT count(*) FROM batch") ?? 0
+        let batchWord = try Int.fetchOne(db, sql: "SELECT count(*) FROM batch_word") ?? 0
+        let review = try Int.fetchOne(db, sql: "SELECT count(*) FROM review") ?? 0
+        return (batch, batchWord, review)
+    }
+    #expect(counts == (1, 3, 1))
+}

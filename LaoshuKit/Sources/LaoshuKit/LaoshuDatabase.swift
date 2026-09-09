@@ -227,6 +227,22 @@ public enum LaoshuDatabase {
                 """)
         }
 
+        // Route line 13: which installed voice speaks a card and how fast.
+        // Both columns on the same `preference` row, the same shape D9-D11
+        // used for the settings that came before them. `voice_identifier` is
+        // nullable — no chosen voice means "let the app pick the best
+        // Mandarin voice installed," not an error. `speech_rate` mirrors
+        // `AVSpeechUtterance.rate`'s own 0.0-1.0 range, stored as a plain
+        // `Double` here since `LaoshuKit` cannot import AVFoundation to
+        // reference its constants directly.
+        migrator.registerMigration("v9_voice_and_rate") { db in
+            try db.execute(sql: "ALTER TABLE preference ADD COLUMN voice_identifier TEXT;")
+            try db.execute(sql: """
+                ALTER TABLE preference ADD COLUMN speech_rate REAL NOT NULL DEFAULT 0.5
+                    CHECK (speech_rate BETWEEN 0.0 AND 1.0);
+                """)
+        }
+
         return migrator
     }
 

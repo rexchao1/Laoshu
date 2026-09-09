@@ -14,6 +14,8 @@ struct SessionView: View {
     @State private var showsResumedNotice = false
     @State private var levelTestResult: LevelTestResult?
     @State private var showLevelTest = false
+    @State private var voiceIdentifier: String?
+    @State private var speechRate: Double = 0.5
     private let speaker = SpeechSpeaker()
 
     private let swipeThreshold: CGFloat = 100
@@ -45,6 +47,7 @@ struct SessionView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             startSession()
+            loadAudioPreferences()
         }
         .fullScreenCover(isPresented: $showLevelTest) {
             LevelTestView(
@@ -84,11 +87,11 @@ struct SessionView: View {
                     let isFirstReveal = !card.isFlipped && !card.hasBeenRevealed
                     session.flipCurrentCard()
                     if isFirstReveal && session.speakOnFlip {
-                        speaker.speak(card.word.hanzi)
+                        speaker.speak(card.word.hanzi, voiceIdentifier: voiceIdentifier, rate: speechRate)
                     }
                 },
                 onReplay: {
-                    speaker.speak(card.word.hanzi)
+                    speaker.speak(card.word.hanzi, voiceIdentifier: voiceIdentifier, rate: speechRate)
                 }
             )
             .offset(dragOffset)
@@ -133,6 +136,21 @@ struct SessionView: View {
             }
         } catch {
             loadError = "\(error)"
+        }
+    }
+
+    /// Route line 13's voice and speed, read once when the screen opens —
+    /// they never change what a session draws or grades, only what a card
+    /// sounds like, so unlike `session.speakOnFlip` they are not carried by
+    /// `Session` itself.
+    private func loadAudioPreferences() {
+        do {
+            let preferences = try engine.preferences()
+            voiceIdentifier = preferences.voiceIdentifier
+            speechRate = preferences.speechRate
+        } catch {
+            // Intentionally swallowed: a card just speaks with the app's
+            // own default voice and speed instead of the chosen one.
         }
     }
 

@@ -17,6 +17,8 @@ struct LevelBrowseView: View {
     // would run again on every rebuild, and two synthesizers would mean a
     // stop on one leaving the other still talking.
     @State private var speaker = SpeechSpeaker()
+    @State private var voiceIdentifier: String?
+    @State private var speechRate: Double = 0.5
 
     var body: some View {
         Group {
@@ -41,6 +43,7 @@ struct LevelBrowseView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             loadWords()
+            loadAudioPreferences()
         }
         .onDisappear {
             speaker.stop()
@@ -77,7 +80,7 @@ struct LevelBrowseView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
 
             Button {
-                speaker.speak(word.hanzi)
+                speaker.speak(word.hanzi, voiceIdentifier: voiceIdentifier, rate: speechRate)
             } label: {
                 Image(systemName: speaker.voiceAvailable ? "speaker.wave.2.fill" : "speaker.slash.fill")
                     .foregroundStyle(speaker.voiceAvailable ? LaoshuTheme.accent : .secondary)
@@ -87,6 +90,17 @@ struct LevelBrowseView: View {
             .accessibilityLabel("Play pronunciation")
         }
         .padding(.vertical, 4)
+    }
+
+    /// Same reasoning as `SessionView.loadAudioPreferences()`.
+    private func loadAudioPreferences() {
+        do {
+            let preferences = try engine.preferences()
+            voiceIdentifier = preferences.voiceIdentifier
+            speechRate = preferences.speechRate
+        } catch {
+            // Intentionally swallowed, same reasoning as `SessionView`.
+        }
     }
 
     private func loadWords() {

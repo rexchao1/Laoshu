@@ -763,4 +763,13 @@ public final class SessionEngine {
     public func levelTestResult(level: Int) throws -> LevelTestResult? {
         try LevelTestStore(dbQueue: dbQueue).result(level: level)
     }
+
+    /// The whole `preference` row, for a view that needs a setting
+    /// `Session` or `LevelTest` doesn't itself carry — route line 13's voice
+    /// and speed, read fresh whenever a card is about to speak rather than
+    /// captured at a session's draw, since neither affects the ladder or a
+    /// swipe's outcome the way direction and the new-word count do.
+    public func preferences() throws -> Preferences {
+        try preferenceStore.preferences()
+    }
 }

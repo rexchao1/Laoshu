@@ -14,6 +14,8 @@ struct LevelTestView: View {
     @State private var loadError: String?
     @State private var dragOffset: CGSize = .zero
     @State private var swipeError: String?
+    @State private var voiceIdentifier: String?
+    @State private var speechRate: Double = 0.5
     private let speaker = SpeechSpeaker()
 
     private let swipeThreshold: CGFloat = 100
@@ -49,6 +51,7 @@ struct LevelTestView: View {
         }
         .task {
             start()
+            loadAudioPreferences()
         }
     }
 
@@ -68,11 +71,11 @@ struct LevelTestView: View {
                     let isFirstReveal = !card.isFlipped && !card.hasBeenRevealed
                     test.flipCurrentCard()
                     if isFirstReveal && test.speakOnFlip {
-                        speaker.speak(card.word.hanzi)
+                        speaker.speak(card.word.hanzi, voiceIdentifier: voiceIdentifier, rate: speechRate)
                     }
                 },
                 onReplay: {
-                    speaker.speak(card.word.hanzi)
+                    speaker.speak(card.word.hanzi, voiceIdentifier: voiceIdentifier, rate: speechRate)
                 }
             )
             .offset(dragOffset)
@@ -112,6 +115,18 @@ struct LevelTestView: View {
             test = try engine.startLevelTest(level: level)
         } catch {
             loadError = "\(error)"
+        }
+    }
+
+    /// Same reasoning as `SessionView.loadAudioPreferences()`: read once,
+    /// not carried by `LevelTest` itself.
+    private func loadAudioPreferences() {
+        do {
+            let preferences = try engine.preferences()
+            voiceIdentifier = preferences.voiceIdentifier
+            speechRate = preferences.speechRate
+        } catch {
+            // Intentionally swallowed, same reasoning as `SessionView`.
         }
     }
 
