@@ -7,6 +7,7 @@ Run from the repository root:
     python3 docs/measure.py > docs/measurements.md
 """
 import re
+import sys
 import csv
 from collections import Counter, defaultdict
 
@@ -29,12 +30,12 @@ def clean(definition):
 
 
 def strip_suffix(word):
-    """Drop a source-side disambiguation suffix. See decision D9."""
+    """Drop a source-side disambiguation suffix. See checkpoint 1 decision D9."""
     return re.sub(r'\d+$', '', word)
 
 
 def collapse(rows):
-    """One row per word_index, at the word's lowest level. See decision D15.
+    """One row per word_index, at the word's lowest level. See checkpoint 1 decision D15.
 
     The source relists a word at a higher level when it gains a part of speech.
     Those rows are identical in every field the app shows, so they collapse.
@@ -56,6 +57,11 @@ def main():
     all_rows = list(csv.DictReader(open(SOURCE), delimiter='\t'))
     kept = [r for r in all_rows if r['level'] in LEVELS]
     words = collapse(kept)
+
+    if '--dump-definitions' in sys.argv[1:]:
+        for r in sorted(words, key=lambda r: int(r['word_index'])):
+            print(f"{r['word_index']}\t{clean(r['definition_cc-cedict'])}")
+        return
 
     out = print
     out('# Laoshu measurements')
@@ -156,6 +162,62 @@ def main():
         out(f'| 1-{n} | {len(sub)} | {amb} | {100 * amb / len(sub):.1f}% |')
     out('')
     out('The worst single form is `shì`: 是 (to be), 事 (matter), 市 (market; city), 室 (room), 试 (to test).')
+    out('')
+
+    out('## Definition and pinyin collisions by level')
+    out('')
+    out('A word collides with another when they share a cleaned definition, or when they share '
+        'toned pinyin. "Catalogue" counts a collision against any of the 5400 shipped words. '
+        '"Level" counts a collision only against other words at the same level, since a session '
+        'draws from one level only.')
+    out('')
+    cleaned = [clean(r['definition_cc-cedict']) for r in words]
+    pinyin = [r['pinyin'].lower() for r in words]
+    levels_of = [int(r['level']) for r in words]
+    def_catalogue = Counter(cleaned)
+    pin_catalogue = Counter(pinyin)
+    def_by_level = defaultdict(Counter)
+    pin_by_level = defaultdict(Counter)
+    for lvl, d, p in zip(levels_of, cleaned, pinyin):
+        def_by_level[lvl][d] += 1
+        pin_by_level[lvl][p] += 1
+
+    out('| level | words | def. collisions (catalogue) | def. share (catalogue) | '
+        'def. collisions (level) | def. share (level) | pinyin collisions (catalogue) | '
+        'pinyin share (catalogue) | pinyin collisions (level) | pinyin share (level) |')
+    out('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |')
+
+    def_cat_total = 0
+    def_lvl_total = 0
+    pin_cat_total = 0
+    pin_lvl_total = 0
+    for lvl in range(1, 7):
+        idx = [i for i, l in enumerate(levels_of) if l == lvl]
+        n = len(idx)
+        def_cat = sum(1 for i in idx if def_catalogue[cleaned[i]] > 1)
+        def_lvl = sum(1 for i in idx if def_by_level[lvl][cleaned[i]] > 1)
+        pin_cat = sum(1 for i in idx if pin_catalogue[pinyin[i]] > 1)
+        pin_lvl = sum(1 for i in idx if pin_by_level[lvl][pinyin[i]] > 1)
+        def_cat_total += def_cat
+        def_lvl_total += def_lvl
+        pin_cat_total += pin_cat
+        pin_lvl_total += pin_lvl
+        out(f'| {lvl} | {n} | {def_cat} | {100 * def_cat / n:.1f}% | {def_lvl} | '
+            f'{100 * def_lvl / n:.1f}% | {pin_cat} | {100 * pin_cat / n:.1f}% | {pin_lvl} | '
+            f'{100 * pin_lvl / n:.1f}% |')
+    n = len(words)
+    out(f'| all | {n} | {def_cat_total} | {100 * def_cat_total / n:.1f}% | {def_lvl_total} | '
+        f'{100 * def_lvl_total / n:.1f}% | {pin_cat_total} | {100 * pin_cat_total / n:.1f}% | '
+        f'{pin_lvl_total} | {100 * pin_lvl_total / n:.1f}% |')
+    out('')
+    assert def_cat_total == 274, f'catalogue-wide definition collisions changed to {def_cat_total}'
+    assert pin_cat_total == 708, f'catalogue-wide pinyin collisions changed to {pin_cat_total}'
+    assert def_lvl_total == 89, f'within-level definition collisions changed to {def_lvl_total}'
+    assert pin_lvl_total == 229, f'within-level pinyin collisions changed to {pin_lvl_total}'
+    out('The all-levels row sums the per-level counts: 274 definition collisions and 708 pinyin '
+        'collisions counted catalogue-wide, 89 and 229 counted inside the level. Inside a level, '
+        'a cleaned definition is shared with another word 1.6% of the time and toned pinyin 4.2%. '
+        'Checkpoint 11 decisions D9, D9a and D10 rest on these four numbers.')
     out('')
 
     out('## Source-side disambiguation suffixes')
