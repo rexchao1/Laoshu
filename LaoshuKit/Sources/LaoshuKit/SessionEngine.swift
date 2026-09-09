@@ -376,4 +376,16 @@ public final class SessionEngine {
     public func startPlacementTest() throws -> PlacementSession {
         try PlacementSession(dbQueue: dbQueue, batchStore: batchStore, today: today, rng: rng)
     }
+
+    /// Whether the first-launch gate should fire, and what a test already
+    /// taken or declined decided (D13/D13a).
+    public func placementStatus() throws -> PlacementStatus {
+        try PlacementStore(dbQueue: dbQueue).status()
+    }
+
+    /// Records the skip on the placement test's first screen so the gate
+    /// never fires again.
+    public func declinePlacementTest() throws {
+        try PlacementStore(dbQueue: dbQueue).decline()
+    }
 }

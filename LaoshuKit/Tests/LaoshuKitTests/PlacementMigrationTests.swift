@@ -135,3 +135,21 @@ private func fetchPlacement(_ dbQueue: DatabaseQueue) throws -> PlacementRow {
         try db.execute(sql: "UPDATE placement SET status = 'taken', recommended_level = 3;")
     }
 }
+
+/// The seeded-taken row of D13a carries no recommended level, and reading it
+/// runs on the first frame after launch. Decoding that NULL into a
+/// non-optional Int traps inside GRDB, which killed the app on every phone
+/// that upgraded rather than installing fresh.
+@Test func testReadingPlacementOnAnUpgradedPhoneDoesNotTrap() throws {
+    let (directory, catalogueURL) = try TestFixtures.makeCatalogue(levelCounts: [1: 5])
+    let reviewLogURL = directory.appendingPathComponent("review.sqlite")
+    try TestFixtures.makeCheckpoint2ReviewLog(
+        at: reviewLogURL,
+        reviewRows: [(wordIndex: 1, reviewedAt: date(2026, 1, 1), grade: Grade.good)]
+    )
+
+    let dbQueue = try LaoshuDatabase.open(catalogueURL: catalogueURL, reviewLogURL: reviewLogURL)
+    let status = try PlacementStore(dbQueue: dbQueue).status()
+
+    #expect(status == .taken(recommendedLevel: nil))
+}
