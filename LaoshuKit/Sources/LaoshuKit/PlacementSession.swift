@@ -30,6 +30,17 @@ public final class PlacementSession {
     /// Set once the walk stops (D5, D12).
     public private(set) var recommendedLevel: Int?
 
+    /// How many words have been answered so far, against
+    /// `PlacementTest.wordCeiling` — what the test screen's progress bar
+    /// fills against, since a walk that stops early never reaches it.
+    public private(set) var wordsAnswered = 0
+
+    /// Every word answered "know it", in answer order — the end screen's
+    /// list, by pinyin and meaning, of what the test marked as known (D17,
+    /// D17a). Kept alongside `knownWordIndicesByLevel`, which groups the
+    /// same words by level for the batches `finish` writes.
+    public private(set) var knownWords: [Word] = []
+
     public var isFinished: Bool { recommendedLevel != nil }
 
     public var currentWord: Word? { queue.first }
@@ -47,9 +58,11 @@ public final class PlacementSession {
     public func answer(_ answer: PlacementAnswer) throws {
         guard !queue.isEmpty else { return }
         let word = queue.removeFirst()
+        wordsAnswered += 1
         if answer == .know {
             knownCountInBlock += 1
             knownWordIndicesByLevel[currentLevel, default: []].append(word.wordIndex)
+            knownWords.append(word)
         }
 
         guard queue.isEmpty else { return }
@@ -89,6 +102,7 @@ public final class PlacementSession {
             for (level, wordIndices) in self.knownWordIndicesByLevel where !wordIndices.isEmpty {
                 try BatchStore.createRetiredBatch(db, level: level, wordIndices: wordIndices, today: self.today)
             }
+            try PlacementStore.markTaken(db, recommendedLevel: recommendedLevel)
         }
         self.recommendedLevel = recommendedLevel
     }
