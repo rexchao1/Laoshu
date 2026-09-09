@@ -681,6 +681,22 @@ private struct WriteSnapshot: Equatable {
     #expect(result.emptyReason == nil)
 }
 
+@Test func testBrowseReturnsDefinitionAndGlossForEveryWord() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 2)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    try store.createBatch(level: 1, wordIndices: [1, 2], today: day0)
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+    let result = try engine.browse(level: 1)
+
+    let byIndex = Dictionary(uniqueKeysWithValues: result.words.map { ($0.wordIndex, $0) })
+    #expect(byIndex[1]?.definition == "word 1")
+    #expect(byIndex[1]?.gloss == "gloss 1")
+    #expect(byIndex[2]?.definition == "word 2")
+    #expect(byIndex[2]?.gloss == "gloss 2")
+}
+
 @Test func testBrowseIncludesWordsFromRetiredBatches() throws {
     let dbQueue = try TestFixtures.makeDatabase(wordCount: 5)
     let store = BatchStore(dbQueue: dbQueue)

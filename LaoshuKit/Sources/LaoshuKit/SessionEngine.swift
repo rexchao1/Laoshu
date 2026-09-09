@@ -438,7 +438,7 @@ public final class SessionEngine {
             try Word.fetchAll(
                 db,
                 sql: """
-                SELECT w.word_index, w.level, w.hanzi, w.pinyin, w.pinyin_numbered, w.definition
+                SELECT w.word_index, w.level, w.hanzi, w.pinyin, w.pinyin_numbered, w.definition, w.gloss
                 FROM batch b
                 JOIN batch_word bw ON bw.batch_id = b.id
                 JOIN cat.word w ON w.word_index = bw.word_index

@@ -38,7 +38,8 @@ enum TestFixtures {
                     hanzi TEXT NOT NULL,
                     pinyin TEXT NOT NULL,
                     pinyin_numbered TEXT NOT NULL,
-                    definition TEXT NOT NULL
+                    definition TEXT NOT NULL,
+                    gloss TEXT NOT NULL
                 );
                 """)
             var index = 1
@@ -47,10 +48,10 @@ enum TestFixtures {
                 for _ in 0..<count {
                     try db.execute(
                         sql: """
-                        INSERT INTO word (word_index, level, hanzi, pinyin, pinyin_numbered, definition)
-                        VALUES (?, ?, ?, ?, ?, ?);
+                        INSERT INTO word (word_index, level, hanzi, pinyin, pinyin_numbered, definition, gloss)
+                        VALUES (?, ?, ?, ?, ?, ?, ?);
                         """,
-                        arguments: [index, level, "字\(index)", "zi\(index)", "zi4\(index)", "word \(index)"]
+                        arguments: [index, level, "字\(index)", "zi\(index)", "zi4\(index)", "word \(index)", "gloss \(index)"]
                     )
                     index += 1
                 }
