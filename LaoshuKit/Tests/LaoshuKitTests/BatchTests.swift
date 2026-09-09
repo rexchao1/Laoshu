@@ -226,6 +226,31 @@ private func localDate(_ year: Int, _ month: Int, _ day: Int) -> LocalDate {
     #expect(try store.hasBatchCreatedToday(today: day1) == false)
 }
 
+/// D6: a batch's own ladder can never retire it the day it is created —
+/// `BatchScheduler.createBatch` always sets `next_look_on`, and
+/// `Batch.lookTaken` only nulls it on the second look, at least eight days
+/// later. So a retired batch dated today can only exist some other way
+/// (e.g. a batch a user retired outright); this writes one directly to
+/// prove the allowance query ignores it rather than exercising the normal
+/// ladder, which cannot produce this shape.
+@Test func testHasBatchCreatedTodayIgnoresARetiredBatch() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let store = BatchStore(dbQueue: dbQueue)
+
+    let day0 = provider(at: date(2026, 1, 1))
+    try dbQueue.write { db in
+        try db.execute(
+            sql: """
+            INSERT INTO batch (level, created_on, next_look_on, look_number)
+            VALUES (1, ?, NULL, 2);
+            """,
+            arguments: [localDate(2026, 1, 1)]
+        )
+    }
+
+    #expect(try store.hasBatchCreatedToday(today: day0) == false)
+}
+
 @Test func testHasActiveBatchIsTrueUntilTheBatchRetires() throws {
     let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
     let store = BatchStore(dbQueue: dbQueue)

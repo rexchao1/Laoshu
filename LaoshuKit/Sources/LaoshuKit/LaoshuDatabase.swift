@@ -110,6 +110,38 @@ public enum LaoshuDatabase {
             try ReviewLogReplay.run(db: db, today: today)
         }
 
+        // D13/D13a: a single row recording whether the placement test has
+        // been taken or declined, and the level it recommended (never set
+        // when declined). A phone that already holds weeks of study — any
+        // batch or review row — is seeded as already taken with no
+        // recommended level, so the first-run gate this table backs never
+        // fires for a user who has been studying for weeks (D14). An empty
+        // database is seeded not taken, so the gate fires.
+        migrator.registerMigration("v4_placement") { db in
+            try db.execute(sql: """
+                CREATE TABLE placement (
+                    id INTEGER PRIMARY KEY CHECK (id = 1),
+                    status TEXT NOT NULL CHECK (status IN ('not_taken', 'taken', 'declined')),
+                    recommended_level INTEGER,
+                    -- A declined test recommended nothing, and a test that has
+                    -- not been taken cannot have. Written as a constraint
+                    -- rather than a comment because the writer lands in a
+                    -- later task, and a rule the schema does not hold is one
+                    -- a migration has to add back later.
+                    CHECK (status = 'taken' OR recommended_level IS NULL)
+                );
+                """)
+
+            let alreadyStudied = try Bool.fetchOne(db, sql: """
+                SELECT EXISTS(SELECT 1 FROM batch) OR EXISTS(SELECT 1 FROM review);
+                """) ?? false
+
+            try db.execute(
+                sql: "INSERT INTO placement (id, status, recommended_level) VALUES (1, ?, NULL);",
+                arguments: [alreadyStudied ? "taken" : "not_taken"]
+            )
+        }
+
         return migrator
     }
 
