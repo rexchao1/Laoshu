@@ -6,6 +6,10 @@ Pick an HSK level, swipe through its words, and meet each day's eight new
 words again the next day and again a week after that. Offline, no account,
 one user.
 
+A placement test on first launch, and any time after from the level list's
+toolbar, walks up and down the levels and marks the words the user already
+knows so they are never taught as new.
+
 ## Shape
 
 - `LaoshuKit/` — a pure Swift package holding the vocabulary catalogue, the
@@ -46,7 +50,7 @@ python3 docs/measure.py > /tmp/m.md && diff /tmp/m.md docs/measurements.md
 ```
 
 The iPhone app target needs Xcode, and its compile gate runs on a machine
-that has it (the Mac mini currently only has the command line tools):
+that has it, not one carrying only the command line tools:
 
 ```
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \

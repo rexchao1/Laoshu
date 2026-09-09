@@ -1,0 +1,107 @@
+# Checkpoint 3 decisions: Find my level
+
+One line per decision: what was decided, and the citation from the frozen plan, copied rather than paraphrased.
+
+D1. The test's judgement is the user's own word, taken at face value. A word is shown, the user answers "know it" or "don't", and a "know it" is recorded as knowledge without any verification step, pseudoword control, or correction formula. Cited: review answer 2026-09-08, "Don't worry about that rule. If I know it I will say I know it and just ask for 8 more words". This overrides the research recommendation below, which was put to the user and declined.
+
+D2. The research that was put to the user and declined, recorded so a later reader knows the risk was measured rather than missed: self-report yes/no vocabulary tests carry false-alarm rates of roughly 4% to 20%, highest among lower-proficiency learners, which is why instruments like X_Lex and LexTALE mix in pseudowords and apply a correction formula. Cited: research 2026-09-08, Mochida & Harrington 2006, Language Testing 23(1), "The Yes/No test as a measure of receptive vocabulary knowledge"; Stubbe 2012, Language Testing, on false-alarm and overestimation rates by proficiency level. The user's answer is the authority here, and D3 is the recovery it names.
+
+D3. The recovery for a placement that leaves a level too easy is the eight-more button already built in checkpoint 2 D19, not an undo list, a known-words review screen, or a reversibility mechanism of any kind. None of those is built here. Cited: review answer 2026-09-08, "just ask for 8 more words".
+
+D4. The test marks only the words it actually showed. It never marks a whole level, and never marks the levels below the one it recommends. Placing at level 4 leaves every untested word in levels 1 to 3 available as new. Cited: review answer 2026-09-08, "If I know it I will say I know it", which speaks to words the user sees; a test of around twenty-five items has no evidence about the other 5,375 words, and D2's error rates are the measured cost of guessing on their behalf.
+
+D5. A word marked known by the test is recorded as introduced by the same mechanism a studied word is: it goes into a batch created already retired, with `next_look_on` null and `look_number` 2, so checkpoint 2 D14's introduced-test excludes it from the new-word draw and nothing ever schedules it. The test writes **one retired batch per level it marked words at**, each dated today and holding only that level's words. Cited: checkpoint 2 D14, "A word counts as introduced when it belongs to any batch"; checkpoint 2 D18 already creates retired batches this way for the pre-upgrade replay, so the shape exists and is tested; critique round 3 finding F1, which found that a test spans up to five levels while `batch.level` is a single NOT NULL column, so one batch holding several levels' words would write a row whose level contradicts its own words. `ReviewLogReplay` groups by day and level for the same reason.
+
+D6. The words marked known do not count against the day's eight-word allowance. The allowance test of checkpoint 2 D7a reads whether any batch has `created_on` of today, so a retired batch written by the test would spend the day's new words before the user studies anything. The allowance query therefore excludes retired batches, and the test's batches are written with a truthful `created_on` of the day it ran. Cited: critique round 2 finding F1, which showed the exclusion cannot change the allowance answer for any study batch: `BatchScheduler.createBatch` always sets `next_look_on`, and `Batch.lookTaken` only nulls it on the second look, at least eight days later, so no study batch is ever both created today and retired today. Checkpoint 2 D7a's meaning is unchanged for every case it was written for. Backdating was the alternative and is rejected: it would write a `created_on` that is false about when the row was written, in the one table a later stats screen reads.
+
+D7. The test is adaptive rather than a fixed sweep of all six levels: it starts at a level, shows a block of words from it, and moves up or down by one level depending on how many were known, stopping when it has bracketed the level where knowledge falls off. Cited: research 2026-09-08, Vispoel 1993, Educational and Psychological Measurement, "Computerized Adaptive and Fixed-Item Versions of the ITED Vocabulary Subtest", which found adaptive vocabulary testing matched or beat fixed-form precision at a fraction of the length; a multidimensional CAT comparison reported in the same research reached higher reliability with about 13 items than a fixed test with 40.
+
+D7a. The move rule, stated as a count out of the block of five. Four or five known moves up one level. Zero or one known moves down one level. Two or three known stops the test: that is the level where knowledge falls off. Cited: critique round 1 finding F1. The rule needs no threshold from outside the test, because five items admit six outcomes and this partitions them evenly into up, stop, and down, so the stop band is as wide as the evidence for either move.
+
+D7b. The test also stops, without bracketing, when any of these happens: a move up is called at level 6, a move down is called at level 1, the twenty-five word ceiling of D8 is reached, or the move would return to a level already tested. The ceiling clause is a guard that cannot fire under the others: D9 starts at level 2 and moves are one level at a time, so the longest run is 2, 3, 4, 5, 6, which is exactly twenty-five words, and at the end of the level 6 block one of the other clauses always fires on the same word. Cited: critique round 3 finding F4. It is kept as a guard rather than deleted so a later change to D9's start or D8's block size cannot produce an unbounded test. Cited: critique round 1 finding F1, which found the stop condition undefined; the last clause is what stops a test oscillating between two adjacent levels until the ceiling.
+
+D7c. The block is five words drawn at random from the words of the current level that belong to no batch, which is the same pool the session draw of checkpoint 2 reads. A word already in a batch is never shown by the test. Cited: critique round 1 finding F4; `SessionEngine.unseenWordIndices` defines that pool, and `batch_word`'s composite key of (batch_id, word_index) permits a word to sit in two batches, so a test that could show an already-batched word would on D12's rerun give it a second, retired batch while its live batch kept scheduling it. Excluding the pool at the source is what makes that state unreachable rather than merely unlikely.
+
+D7e. A level with fewer than five words in no batch cannot fill a block. The test does not show a short block: it treats that level as known and calls a move up, and if D7b refuses that move the test stops. Cited: critique round 2 finding F2. A level whose unseen pool is empty has nothing left to teach, so "known" is the truthful reading of it, and it keeps D7a stated as a count out of five rather than a fraction that would have to be defined for every block size. No phone step reaches this case: step 6 presses eight more ten times, which batches about eighty-five of level 2's two hundred words and still leaves a full block. It is covered by the automated check alone (critique round 3 finding F5).
+
+D7d. The placement card shows the pinyin with the hanzi small and grey beneath it, exactly as the study card front does, and carries no speaker glyph and no back. Cited: critique round 1 finding F5; checkpoint 1 D6 puts the hanzi on every front because `docs/measurements.md` records 13.1% of shipped words sharing exact toned pinyin with another word, `shì` alone covering 是 事 市 室 试, so a pinyin-only face cannot be judged honestly. D1 takes the answer at face value and D3 rules out an undo, so a face that cannot be judged would permanently mark a word the user never actually judged. The speaker is left off because the test is about recognising the written word and audio would lengthen a test the user capped at twenty-five words.
+
+D8. The block size is five words per level and the test stops at a ceiling of twenty-five words. Cited: review answer 2026-09-08 choosing "about 25 words", five per level, over a 15-word and a 40-word option. The limit this accepts, recorded because it was measured rather than missed: research 2026-09-08 records that the Vocabulary Size Test samples 10 items per 1,000-word band, and that Gyllstad, McLean & Stewart 2020, Language Testing, doi:10.1177/0265532220979562, found 5 to 10 items per band give confidence intervals too wide for band-level claims, recommending 24 to 40 per band. Five per level cannot support a defensible per-level claim in the psychometric sense. What makes it acceptable is that the stakes are one tap: the level list is the home screen and any level opens from it at any time, and D3 names the recovery.
+
+D9. The test starts at level 2. Cited: review answer 2026-09-08, "Near beginner, start at level 2", confirming the "near beginner" of checkpoint 1 D5 still holds as of that date.
+
+D10. The recommended level is the lowest level tested whose block had three or fewer of five known. If every level tested had four or more known, the recommendation is the highest level reached. Cited: critique round 1 finding F1 for needing a defined answer, and critique round 2 finding F3 for what it must be. One rule covers every path, including the truncated and topped-out cases, and it always names the lowest level the user has not shown they know, which is where learning should start. The asymmetry it repairs: stopping at the level the block was drawn from recommended level 1 on the descending path, where the sample said the user knew 80 to 100 percent of it, while the ascending path recommended the level where knowledge ran out. The same evidence now gets the same answer from either direction.
+
+D11. The test is skippable from its first screen, and skipping lands on the level list exactly as today. Cited: checkpoint 2 D20, "Level list stays home, each row gains a due count", which is what makes the level list home; a first-run gate with no exit would make the app unopenable for a user who wants to browse.
+
+D11a. Skipping writes placement state recording that the test was declined, so the gate does not fire again. Cited: critique round 1 finding F2, which found nothing said whether a skip was recorded, and that a builder deciding either way alone produces a defect: not recording it shows the test on every launch to a user who declined it, and recording it silently would strand a mis-tap. The mis-tap is not stranded here because D12 keeps the test reachable from the level list, which is the same one tap that D3 relies on everywhere else.
+
+D11b. The test is presented over the level list rather than replacing it, and finishing it dismisses the test and pushes the recommended level onto the level list's own navigation stack, so going back from the session lands on the level list that checkpoint 2 D20 calls home. Cited: critique round 3 finding F3; `Laoshu/RootView.swift` shows the level list as the only root once the engine opens, and `Laoshu/LevelListView.swift` owns the `NavigationStack` and its `navigationDestination`, so the gate has to be placed relative to both.
+
+D12. The test can be run again later, from a control in the level list's toolbar. Running it again does not un-mark anything it marked before; it only adds. Cited: D3, which rules out an undo mechanism in this checkpoint.
+
+D13. Placement state lives in a new table in the writable database, recording that the test has been taken or declined and what it recommended, so the first-run gate fires once. Cited: checkpoint 2 D11 and D12 put new tables in the writable database behind an ordered migration.
+
+D13a. The migration that creates the placement table seeds it as already taken when the database it runs on already holds any batch row or any review row, with no recommended level. Cited: critique round 1 finding F3. The path this checkpoint actually ships on is not a fresh install: it is a phone carrying checkpoint 2's database and weeks of study, where an empty placement table would fire a first-run placement test at a user who has been studying for weeks. Such a user has already placed themselves by choosing levels, and D12 leaves the test available from the level list if they want it.
+
+D14. Any migration added by this checkpoint is tested against a database built the way the previously shipped version built it, not one built by the current migrator. Cited: the checkpoint 2 upgrade defect found on 2026-09-08 during verification, where the v1 migration ran `CREATE TABLE review` against a phone that already had the table and the app could not launch at all; 58 tests passed because the pre-upgrade fixture built its database through a `DatabaseMigrator`, which stamped a migration row that a real checkpoint 1 database never had. The fix and its regression test are at commit 6b1b765.
+
+D15. No new package dependency is added. Cited: checkpoint 2 D23.
+
+D16. The look follows checkpoint 1 D28 and D29: the Sprout palette from `LaoshuTheme`, an elevated white card on a cool near-white ground, a slim progress bar across the top whose denominator is the twenty-five word ceiling of D8, so a test that stops early under D7a ends with the bar part filled rather than needing a length it cannot know when the first card appears (critique round 1 finding F6; `Laoshu/ProgressBar.swift` takes a 0...1 fraction). The two answers are swipes, left for "don't" and right for "know it", the same directions a study card uses. Cited: review answer 2026-09-08 choosing "Swipes, like a study card" over buttons, against the recommendation.
+
+D17a. The test ends on a screen naming the level it recommends and listing, by pinyin and meaning, every word it marked as known. When it marked none, the screen says so in words rather than rendering an empty list, in the voice `SessionSummaryView` already uses for "Nothing to park this time." Cited: critique round 3 finding F2; checkpoint 2 D22 exists because a screen rendering a zero reads as broken. Cited: critique round 1 finding F7. Without it nothing the user can see on the phone reports a mark: the level list shows the whole-level word count and the waiting count, neither of which moves when a word is marked, and the eight new words of the next session are drawn at random from a pool of 195 to 1,795, so the roughly five marked words are absent from those eight about 81% of the time at level 2 and about 96% at level 4 even when the exclusion is entirely broken. The list is what turns the headline promise into something a person can check.
+
+D17. The placement card does not carry checkpoint 1's swipe gate. D26 and D26a hold that a swipe is ignored until the card has been revealed at least once, because grading a card whose meaning was never shown would write a review row as evidence of recall that never happened. A placement card has no back to reveal and writes no review row, so the gate has nothing to protect and would make the card unswipeable. Cited: checkpoint 1 D26 and D26a, and D1 here, which takes the user's answer at face value with no reveal step. The placement screen is therefore its own view and does not reuse the session card's gesture handling.
+
+## Failure modes recorded in the plan
+
+The user over-claims during the test and words they cannot actually recall are marked known and never taught. Nothing detects it; the user presses eight more for additional words, per D3, and the words wrongly marked stay marked.
+The test recommends a level far from the user's real one. The level list is the home screen and any level is one tap away, so the cost is a tap.
+The test is abandoned partway. Nothing is written until it completes, so an abandoned test leaves no marks and fires again next launch.
+The app is closed mid-test. Same as abandonment: no partial state.
+The user runs the test a second time and answers differently. The second run adds marks and removes none, per D12, so words known once stay known.
+A user who knows nothing answers "don't" to every word. The test bottoms out at level 1 and marks nothing, which is the correct outcome.
+A user who knows everything answers "know it" to every word. The test tops out at level 6 and marks the words it showed. Levels below stay untouched, per D4.
+The migration that adds the placement table runs on a phone that already has checkpoint 2's schema. D14 requires that path to be tested against a database built by checkpoint 2's own migrator.
+The upgrade lands on a phone with weeks of study on it. D13a seeds placement as taken, so the test does not fire at a user who has already placed themselves; they reach it from the level list if they want it.
+The user taps skip by mistake. D11a records the decline and the gate does not fire again; the test is reached from the level list, per D12.
+The test oscillates between two adjacent levels. D7b stops it when a move would return to a level already tested.
+A level has fewer than five words in no batch, so D7c cannot fill a block. D7e treats the level as known and moves up, which is what an exhausted level means: there is nothing left there to teach.
+
+## Checks run
+
+All commands below were run on a machine with Xcode installed, which D14's compile gate requires: it cannot run anywhere only the command line tools are present.
+
+- `swift test --package-path LaoshuKit` — passed, 86 tests.
+- `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -scheme Laoshu -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' build CODE_SIGNING_ALLOWED=NO` — BUILD SUCCEEDED.
+- `python3 docs/measure.py > /tmp/m.md && diff /tmp/m.md docs/measurements.md` — empty diff.
+- `swift run --package-path LaoshuKit laoshu-build-db --checksum data/laoshu.sqlite` — `c4a5f6c2d416185e1f7f3bc071268cfa282ae78d66ddb834e5fb91c413f360a5`, unchanged from the checkpoint 1 and 2 records.
+- `sqlite3 data/laoshu.sqlite "select level, count(*) from word group by level order by level"` — 1|300, 2|200, 3|500, 4|1000, 5|1600, 6|1800.
+
+## Defects found and fixed while building this checkpoint
+
+Two crashes at launch, both reaching only a device that already held data, and both invisible to a test suite whose databases all start empty.
+
+1. Carried over from checkpoint 2, fixed at commit 6b1b765. Checkpoint 1 created the review table with bare `CREATE TABLE IF NOT EXISTS` and recorded nothing; checkpoint 2 introduced a migrator, which found no row saying v1 was applied, ran it against a database that already had the table, and threw "table review already exists". The pre-upgrade fixture had been built through a `DatabaseMigrator`, which stamped a migration row a real checkpoint 1 database never carried, so 58 tests passed against a shape the app never produced. D14 exists because of this.
+
+2. In this checkpoint's own placement read, fixed before PR #13 merged. A phone seeded as placed by D13a carries a null recommended level, which was decoded into a non-optional `Int` and trapped inside GRDB on the first frame after the level list appeared. A fresh install and a completed test both took safe branches, so the suite and the compile gate stayed green. The level is now optional, which is what the seeded row means, and the bad state no longer compiles.
+
+The rule D14 states covers migrations. Neither of these was caught by a migration test alone: the second was a read. Any later checkpoint that reads seeded state on a launch path should be tested against a database built the way the previously shipped version built it, not one built by the code under test.
+
+## Not run here
+
+The user runs these on the phone, in this order. Steps 1 and 2 come first and must be done before the app is ever deleted: the review log lives in the app container, so a delete-and-reinstall destroys the studied database that those two steps are the only check of, and takes checkpoint 2's still-owed manual pass with it (critique round 2 finding F4).
+
+1. Install this checkpoint over the phone as it stands, with its existing study on it. The placement test does not appear at all; the level list opens as before (D13a).
+2. Everything checkpoint 2 promised still works on that database: the waiting counts are there and a session composes.
+
+Then, and only then, on a deleted-and-reinstalled app:
+
+3. Open the app. The test appears rather than the level list.
+4. Answer honestly through it. It ends by naming a level and opening it.
+5. The end screen lists the words it marked as known. Note them down.
+6. Press eight more ten times at the recommended level, which draws eighty new words. None of the noted words appears among them. This is sampling rather than proof, and it is named as such: exhausting a level would mean about twenty-five sessions and would permanently introduce every word in it. The automated check carries the actual guarantee; this step exists so a person sees it hold.
+7. Reopen the app. The test does not appear again.
+8. Delete and reinstall, skip the test, and land on the level list with everything available. Reopen the app and confirm the test does not appear again (D11a).
+9. Run the test again from the level list and confirm it does not un-mark anything.

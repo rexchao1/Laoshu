@@ -48,9 +48,9 @@ D22. Session state lives in memory only; closing or force-quitting the app aband
 
 D23. Persistence is GRDB over one connection: the writable review database in Application Support is primary and `ATTACH`es the bundled catalogue read-only as schema `cat`, so every query including D18's introduced-test runs on that one connection. Cited: D13 requires opening a prebuilt file, which SwiftData cannot do without an import step; checkpoint 2's central query is "what is due now, ordered by due date", which is one SQL statement; measured comparisons reported by pistack.xyz and fatbobman.com put direct-SQLite frameworks ahead of Core Data ahead of SwiftData on read and write.
 
-D24. The deployment target is iOS 26, and the build reaches the phone by sideloading from Xcode on the MacBook against a free Apple developer account, meaning the signature expires and the app must be rebuilt every seven days. Cited: review answer 2026-09-07, iOS 26.6.1 and a free account. The seven-day expiry is a standing friction for an app meant to be opened daily, and a paid account at $99 a year removes it; that is the user's call and does not block this checkpoint.
+D24. The deployment target is iOS 26, and the build reaches the phone by sideloading from Xcode on a development machine against a free Apple developer account, meaning the signature expires and the app must be rebuilt every seven days. Cited: review answer 2026-09-07, iOS 26.6.1 and a free account. The seven-day expiry is a standing friction for an app meant to be opened daily, and a paid account at $99 a year removes it; that is the user's call and does not block this checkpoint.
 
-D25. The Mac mini has command line tools only, no Xcode, so it cannot run the D11 compile gate; until Xcode is installed there, tasks touching the app target are MacBook work and are not submitted to the factory. Cited: review answer 2026-09-07, "It only has the command line tools. I could get it if needed"; `factory-submit` option list, which offers only --assurance, --draft, --name, --pipeline, --planning, --project, --repo, --request-key and --spec-file.
+D25. One of the build machines has command line tools only, no Xcode, so it cannot run the D11 compile gate; until Xcode is installed there, tasks touching the app target run where Xcode is present and are not submitted to the factory. Cited: review answer 2026-09-07, "It only has the command line tools. I could get it if needed"; `factory-submit` option list, which offers only --assurance, --draft, --name, --pipeline, --planning, --project, --repo, --request-key and --spec-file.
 
 D26. A swipe is ignored until the card has been flipped: on the front it neither advances the card nor writes a review row, and the flip is one-way for a single presentation, reset only by a requeue. Cited: critique round 3 finding F3; grading a card whose answer was never shown would write a row that D16 hands checkpoint 2 as evidence of recall that never happened.
 
@@ -62,7 +62,7 @@ D29. The palette is Sprout's: a cool near-white ground, a white card, a green ac
 
 ## Checks run
 
-All commands below were run on the MacBook, since D25 keeps the Mac mini, which has command line tools only, from running the `xcodebuild` gate.
+All commands below were run on a machine with Xcode installed, since D25 keeps a command-line-tools-only machine from running the `xcodebuild` gate.
 
 - `swift test --package-path LaoshuKit` — passed, 16 tests.
 - `swift run --package-path LaoshuKit laoshu-build-db data/hsk_word_list.tsv data/laoshu.sqlite` — regenerated the catalogue, no diff against the committed file.
