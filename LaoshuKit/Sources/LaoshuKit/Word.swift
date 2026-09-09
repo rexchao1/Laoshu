@@ -8,6 +8,7 @@ public struct Word: Sendable, Equatable, FetchableRecord {
     public let pinyin: String
     public let pinyinNumbered: String
     public let definition: String
+    public let gloss: String
 
     public init(
         wordIndex: Int,
@@ -15,7 +16,8 @@ public struct Word: Sendable, Equatable, FetchableRecord {
         hanzi: String,
         pinyin: String,
         pinyinNumbered: String,
-        definition: String
+        definition: String,
+        gloss: String
     ) {
         self.wordIndex = wordIndex
         self.level = level
@@ -23,6 +25,7 @@ public struct Word: Sendable, Equatable, FetchableRecord {
         self.pinyin = pinyin
         self.pinyinNumbered = pinyinNumbered
         self.definition = definition
+        self.gloss = gloss
     }
 
     public init(row: Row) {
@@ -32,6 +35,7 @@ public struct Word: Sendable, Equatable, FetchableRecord {
         pinyin = row["pinyin"]
         pinyinNumbered = row["pinyin_numbered"]
         definition = row["definition"]
+        gloss = row["gloss"]
     }
 
     /// Fetches every word in `indices` from `cat.word`, restored to
@@ -45,7 +49,7 @@ public struct Word: Sendable, Equatable, FetchableRecord {
             try Word.fetchAll(
                 db,
                 sql: """
-                SELECT word_index, level, hanzi, pinyin, pinyin_numbered, definition
+                SELECT word_index, level, hanzi, pinyin, pinyin_numbered, definition, gloss
                 FROM cat.word
                 WHERE word_index IN (\(placeholders));
                 """,

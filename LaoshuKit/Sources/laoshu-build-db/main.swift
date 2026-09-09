@@ -11,7 +11,7 @@ func fail(_ message: String) -> Never {
 func usage() -> Never {
     fail("""
     usage:
-      laoshu-build-db <source.tsv> <database.sqlite>
+      laoshu-build-db <source.tsv> <glosses.tsv> <database.sqlite>
       laoshu-build-db --checksum <database.sqlite>
     """)
 }
@@ -65,6 +65,16 @@ func readSourceRows(path: String) throws -> [CatalogueBuilder.SourceRow] {
     return rows
 }
 
+/// Reads `data/glosses.tsv`'s non-header lines, unparsed — parsing and
+/// validation happen in `CatalogueBuilder.buildGlossMap`.
+func readGlossLines(path: String) throws -> [String] {
+    let contents = try String(contentsOfFile: path, encoding: .utf8)
+    var lines = contents.split(separator: "\n", omittingEmptySubsequences: true).map(String.init)
+    guard !lines.isEmpty else { return [] }
+    lines.removeFirst() // header
+    return lines
+}
+
 // MARK: - SQLite
 
 func sqliteCheck(_ code: Int32, _ db: OpaquePointer?, _ context: String) {
@@ -86,7 +96,8 @@ func writeDatabase(words: [CatalogueBuilder.CleanWord], to path: String) throws 
             hanzi TEXT NOT NULL,
             pinyin TEXT NOT NULL,
             pinyin_numbered TEXT NOT NULL,
-            definition TEXT NOT NULL
+            definition TEXT NOT NULL,
+            gloss TEXT NOT NULL
         );
         """, nil, nil, nil), db, "creating table")
 
@@ -94,8 +105,8 @@ func writeDatabase(words: [CatalogueBuilder.CleanWord], to path: String) throws 
 
     var statement: OpaquePointer?
     sqliteCheck(sqlite3_prepare_v2(db, """
-        INSERT INTO word (word_index, level, hanzi, pinyin, pinyin_numbered, definition)
-        VALUES (?, ?, ?, ?, ?, ?);
+        INSERT INTO word (word_index, level, hanzi, pinyin, pinyin_numbered, definition, gloss)
+        VALUES (?, ?, ?, ?, ?, ?, ?);
         """, -1, &statement, nil), db, "preparing insert")
     defer { sqlite3_finalize(statement) }
 
@@ -107,6 +118,7 @@ func writeDatabase(words: [CatalogueBuilder.CleanWord], to path: String) throws 
         sqlite3_bind_text(statement, 4, word.pinyin, -1, transient)
         sqlite3_bind_text(statement, 5, word.pinyinNumbered, -1, transient)
         sqlite3_bind_text(statement, 6, word.definition, -1, transient)
+        sqlite3_bind_text(statement, 7, word.gloss, -1, transient)
         sqliteCheck(sqlite3_step(statement), db, "inserting word_index \(word.wordIndex)")
         sqlite3_reset(statement)
     }
@@ -121,7 +133,7 @@ func readChecksumRows(from path: String) throws -> [String] {
 
     var statement: OpaquePointer?
     sqliteCheck(sqlite3_prepare_v2(db, """
-        SELECT word_index, level, hanzi, pinyin, pinyin_numbered, definition
+        SELECT word_index, level, hanzi, pinyin, pinyin_numbered, definition, gloss
         FROM word ORDER BY word_index;
         """, -1, &statement, nil), db, "preparing checksum query")
     defer { sqlite3_finalize(statement) }
@@ -137,7 +149,8 @@ func readChecksumRows(from path: String) throws -> [String] {
         let pinyin = String(cString: sqlite3_column_text(statement, 3))
         let pinyinNumbered = String(cString: sqlite3_column_text(statement, 4))
         let definition = String(cString: sqlite3_column_text(statement, 5))
-        rows.append("\(wordIndex)\t\(level)\t\(hanzi)\t\(pinyin)\t\(pinyinNumbered)\t\(definition)")
+        let gloss = String(cString: sqlite3_column_text(statement, 6))
+        rows.append("\(wordIndex)\t\(level)\t\(hanzi)\t\(pinyin)\t\(pinyinNumbered)\t\(definition)\t\(gloss)")
     }
     return rows
 }
@@ -169,14 +182,16 @@ case 2 where arguments[0] == "--checksum":
     let rows = try readChecksumRows(from: arguments[1])
     print(checksum(of: rows))
 
-case 2:
+case 3:
     let sourcePath = arguments[0]
-    let outputPath = arguments[1]
+    let glossPath = arguments[1]
+    let outputPath = arguments[2]
 
     let sourceRows = try readSourceRows(path: sourcePath)
+    let glossLines = try readGlossLines(path: glossPath)
     let words: [CatalogueBuilder.CleanWord]
     do {
-        words = try CatalogueBuilder.buildCatalogue(from: sourceRows)
+        words = try CatalogueBuilder.buildCatalogue(from: sourceRows, glossLines: glossLines)
     } catch {
         fail("\(error)")
     }

@@ -34,7 +34,7 @@ The word database at `data/laoshu.sqlite` is generated from the vendored TSV
 and committed rather than built on device:
 
 ```
-swift run --package-path LaoshuKit laoshu-build-db data/hsk_word_list.tsv data/laoshu.sqlite
+swift run --package-path LaoshuKit laoshu-build-db data/hsk_word_list.tsv data/glosses.tsv data/laoshu.sqlite
 swift run --package-path LaoshuKit laoshu-build-db --checksum data/laoshu.sqlite
 ```
 

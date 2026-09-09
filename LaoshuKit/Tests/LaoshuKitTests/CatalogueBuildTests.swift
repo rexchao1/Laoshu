@@ -59,3 +59,117 @@ import Testing
     #expect(collapsed.first(where: { $0.wordIndex == 42 })?.level == 1)
     #expect(collapsed.first(where: { $0.wordIndex == 7 })?.level == 2)
 }
+
+// MARK: - Gloss validation
+
+@Test func testValidateGlossAcceptsAnOrdinaryGloss() throws {
+    try CatalogueBuilder.validateGloss("to love; to be fond of", wordIndex: 1)
+}
+
+@Test func testValidateGlossAcceptsBareSurname() throws {
+    try CatalogueBuilder.validateGloss("surname; family name", wordIndex: 1)
+}
+
+@Test func testValidateGlossRejectsEmptyGloss() {
+    #expect(throws: CatalogueBuilder.BuildError.emptyGloss(wordIndex: 1)) {
+        try CatalogueBuilder.validateGloss("", wordIndex: 1)
+    }
+}
+
+@Test func testValidateGlossRejectsGlossOver40Characters() {
+    let gloss = String(repeating: "a", count: 41)
+    #expect(throws: CatalogueBuilder.BuildError.glossTooLong(wordIndex: 1)) {
+        try CatalogueBuilder.validateGloss(gloss, wordIndex: 1)
+    }
+}
+
+@Test func testValidateGlossAcceptsExactly40Characters() throws {
+    let gloss = String(repeating: "a", count: 40)
+    try CatalogueBuilder.validateGloss(gloss, wordIndex: 1)
+}
+
+@Test func testValidateGlossRejectsSurnameFollowedByCapitalizedWord() {
+    #expect(throws: CatalogueBuilder.BuildError.bannedGlossPattern(wordIndex: 1)) {
+        try CatalogueBuilder.validateGloss("cold; surname Leng", wordIndex: 1)
+    }
+}
+
+@Test func testValidateGlossRejectsVariantOf() {
+    #expect(throws: CatalogueBuilder.BuildError.bannedGlossPattern(wordIndex: 1)) {
+        try CatalogueBuilder.validateGloss("variant of 打", wordIndex: 1)
+    }
+}
+
+@Test func testValidateGlossRejectsOldVariantOf() {
+    #expect(throws: CatalogueBuilder.BuildError.bannedGlossPattern(wordIndex: 1)) {
+        try CatalogueBuilder.validateGloss("old variant of 打", wordIndex: 1)
+    }
+}
+
+@Test func testValidateGlossRejectsErhuaVariantOf() {
+    #expect(throws: CatalogueBuilder.BuildError.bannedGlossPattern(wordIndex: 1)) {
+        try CatalogueBuilder.validateGloss("erhua variant of 打", wordIndex: 1)
+    }
+}
+
+@Test func testValidateGlossRejectsAbbrFor() {
+    #expect(throws: CatalogueBuilder.BuildError.bannedGlossPattern(wordIndex: 1)) {
+        try CatalogueBuilder.validateGloss("abbr. for something", wordIndex: 1)
+    }
+}
+
+@Test func testValidateGlossRejectsBoundForm() {
+    #expect(throws: CatalogueBuilder.BuildError.bannedGlossPattern(wordIndex: 1)) {
+        try CatalogueBuilder.validateGloss("(bound form) to eat", wordIndex: 1)
+    }
+}
+
+@Test func testValidateGlossRejectsHanzi() {
+    #expect(throws: CatalogueBuilder.BuildError.bannedGlossPattern(wordIndex: 1)) {
+        try CatalogueBuilder.validateGloss("to hit 打", wordIndex: 1)
+    }
+}
+
+@Test func testValidateGlossRejectsBracketedPinyinReference() {
+    #expect(throws: CatalogueBuilder.BuildError.bannedGlossPattern(wordIndex: 1)) {
+        try CatalogueBuilder.validateGloss("to hold an umbrella [da3 san3]", wordIndex: 1)
+    }
+}
+
+@Test func testValidateGlossRejectsTrailingEllipsis() {
+    #expect(throws: CatalogueBuilder.BuildError.bannedGlossPattern(wordIndex: 1)) {
+        try CatalogueBuilder.validateGloss("a semantically light, transitive verb...", wordIndex: 1)
+    }
+}
+
+@Test func testBuildGlossMapRejectsUnknownWordIndex() {
+    #expect(throws: CatalogueBuilder.BuildError.unknownGlossWordIndex(wordIndex: 99)) {
+        try CatalogueBuilder.buildGlossMap(fromLines: ["99\tto hit"], wordIndices: [1])
+    }
+}
+
+@Test func testBuildGlossMapRejectsDuplicateWordIndex() {
+    #expect(throws: CatalogueBuilder.BuildError.duplicateGlossWordIndex(wordIndex: 1)) {
+        try CatalogueBuilder.buildGlossMap(fromLines: ["1\tto hit", "1\tto strike"], wordIndices: [1])
+    }
+}
+
+@Test func testBuildGlossMapRejectsMissingGloss() {
+    #expect(throws: CatalogueBuilder.BuildError.missingGloss(wordIndex: 2)) {
+        try CatalogueBuilder.buildGlossMap(fromLines: ["1\tto hit"], wordIndices: [1, 2])
+    }
+}
+
+@Test func testBuildGlossMapRejectsMalformedLine() {
+    #expect(throws: CatalogueBuilder.BuildError.malformedGlossLine(lineNumber: 2)) {
+        try CatalogueBuilder.buildGlossMap(fromLines: ["not-a-tsv-row"], wordIndices: [1])
+    }
+}
+
+@Test func testBuildGlossMapAcceptsAValidFile() throws {
+    let glosses = try CatalogueBuilder.buildGlossMap(
+        fromLines: ["1\tto hit", "2\ta few"],
+        wordIndices: [1, 2]
+    )
+    #expect(glosses == [1: "to hit", 2: "a few"])
+}
