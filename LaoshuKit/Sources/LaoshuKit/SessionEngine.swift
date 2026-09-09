@@ -216,6 +216,24 @@ public struct LevelSummary: Sendable, Equatable {
     }
 }
 
+/// Why `SessionEngine.browse(level:)` found nothing to list.
+public enum BrowseEmptyReason: Sendable, Equatable {
+    /// The level has no batch at all — nothing has ever been introduced.
+    case levelHasNoBatches
+}
+
+/// Every word already met in a level, for the browse screen (D2, D3, D7,
+/// D8, D10, D11).
+public struct BrowseResult: Sendable, Equatable {
+    public let words: [Word]
+    public let emptyReason: BrowseEmptyReason?
+
+    public init(words: [Word], emptyReason: BrowseEmptyReason? = nil) {
+        self.words = words
+        self.emptyReason = emptyReason
+    }
+}
+
 /// Decides which words come next and hands out sessions.
 public final class SessionEngine {
     private let dbQueue: DatabaseQueue
@@ -367,6 +385,50 @@ public final class SessionEngine {
             newWordIndices: newWordIndices, dueBatchIDs: [], emptyReason: nil,
             hasUnseenWordsRemaining: hasUnseenWordsRemaining, nextBatchReturnOn: nil
         )
+    }
+
+    /// Every word already met in `level`: every word belonging to any batch
+    /// of the level, retired batches included (D3) — the whole of what the
+    /// browse screen shows, and nothing else, since browsing never writes
+    /// anything.
+    ///
+    /// Ordered by the batch's `created_on` descending, then the batch's `id`
+    /// descending (D7 — `created_on` is a date, not a timestamp, so two
+    /// batches created the same day need `id` to break the tie), then
+    /// `word_index` ascending within a batch.
+    ///
+    /// Carries `emptyReason` rather than a bare empty array when the level
+    /// has no batches at all.
+    public func browse(level: Int) throws -> BrowseResult {
+        let words = try dbQueue.read { db in
+            try Word.fetchAll(
+                db,
+                sql: """
+                SELECT w.word_index, w.level, w.hanzi, w.pinyin, w.pinyin_numbered, w.definition
+                FROM batch b
+                JOIN batch_word bw ON bw.batch_id = b.id
+                JOIN cat.word w ON w.word_index = bw.word_index
+                WHERE b.level = ?
+                ORDER BY b.created_on DESC, b.id DESC, bw.word_index ASC;
+                """,
+                arguments: [level]
+            )
+        }
+
+        if words.isEmpty {
+            let hasBatches = try dbQueue.read { db in
+                try Int.fetchOne(
+                    db,
+                    sql: "SELECT 1 FROM batch WHERE level = ? LIMIT 1;",
+                    arguments: [level]
+                ) != nil
+            }
+            if !hasBatches {
+                return BrowseResult(words: [], emptyReason: .levelHasNoBatches)
+            }
+        }
+
+        return BrowseResult(words: words)
     }
 
     /// Starts a placement test (D1): the walk begins at level 2, drawing
