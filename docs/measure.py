@@ -12,7 +12,23 @@ import csv
 from collections import Counter, defaultdict
 
 SOURCE = 'data/hsk_word_list.tsv'
+GLOSSES = 'data/glosses.tsv'
 LEVELS = ('1', '2', '3', '4', '5', '6')
+MAX_GLOSS_LENGTH = 40
+
+# The same mechanical signals docs/check_glosses.py bans in a written gloss,
+# checked here against the cleaned CC-CEDICT definition instead: a word whose
+# cleaned definition still carries one is a word the generation pass could not
+# have glossed by copying that definition, and needed to write by hand. See
+# checkpoint 8 decisions D2 and D5.
+SIGNALS = (
+    ('bracketed pinyin', re.compile(r'\[[^\]]*\]')),
+    ('hanzi', re.compile(r'[㐀-鿿豈-﫿]')),
+    ('surname', re.compile(r'surname\s+[A-Z]')),
+    ('(bound form)', re.compile(r'\(bound form\)', re.I)),
+    ('variant of', re.compile(r'variant of', re.I)),
+    ('trailing ellipsis', re.compile(r'\.\.\.\s*$')),
+)
 
 
 def clean(definition):
@@ -53,10 +69,24 @@ def stats(values):
     return v[len(v) // 2], v[int(len(v) * 0.9)], v[-1]
 
 
+def load_glosses(built):
+    rows = list(csv.DictReader(open(GLOSSES), delimiter='\t'))
+    by_index = {int(r['word_index']): r['gloss'] for r in rows}
+    missing = built - set(by_index)
+    assert not missing, f'{len(missing)} built words have no gloss row'
+    return by_index
+
+
+def own_hanzi(word, definition):
+    """Does the cleaned definition repeat one of the word's own hanzi? See checkpoint 8 decision D5."""
+    return any(ch in definition for ch in strip_suffix(word))
+
+
 def main():
     all_rows = list(csv.DictReader(open(SOURCE), delimiter='\t'))
     kept = [r for r in all_rows if r['level'] in LEVELS]
     words = collapse(kept)
+    glosses = load_glosses({int(r['word_index']) for r in words})
 
     if '--dump-definitions' in sys.argv[1:]:
         for r in sorted(words, key=lambda r: int(r['word_index'])):
@@ -150,6 +180,12 @@ def main():
     out(f'Rows cleaning to empty across all {len(words)} shipped words: **{len(empty)}**'
         + (f' (`word_index` {", ".join(empty[:20])})' if empty else ''))
     out('')
+    at_or_under_40 = sum(1 for x in cl if len(x) <= MAX_GLOSS_LENGTH)
+    out(f'Cleaned definitions at or under the {MAX_GLOSS_LENGTH}-character gloss limit: '
+        f'**{at_or_under_40}** of {len(words)}. Checkpoint 8 decision D2 rests on this number.')
+    out('')
+    assert at_or_under_40 == 4600, (
+        f'cleaned definitions at or under {MAX_GLOSS_LENGTH} characters changed to {at_or_under_40}')
 
     out('## Pinyin collisions on exact toned pinyin')
     out('')
@@ -173,24 +209,31 @@ def main():
     out('')
     cleaned = [clean(r['definition_cc-cedict']) for r in words]
     pinyin = [r['pinyin'].lower() for r in words]
+    gloss = [glosses[int(r['word_index'])] for r in words]
     levels_of = [int(r['level']) for r in words]
     def_catalogue = Counter(cleaned)
     pin_catalogue = Counter(pinyin)
+    gloss_catalogue = Counter(gloss)
     def_by_level = defaultdict(Counter)
     pin_by_level = defaultdict(Counter)
-    for lvl, d, p in zip(levels_of, cleaned, pinyin):
+    gloss_by_level = defaultdict(Counter)
+    for lvl, d, p, g in zip(levels_of, cleaned, pinyin, gloss):
         def_by_level[lvl][d] += 1
         pin_by_level[lvl][p] += 1
+        gloss_by_level[lvl][g] += 1
 
     out('| level | words | def. collisions (catalogue) | def. share (catalogue) | '
         'def. collisions (level) | def. share (level) | pinyin collisions (catalogue) | '
-        'pinyin share (catalogue) | pinyin collisions (level) | pinyin share (level) |')
-    out('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |')
+        'pinyin share (catalogue) | pinyin collisions (level) | pinyin share (level) | '
+        'gloss collisions (catalogue) | gloss collisions (level) |')
+    out('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |')
 
     def_cat_total = 0
     def_lvl_total = 0
     pin_cat_total = 0
     pin_lvl_total = 0
+    gloss_cat_total = 0
+    gloss_lvl_total = 0
     for lvl in range(1, 7):
         idx = [i for i, l in enumerate(levels_of) if l == lvl]
         n = len(idx)
@@ -198,26 +241,35 @@ def main():
         def_lvl = sum(1 for i in idx if def_by_level[lvl][cleaned[i]] > 1)
         pin_cat = sum(1 for i in idx if pin_catalogue[pinyin[i]] > 1)
         pin_lvl = sum(1 for i in idx if pin_by_level[lvl][pinyin[i]] > 1)
+        gloss_cat = sum(1 for i in idx if gloss_catalogue[gloss[i]] > 1)
+        gloss_lvl = sum(1 for i in idx if gloss_by_level[lvl][gloss[i]] > 1)
         def_cat_total += def_cat
         def_lvl_total += def_lvl
         pin_cat_total += pin_cat
         pin_lvl_total += pin_lvl
+        gloss_cat_total += gloss_cat
+        gloss_lvl_total += gloss_lvl
         out(f'| {lvl} | {n} | {def_cat} | {100 * def_cat / n:.1f}% | {def_lvl} | '
             f'{100 * def_lvl / n:.1f}% | {pin_cat} | {100 * pin_cat / n:.1f}% | {pin_lvl} | '
-            f'{100 * pin_lvl / n:.1f}% |')
+            f'{100 * pin_lvl / n:.1f}% | {gloss_cat} | {gloss_lvl} |')
     n = len(words)
     out(f'| all | {n} | {def_cat_total} | {100 * def_cat_total / n:.1f}% | {def_lvl_total} | '
         f'{100 * def_lvl_total / n:.1f}% | {pin_cat_total} | {100 * pin_cat_total / n:.1f}% | '
-        f'{pin_lvl_total} | {100 * pin_lvl_total / n:.1f}% |')
+        f'{pin_lvl_total} | {100 * pin_lvl_total / n:.1f}% | {gloss_cat_total} | {gloss_lvl_total} |')
     out('')
     assert def_cat_total == 274, f'catalogue-wide definition collisions changed to {def_cat_total}'
     assert pin_cat_total == 708, f'catalogue-wide pinyin collisions changed to {pin_cat_total}'
     assert def_lvl_total == 89, f'within-level definition collisions changed to {def_lvl_total}'
     assert pin_lvl_total == 229, f'within-level pinyin collisions changed to {pin_lvl_total}'
+    assert gloss_cat_total == 511, f'catalogue-wide gloss collisions changed to {gloss_cat_total}'
+    assert gloss_lvl_total == 162, f'within-level gloss collisions changed to {gloss_lvl_total}'
     out('The all-levels row sums the per-level counts: 274 definition collisions and 708 pinyin '
         'collisions counted catalogue-wide, 89 and 229 counted inside the level. Inside a level, '
         'a cleaned definition is shared with another word 1.6% of the time and toned pinyin 4.2%. '
-        'Checkpoint 11 decisions D9, D9a and D10 rest on these four numbers.')
+        'Checkpoint 11 decisions D9, D9a and D10 rest on these four numbers. The gloss columns '
+        f'recount the same catalogue against `data/glosses.tsv` instead of the cleaned definition: '
+        f'{gloss_cat_total} words share a gloss with another word catalogue-wide, {gloss_lvl_total} '
+        'inside their own level. Checkpoint 8 decision D4b rests on these two numbers.')
     out('')
 
     out('## Source-side disambiguation suffixes')
@@ -225,6 +277,64 @@ def main():
     suf = [r['word'] for r in words if re.search(r'\d$', r['word'])]
     out(f'{len(suf)} shipped words carry a trailing digit, e.g. {", ".join(suf[:10])}. '
         'Stripped at build time; a zh-CN voice otherwise pronounces the digit.')
+    out('')
+
+    out('## Gloss source signals')
+    out('')
+    out('A word is flagged when its cleaned CC-CEDICT definition still carries a signal a rule '
+        'can check mechanically: bracketed pinyin, a hanzi character, a bare "surname" tag, a '
+        '"(bound form)" tag, a "variant of" tag, a definition `clean()` truncated with a trailing '
+        '"...", or the word\'s own hanzi repeated back in its definition. None of these can be '
+        'trusted to a rule, which is why checkpoint 8 decision D5 has every gloss written by a '
+        'model pass instead of falling back to the cleaned definition.')
+    out('')
+    signal_hits = {name: [] for name, _ in SIGNALS}
+    signal_hits['own hanzi'] = []
+    flagged = [False] * len(words)
+    flagged_by_level = defaultdict(int)
+    for i, (r, d) in enumerate(zip(words, cleaned)):
+        hit = False
+        for name, pattern in SIGNALS:
+            if pattern.search(d):
+                signal_hits[name].append(i)
+                hit = True
+        if own_hanzi(r['word'], d):
+            signal_hits['own hanzi'].append(i)
+            hit = True
+        flagged[i] = hit
+        if hit:
+            flagged_by_level[int(r['level'])] += 1
+
+    out('| level | words | flagged by any signal | share |')
+    out('| --- | --- | --- | --- |')
+    for lvl in range(1, 7):
+        n = counts[lvl]
+        out(f'| {lvl} | {n} | {flagged_by_level[lvl]} | {100 * flagged_by_level[lvl] / n:.1f}% |')
+    total_flagged = sum(flagged)
+    out(f'| all | {len(words)} | {total_flagged} | {100 * total_flagged / len(words):.1f}% |')
+    out('')
+    signal_counts = {name: len(hits) for name, hits in signal_hits.items()}
+    out('| signal | words |')
+    out('| --- | --- |')
+    for name, _ in SIGNALS:
+        out(f'| {name} | {signal_counts[name]} |')
+    out(f'| own hanzi | {signal_counts["own hanzi"]} |')
+    out('')
+    assert total_flagged == 214, f'words flagged by any signal changed to {total_flagged}'
+    assert signal_counts['bracketed pinyin'] == 83, (
+        f'bracketed pinyin signal changed to {signal_counts["bracketed pinyin"]}')
+    assert signal_counts['hanzi'] == 73, f'hanzi signal changed to {signal_counts["hanzi"]}'
+    assert signal_counts['surname'] == 61, f'surname signal changed to {signal_counts["surname"]}'
+    assert signal_counts['(bound form)'] == 45, (
+        f'(bound form) signal changed to {signal_counts["(bound form)"]}')
+    assert signal_counts['variant of'] == 37, (
+        f'variant of signal changed to {signal_counts["variant of"]}')
+    assert signal_counts['trailing ellipsis'] == 32, (
+        f'trailing ellipsis signal changed to {signal_counts["trailing ellipsis"]}')
+    assert signal_counts['own hanzi'] == 59, f'own hanzi signal changed to {signal_counts["own hanzi"]}'
+    out(f'{total_flagged} of {len(words)} words are flagged by at least one signal, '
+        f'{flagged_by_level[1]} of them at level 1. Checkpoint 8 decision D5 rests on these eight '
+        'numbers: the total and each of the seven signals above.')
     out('')
 
     out('## Speech synthesis: hanzi versus pinyin')

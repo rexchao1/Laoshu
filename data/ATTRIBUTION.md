@@ -14,3 +14,10 @@ attribution and stay under the same licence.
 Level assignments come from the official HSK 3.0 syllabus published by Chinese
 Testing International. `docs/measurements.md` checks the per-level counts in
 this file against the published cumulative totals.
+
+The glosses in `glosses.tsv` are adapted from CC-CEDICT: each was written by
+reading that word's CC-CEDICT entry and picking its real, primary meaning.
+Sharing the app, or sharing this data with anyone, would count as
+redistributing a database built from CC-CEDICT, and would activate both the
+attribution requirement and the ShareAlike requirement of its licence, the
+same as the columns derived from it above.
