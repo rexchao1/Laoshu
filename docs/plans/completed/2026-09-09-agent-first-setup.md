@@ -29,3 +29,9 @@ Laoshu is the pilot for a workflow change across the user's repositories: short 
 3. Add the first boundary check (kit imports, app never imports GRDB) with fixtures. Register it in `scripts/check`. Done 2026-09-09: `scripts/check-imports`.
 4. Run one real change through the setup in a fresh session and fix whatever confused it.
 5. Move this plan to `docs/plans/completed/` with a Result.
+
+## Result
+
+Closed 2026-09-09. Steps 1 to 3 landed on main: the guide, the map, the scripts, and
+`scripts/check-imports` with fixtures. Step 4, a real change run through a fresh session,
+was skipped by decision; the first ordinary task in this repo serves as that check.
