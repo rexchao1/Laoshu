@@ -88,13 +88,18 @@ struct LevelListView: View {
                     }
                     .accessibilityLabel("Take placement test")
                 }
+                // Without the spacer iOS 26 packs both trailing items into
+                // one glass capsule with no divider, so the checklist glyph
+                // and this word read as a single segmented control.
+                ToolbarSpacer(.fixed, placement: .navigationBarTrailing)
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         toggleDirection()
                     } label: {
                         Text(directionLabel(direction))
                     }
-                    .accessibilityLabel("Study direction: \(directionLabel(direction)). Tap to switch to the other direction.")
+                    .accessibilityLabel("Study direction: \(directionLabel(direction))")
+                    .accessibilityHint("Switches to the other direction")
                 }
             }
             // D26: `SessionEngine` isn't `@Observable`, so nothing tells
@@ -155,10 +160,14 @@ struct LevelListView: View {
         }
     }
 
+    /// D4: the label has to say which way the next session will ask, and
+    /// "Receptive" and "Reverse" are words about the app rather than about
+    /// the card. These read as the card does: what is on the front, then
+    /// what the user has to come up with.
     private func directionLabel(_ direction: StudyDirection) -> String {
         switch direction {
-        case .receptive: return "Receptive"
-        case .reverse: return "Reverse"
+        case .receptive: return "Pinyin first"
+        case .reverse: return "English first"
         }
     }
 
