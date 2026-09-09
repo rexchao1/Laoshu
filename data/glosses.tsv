@@ -1,0 +1,5401 @@
+word_index	gloss
+1	to love; to be fond of
+2	eight
+3	dad; father
+4	particle for suggestions or guesses
+5	daytime
+6	hundred
+7	half
+8	steamed stuffed bun
+9	cup; glass
+10	classifier for books
+11	side; edge
+12	illness; to be sick
+13	not
+14	you're welcome
+15	don't
+16	vegetable; a dish of food
+17	tea
+18	to sing
+19	supermarket
+20	car; vehicle
+21	to eat
+22	taxi
+23	to wear; to put on
+24	to make a phone call
+25	big; large
+26	everyone
+27	university
+28	college student
+29	to arrive; to reach
+30	particle marking possession, like 's
+31	prefix for ordinal numbers
+32	younger brother
+33	o'clock; a little
+34	shop; store
+35	telephone; phone call
+36	computer
+37	television; TV
+38	movie; film
+39	movie theater; cinema
+40	thing; stuff
+41	all; both
+42	to read
+43	to study; to read a book
+44	right; towards
+45	I'm sorry; excuse me
+46	many; how (before an adjective)
+47	how much; how many
+48	son
+49	two
+50	cooked rice; a meal
+51	restaurant; hotel
+52	room
+53	very; extremely
+54	airplane
+55	minute; cent (money)
+56	minute
+57	happy; glad
+58	song
+59	older brother
+60	general classifier for people or things
+61	to give; for
+62	company
+63	to work; job
+64	dog
+65	expensive
+66	country; nation
+67	still; also
+68	child
+69	Chinese (language)
+70	Chinese character
+71	good; fine
+72	tasty; delicious
+73	good-looking; nice
+74	pleasant to hear
+75	fun; amusing
+76	day of the month; number
+77	to drink
+78	and; with
+79	very
+80	after; behind
+81	to return; to go back
+82	can; to know how to
+83	train
+84	egg
+85	how many; several
+86	home; family
+87	family member
+88	to see; to meet
+89	classifier for events, items, clothes
+90	dumpling
+91	to be called; to call
+92	older sister
+93	this year
+94	today
+95	nine
+96	to feel; to think
+97	to open; to turn on
+98	to drive (a car)
+99	to look at; to watch
+100	to see a doctor
+101	to see; to catch sight of
+102	can; may
+103	class; lesson
+104	mouth; classifier for family members
+105	piece; yuan (money)
+106	to come
+107	teacher
+108	particle marking a completed action
+109	cold
+110	inside; in
+111	two (before a measure word)
+112	zero
+113	six
+114	mom; mother
+115	particle for yes-no questions
+116	to buy
+117	to sell
+118	busy
+119	cat
+120	it doesn't matter
+121	it's nothing; never mind
+122	to not have; there isn't
+123	younger sister
+124	plural suffix for people
+125	cooked rice
+126	bread
+127	noodles
+128	next year
+129	tomorrow
+130	name
+131	which
+132	which one
+133	where
+134	where
+135	which ones
+136	that
+137	over there
+138	that one; that
+139	there
+140	there
+141	those
+142	male
+143	boyfriend
+144	particle for follow-up questions
+145	can; to be able to
+146	you
+147	hello; hi
+148	you (plural)
+149	year
+150	you (polite)
+151	milk
+152	female
+153	daughter
+154	girlfriend
+155	lady; Ms.
+156	friend
+157	cheap; inexpensive
+158	pretty; beautiful
+159	apple
+160	seven
+161	to get up
+162	thousand
+163	front; before
+164	money
+165	please; to invite
+166	excuse me, may I ask
+167	to go
+168	last year
+169	hot
+170	person; people
+171	to know; to recognize
+172	day; date
+173	three
+174	store; shop
+175	up; above
+176	to go to work
+177	to attend class
+178	morning
+179	to go to school
+180	few; to be missing
+181	who
+182	what
+183	to get sick
+184	ten
+185	time; moment
+186	time
+187	matter; thing
+188	to be
+189	cell phone
+190	book
+191	bookstore
+192	water
+193	fruit
+194	to sleep; to lie down
+195	to go to bed; to sleep
+196	to speak; to say
+197	to speak; to talk
+198	four
+199	years old (age)
+200	he; him
+201	it
+202	she
+203	they; them
+204	they; them (things)
+205	they; them (females)
+206	too; extremely
+207	day; sky
+208	weather
+209	to listen; to hear
+210	to hear
+211	classmate
+212	outside
+213	outside
+214	to play; to have fun
+215	late; evening
+216	dinner
+217	evening; night
+218	hey; hello (on the phone)
+219	to ask
+220	question; problem
+221	I; me
+222	we; us
+223	five
+224	lunch
+225	to like
+226	under; below
+227	to rain
+228	to get off work
+229	to finish class
+230	afternoon
+231	sir; mister; husband
+232	now
+233	to want; to miss (someone)
+234	small
+235	child; kid
+236	hour
+237	elementary school
+238	primary school student
+239	some; a few
+240	to write
+241	thank you
+242	new
+243	week
+244	Sunday
+245	Sunday
+246	to rest
+247	to study; to learn
+248	student
+249	to study; to learn
+250	school
+251	snow
+252	to want; will
+253	also; too
+254	one
+255	clothes
+256	doctor
+257	hospital
+258	half
+259	a little; a moment
+260	chair
+261	a little; a bit
+262	some; a few
+263	to have; there is
+264	some
+265	a little; somewhat
+266	some
+267	rain
+268	yuan (unit of money)
+269	month; moon
+270	again
+271	at; in
+272	goodbye
+273	early; good morning
+274	breakfast
+275	morning
+276	how; why
+277	how; how about
+278	to look for
+279	this
+280	this side; here
+281	this; this one
+282	here
+283	here
+284	these
+285	really; truly
+286	in the process of (doing sth)
+287	classifier for animals
+288	to know
+289	China
+290	Chinese (language)
+291	noon
+292	middle school
+293	middle school student
+294	to live; to reside
+295	table; desk
+296	character; word
+297	yesterday
+298	to sit; to take (transport)
+299	to make; to do
+300	to cook; to prepare a meal
+301	particle showing agreement or emphasis
+302	to enjoy; hobby
+303	white
+304	class (in school); shift; team
+305	to help
+306	to help; to do a favor
+307	bag; to wrap
+308	notebook
+309	to compare; than
+310	pen; writing implement
+311	don't
+312	pretty good; not bad
+313	embarrassed; sorry to trouble you
+314	long
+315	station; bus stop
+316	to go out
+317	to go abroad
+318	to come out
+319	to go out; to leave home
+320	to go out
+321	bed
+322	word
+323	classifier for occurrences; time(s)
+324	from
+325	since childhood
+326	wrong; mistake
+327	to hit; to play (a sport)
+328	to take a taxi
+329	to open; to turn on
+330	but
+331	but; however
+332	particle linking a verb to its result
+333	-ly; particle before a verb or adjective
+334	to wait; and so on
+335	subway
+336	to order (food); to touch lightly
+337	to understand
+338	to move
+339	restaurant
+340	to fly
+341	tall; high
+342	high school
+343	to tell; to inform
+344	height; build (of a person)
+345	with
+346	public bus
+347	to pass; to spend (time)
+348	to come over
+349	to celebrate the New Year
+350	to go past; to pass by
+351	particle marking a past experience
+352	still; or
+353	black
+354	black tea
+355	red
+356	behind; the back
+357	to spend (money, time)
+358	flower
+359	to draw; a painting
+360	bad; broken
+361	to come back
+362	to go back
+363	airport
+364	plane ticket
+365	to remember
+366	classifier for rooms
+367	to teach
+368	classroom
+369	to introduce
+370	to enter
+371	near; close
+372	to come in
+373	to go in
+374	often; frequently
+375	hotel
+376	then; already; just
+377	coffee
+378	to begin; beginning
+379	to start school (term)
+380	to take a test; to test
+381	to take an exam; exam
+382	maybe; possible
+383	pants; trousers
+384	fast; quick; soon
+385	happy
+386	about to; soon
+387	basketball
+388	tired
+389	away from; to leave
+390	inside
+391	building; floor
+392	road
+393	on the way
+394	to travel; trip
+395	green tea
+396	green
+397	slow
+398	boring
+399	every; each
+400	door; gate
+401	doorway; entrance
+402	admission ticket
+403	suffix meaning side, as in inside
+404	name; classifier for people
+405	to hold; to take
+406	so; like that; then
+407	like that; that way
+408	milk tea
+409	grandma (paternal)
+410	boy
+411	bird
+412	girl
+413	beside; next to
+414	to run
+415	to run; to jog
+416	ticket
+417	wife
+418	to get up; to stand up
+419	in front; ahead
+420	sunny; clear (weather)
+421	ball
+422	to let; to have someone do something
+423	meat
+424	shopping mall
+425	to come up
+426	on top of; above
+427	to go up
+428	to go online
+429	body; health
+430	birthday
+431	time; o'clock
+432	matter; thing
+433	hand
+434	wristwatch
+435	schoolbag
+436	comfortable
+437	to give (as a gift); to send
+438	although
+439	so; therefore
+440	sore; painful
+441	to kick
+442	question; problem (on an exam)
+443	classifier for long thin things
+444	to dance
+445	head
+446	foreign country
+447	outside
+448	to finish
+449	ten thousand
+450	toward
+451	online
+452	to forget
+453	classifier for people (polite)
+454	why
+455	to hope
+456	to wash
+457	bathroom; restroom
+458	to come down
+459	below; next
+460	to go down; to continue
+461	child; kid
+462	when one was young
+463	to laugh; to smile
+464	surname; to be named
+465	full name
+466	color
+467	eye
+468	medicine
+469	pharmacy
+470	grandpa (paternal)
+471	a moment; a while
+472	already
+473	together
+474	meaning
+475	overcast; cloudy
+476	because
+477	to swim
+478	to swim
+479	interesting
+480	sometimes
+481	right (side)
+482	right side
+483	fish
+484	far
+485	sports; to exercise
+486	station; stop
+487	husband
+488	so; like this
+489	like this; such
+490	particle marking an ongoing action
+491	right; exactly; in the middle of
+492	week
+493	to prepare; to plan to
+494	oneself
+495	to walk; to leave
+496	to walk
+497	soccer
+498	most; -est
+499	left
+500	left side
+501	aunt; woman of one's parents' age
+502	short (of a person)
+503	spouse
+504	quiet; peaceful
+505	safe
+506	classifier for a handful; object marker
+507	to move (something); to relocate
+508	class (in school)
+509	to move house
+510	to handle; to manage
+511	method; way (to do something)
+512	office
+513	half a day; a long time
+514	to help; help
+515	full (after eating)
+516	newspaper
+517	north
+518	the north
+519	by (marks the passive voice)
+520	notes (written)
+521	to compare; relatively
+522	notebook; laptop
+523	for example
+524	competition; match
+525	must; have to
+526	to change; to become
+527	classifier for repeated actions
+528	to become; to turn into
+529	to change; a change
+530	to perform; performance
+531	other; else
+532	other people; others
+533	hotel
+534	ice
+535	ice cream
+536	refrigerator
+537	patient (sick person)
+538	not only
+539	not to see; to be missing
+540	no need to
+541	different
+542	soon; not long after
+543	won't do; not okay
+544	only then; not until
+545	menu
+546	to take part in; to join
+547	grass
+548	lawn; meadow
+549	floor (of a building); layer
+550	to look up; to check
+551	lacking; not up to standard
+552	almost; about the same
+553	to taste (food)
+554	often
+555	common; commonly seen
+556	commonly used
+557	often; frequently
+558	shirt
+559	grades; results
+560	city
+561	to arrive late; to be late
+562	to set off; to depart
+563	to be born
+564	to leave the hospital
+565	junior high school
+566	besides; except for
+567	boat; ship
+568	spring (season)
+569	dictionary
+570	smart; clever
+571	to clean; to sweep
+572	to plan; plan
+573	probably; approximate
+574	adult
+575	size
+576	giant panda
+577	overcoat
+578	to bring; to carry; to lead
+579	to worry
+580	cake
+581	of course
+582	everywhere
+583	to get; to obtain
+584	to get; to receive
+585	to score (a point); score
+586	if (after a conditional clause)
+587	must; have to
+588	lamp; light
+589	ground; land
+590	location; place
+591	place
+592	map
+593	electricity
+594	elevator
+595	e-book
+596	to lose; to throw away
+597	east
+598	northeast; Manchuria
+599	the east; the Orient
+600	southeast
+601	winter
+602	to understand; to know
+603	animal
+604	zoo
+605	short; brief
+606	shorts; short pants
+607	classifier for periods, sections
+608	to exercise; to work out
+609	to have a dialogue; conversation
+610	hungry
+611	moreover; and also
+612	ear
+613	headphones; earphones
+614	to send out; to issue
+615	to have a fever
+616	to happen; to occur
+617	to discover; to find
+618	to develop; development
+619	convenient
+620	instant noodles
+621	method; way
+622	direction
+623	house; building
+624	to put; to place
+625	to be on vacation
+626	to feel at ease; not to worry
+627	to get out of school
+628	to separate; to part
+629	wind
+630	classifier for letters
+631	married couple; husband and wife
+632	to serve; service
+633	nearby; in the vicinity
+634	to review (lessons)
+635	should; ought to
+636	clean
+637	to be interested
+638	to feel; to sense
+639	to catch a cold; a cold
+640	to do; to work
+641	just; just now
+642	just now; a moment ago
+643	just now; just recently
+644	high-speed rail
+645	according to; based on
+646	even more; still more
+647	kilogram
+648	park
+649	workday; weekday
+650	story; tale
+651	to blow (of wind); to shave
+652	to close; to turn off
+653	to turn off; to shut down
+654	relationship; connection
+655	to care about; to be concerned
+656	about; concerning
+657	to pay attention to; to follow
+658	country; nation
+659	to celebrate a holiday
+660	the past; former
+661	sea; ocean
+662	to be afraid; to be scared
+663	many; quite a lot
+664	a long time; quite a while
+665	to seem like; as if
+666	number
+667	river
+668	suitable; appropriate
+669	blackboard
+670	traffic light
+671	afterwards; later
+672	the year after next
+673	the day after tomorrow
+674	passport
+675	garden
+676	painter; artist
+677	to welcome
+678	to return; to pay back
+679	environment; surroundings
+680	to exchange; to change
+681	yellow
+682	to answer; to reply
+683	meeting; association
+684	meeting; conference
+685	or
+686	or
+687	chicken
+688	almost; nearly
+689	opportunity; chance
+690	extremely
+691	urgent; anxious; to worry
+692	to remember; to note down
+693	season
+694	season
+695	to add; plus
+696	vacation; holiday
+697	to persist; to persevere
+698	to examine; to inspect
+699	simple; not complicated
+700	to check tickets
+701	healthy; health
+702	to meet (each other)
+703	to speak; to explain
+704	dime (0.1 yuan)
+705	foot; leg (of an animal or object)
+706	to meet (someone); to answer (phone)
+707	street
+708	classifier for lessons; festival
+709	to get married
+710	show; program
+711	holiday; festival
+712	to end; to finish
+713	to solve; to resolve
+714	sisters
+715	to borrow; to lend
+716	catty (500 grams)
+717	to pass by; to go through
+718	manager
+719	long (in time)
+720	alcohol; liquor; wine
+721	old; used
+722	classifier for sentences
+723	sentence
+724	to decide; decision
+725	card
+726	to bloom; to blossom
+727	to have a meeting
+728	to turn on; to start up (a device)
+729	happy; cheerful
+730	it seems; apparently
+731	but; however
+732	thirsty
+733	cute; adorable
+734	but; however
+735	quarter of an hour
+736	textbook
+737	guest; visitor
+738	text (of a lesson)
+739	air conditioner
+740	to cry; to weep
+741	chopsticks
+742	mineral water
+743	to come from
+744	blue
+745	old; prefix for familiarity
+746	old person; elderly person
+747	to leave; to depart
+748	gift; present
+749	history
+750	face
+751	to practice; to train
+752	to practice; exercise
+753	pleasantly cool
+754	classifier for vehicles
+755	to chat
+756	to chat
+757	to understand; to find out
+758	neighbor
+759	to study abroad
+760	student studying abroad
+761	stairs; staircase
+762	roadside; curb
+763	intersection; crossing
+764	horse
+765	street; road
+766	right away; immediately
+767	satisfied; pleased
+768	dime (0.1 yuan)
+769	meter (unit); rice
+770	in front of; facing
+771	clear; to understand
+772	list of names
+773	celebrity; famous person
+774	south
+775	difficult; hard
+776	the south; southern region
+777	sad; feeling bad
+778	ugly; unsightly
+779	man; men
+780	boy; male student
+781	difficult problem
+782	unpleasant to hear; harsh
+783	grade; year (in school)
+784	young
+785	cow; ox; cattle
+786	to work hard; hard-working
+787	woman
+788	girl; female student
+789	to climb; to crawl
+790	to be afraid; to fear
+791	to take a photo
+792	plate; tray
+793	fat; plump
+794	beer
+795	usually; ordinarily
+796	bottle
+797	to ride (a bike, horse)
+798	strange; odd
+799	actually; in fact
+800	other; the rest
+801	to get up; to rise
+802	to take off (aircraft)
+803	car; automobile
+804	pencil
+805	the year before last
+806	the day before yesterday
+807	clear; to understand clearly
+808	to ask for time off
+809	to treat someone (to a meal)
+810	autumn; fall
+811	court; field; stadium
+812	skirt
+813	then; after that
+814	warm; enthusiastic
+815	to recognize
+816	to think; to believe
+817	serious; conscientious
+818	easy
+819	if
+820	umbrella
+821	to sweep
+822	sofa; couch
+823	mountain; hill
+824	jacket; upper garment
+825	spoon; ladle
+826	at one's side; nearby
+827	height (of a person)
+828	sound; classifier for sounds
+829	life; to live
+830	to get angry
+831	sound; voice
+832	city; market
+833	to try; to test
+834	room
+835	world
+836	to receive; to collect
+837	to receive
+838	to receive; to bear; to suffer
+839	thin; skinny
+840	to receive; to be subjected to
+841	uncle (father's younger brother)
+842	tree
+843	math; mathematics
+844	to brush; to swipe (a card)
+845	pair; classifier for pairs
+846	level; standard (of skill)
+847	driver
+848	the four seasons
+849	sun
+850	sugar; candy
+851	special; especially
+852	to raise; to improve
+853	sports; physical education
+854	gym; stadium
+855	sweet
+856	to jump; to hop
+857	to hear (that); it's said that
+858	quite; very (coll.)
+859	colleague; co-worker
+860	to agree
+861	hair (on the head)
+862	sudden; suddenly
+863	library
+864	leg
+865	another part of the country
+866	takeout food; to deliver takeout
+867	foreign language
+868	to complete; to finish
+869	bowl
+870	late; delayed (of trains etc)
+871	evening party
+872	tennis
+873	website
+874	to forget
+875	for; because of
+876	in order to; for the sake of
+877	bathroom; toilet
+878	culture
+879	room; house
+880	west
+881	northwest
+882	the West; Western countries
+883	watermelon
+884	southwest
+885	habit; to be used to
+886	to like; to be fond of
+887	washing machine
+888	to take a shower; to bathe
+889	summer
+890	first; beforehand
+891	banana
+892	to believe; to trust
+893	suitcase; box
+894	towards; to face
+895	to resemble; to be like
+896	camera
+897	residential community
+898	to be careful
+899	campus
+900	principal; headmaster
+901	shoe
+902	in one's heart; on one's mind
+903	New Year
+904	news
+905	fresh; novel
+906	letter; to trust
+907	credit card
+908	OK; all right; competent
+909	luggage
+910	interest; hobby
+911	to go on vacation
+912	to need; needs
+913	to choose; to select
+914	to choose; choice
+915	semester; term
+916	tooth
+917	toothbrush
+918	sheep; goat
+919	to raise; to keep (pets)
+920	to require; requirement
+921	page
+922	certainly; definitely
+923	in total; altogether
+924	together; in one place
+925	the same; alike
+926	after; afterwards; later
+927	before; previously
+928	above; more than
+929	besides; other than
+930	to think; to assume (wrongly)
+931	below; the following
+932	ordinary; usual; general
+933	while (doing two things at once)
+934	continuously; always; straight
+935	music
+936	bank
+937	bank card
+938	drink; beverage
+939	should; ought to
+940	influence; to affect
+941	to use
+942	mail; email
+943	tourist
+944	game
+945	mailbox; email inbox
+946	related to; concerning
+947	famous; well-known
+948	useful
+949	again; also
+950	badminton
+951	language
+952	raincoat
+953	to run into; to encounter
+954	to meet; to run into
+955	garden; park
+956	suffix for a person's role or job
+957	willing; to be willing to
+958	increasingly; the more, the more
+959	the moon
+960	sports meet; games
+961	athlete
+962	we; us (including listener)
+963	dirty
+964	what should I do?
+965	how; what kind
+966	to stand
+967	classifier for flat objects; to open
+968	to grow; head; chief
+969	worried; anxious; in a hurry
+970	according to; to take a photo
+971	to take care of; to look after
+972	photo; picture
+973	to take a photo
+974	until
+975	only; just
+976	paper
+977	can only
+978	just; merely; but
+979	as long as; provided that
+980	only if; only when
+981	in; within; middle
+982	the middle; between
+983	finally; at last
+984	classifier for kinds/types
+985	important
+986	weekend
+987	main; major; primary
+988	to pay attention to
+989	to be hospitalized
+990	dictionary
+991	bicycle
+992	noun suffix with no meaning of its own
+993	always; in general; overall
+994	always
+995	mouth
+996	best; had better
+997	finally; last; in the end
+998	recently
+999	to be a guest; to visit
+1000	homework; assignment
+1001	ah!; oh! (surprise)
+1002	romantic love
+1003	compassion; kindness
+1004	security check
+1005	to arrange; to plan
+1006	to press; according to
+1007	on time; on schedule
+1008	according to
+1009	baijiu (Chinese liquor)
+1010	to work (in an office)
+1011	to handle; to process
+1012	to handle matters; to work
+1013	great; wonderful
+1014	to protect
+1015	to guarantee; guarantee
+1016	to hug; to hold in one's arms
+1017	to sign up for an exam
+1018	to sign up; to register
+1019	sorry; apologetic
+1020	to carry on one's back
+1021	backpack
+1022	the north; northern part
+1023	times; -fold (multiplier)
+1024	undergraduate program
+1025	originally; at first
+1026	stupid; foolish
+1027	nose
+1028	written exam
+1029	to graduate; graduation
+1030	graduate (of a school)
+1031	convenient for; easy to
+1032	standard; criterion
+1033	watch (timepiece); table; form
+1034	form; table
+1035	to express; to indicate
+1036	to show; performance; behavior
+1037	to praise
+1038	cookie; cracker
+1039	and; also; (not) at all
+1040	and; moreover
+1041	to broadcast; to play (media)
+1042	PhD; doctorate
+1043	need not; don't have to
+1044	inconvenient
+1045	continuously; constantly
+1046	not enough; insufficient
+1047	but; however; only
+1048	no matter (what/who/how)
+1049	a step; a pace
+1050	department; classifier for films/books
+1051	have no choice but to
+1052	part; portion
+1053	no matter; regardless of
+1054	not only
+1055	not only
+1056	dissatisfied; discontented
+1057	department; branch
+1058	not as good as; inferior to
+1059	to wipe; to rub
+1060	to guess
+1061	material; data
+1062	to visit; to tour
+1063	to compete; to take part
+1064	restaurant; dining hall
+1065	sports field; playground
+1066	toilet; restroom
+1067	to examine; to check
+1068	tea leaves; tea
+1069	to search for; to look up
+1070	almost; nearly
+1071	to produce; to give rise to
+1072	factory
+1073	classifier for events/performances
+1074	to exceed; to surpass
+1075	vehicle speed
+1076	parking space
+1077	city
+1078	to ride; to take a vehicle
+1079	to succeed; successful
+1080	passenger
+1081	honest
+1082	to become
+1083	to ride; to take a vehicle
+1084	to be startled; shocked
+1085	late
+1086	again; repeated
+1087	again; anew
+1088	to go on a business trip
+1089	exit; to export
+1090	to appear
+1091	to travel; to go on a trip
+1092	to rent out
+1093	kitchen
+1094	chef; cook
+1095	window
+1096	window
+1097	to blow
+1098	word; term; expression
+1099	this; these
+1100	this time
+1101	besides; in addition
+1102	from then on; since then
+1103	always; never (in negatives)
+1104	from within; therefrom
+1105	thick; coarse
+1106	careless; thoughtless
+1107	village
+1108	to save; to deposit; to store
+1109	to miss (a chance, train)
+1110	mistake; wrong
+1111	to agree; to promise
+1112	to answer; to reply
+1113	answer
+1114	to reach; to achieve
+1115	to greet; to say hello
+1116	to defeat; to beat
+1117	to have a part-time job
+1118	to disturb; to bother
+1119	to print
+1120	printer
+1121	to give a discount
+1122	to get/give a shot
+1123	coach; large bus
+1124	greatly; enormously
+1125	doctor
+1126	a great amount of; large
+1127	major competition
+1128	hall; lobby
+1129	approximately; about
+1130	nature (the natural world)
+1131	to stay
+1132	to wear (hat, glasses etc)
+1133	bag
+1134	unit; workplace
+1135	to act as; when; during
+1136	at that time; then
+1137	knife
+1138	tour guide
+1139	to pour; upside down
+1140	road; way; classifier for long things
+1141	after all; in the end
+1142	to arrive; arrival
+1143	road; path
+1144	to apologize
+1145	pleased with oneself; proud
+1146	to board a plane
+1147	etc.; and so on
+1148	until; by the time
+1149	low
+1150	low price
+1151	low temperature
+1152	to be lower than
+1153	bottom; base
+1154	underneath; below
+1155	the earth
+1156	address
+1157	to take roll call; to name
+1158	to nod
+1159	electric bike/vehicle
+1160	TV series
+1161	to fall; to drop; to lose
+1162	to investigate; survey
+1163	to order; to book
+1164	to set; to decide; to book
+1165	the east; eastern part
+1166	high-speed train
+1167	movement; action
+1168	reader
+1169	traffic jam
+1170	to go on vacation
+1171	belly; stomach
+1172	text message
+1173	team; squad
+1174	the other person/side
+1175	across; opposite
+1176	regarding; as for
+1177	team member
+1178	team captain; leader
+1179	classifier for meals
+1180	how; what (exclamation)
+1181	majority; most
+1182	diverse; varied
+1183	and; but; yet
+1184	child; children
+1185	to send out; to issue
+1186	to send; to transmit
+1187	law; method; way
+1188	law
+1189	to translate; translator
+1190	annoyed; to bother
+1191	worried; troubled
+1192	to oppose; to object to
+1193	aspect; respect; side
+1194	way; method; manner
+1195	landlord
+1196	rent (for housing)
+1197	to give up; to abandon
+1198	to relax
+1199	fee; to cost
+1200	cost; expense
+1201	score; fraction
+1202	to divide into
+1203	classifier for copies, sets, gifts
+1204	rich; abundant
+1205	scenery; landscape
+1206	otherwise; if not
+1207	classifier for pictures, cloth
+1208	to match; to conform to
+1209	to pay
+1210	parents
+1211	father and daughter
+1212	father
+1213	to photocopy
+1214	complicated; complex
+1215	responsible; in charge
+1216	person in charge
+1217	father and son
+1218	to change; to correct
+1219	to change; to alter
+1220	dry
+1221	to drink a toast; cheers
+1222	to rush; to catch up
+1223	to dare
+1224	suffix meaning 'sense of'
+1225	to move emotionally; touched
+1226	quickly; without delay
+1227	feeling; to feel
+1228	quickly; at once
+1229	feelings; emotion
+1230	touching; moving
+1231	to catch up with
+1232	to feel; a feeling
+1233	to thank; grateful
+1234	to do manual work
+1235	piano
+1236	high price
+1237	college entrance exam
+1238	high-speed; expressway
+1239	high temperature
+1240	to exceed; higher than
+1241	arm
+1242	singing voice
+1243	singer
+1244	each; every
+1245	everywhere; all parts
+1246	each; every one
+1247	everyone
+1248	every kind of; various
+1249	even more
+1250	factory
+1251	skill; kung fu
+1252	public
+1253	homework; schoolwork
+1254	kilometer
+1255	highway; road
+1256	worker
+1257	wages; salary
+1258	altogether; in total
+1259	common; joint
+1260	enough; quite
+1261	to purchase; to buy
+1262	to shop
+1263	to estimate; to guess
+1264	girl; young woman
+1265	to encourage
+1266	customer
+1267	deliberately; on purpose
+1268	to hang; to hang up (phone)
+1269	key; crucial
+1270	to watch
+1271	audience; spectators
+1272	to manage; to control; to mind
+1273	to manage; to administer
+1274	light; only
+1275	broadcast; to broadcast
+1276	advertisement
+1277	to stroll; to visit
+1278	to stipulate; regulation
+1279	nationality
+1280	international
+1281	fruit juice
+1282	process; course
+1283	ocean
+1284	shy; bashful
+1285	winter vacation
+1286	cold (weather)
+1287	to shout; to yell
+1288	sweat
+1289	flight
+1290	benefit; advantage
+1291	properly; carefully
+1292	funny; laughable
+1293	qualified; up to standard
+1294	box
+1295	red envelope (money gift)
+1296	thick
+1297	to regret
+1298	suddenly
+1299	the Internet
+1300	nurse
+1301	each other; mutually
+1302	stage play
+1303	to doubt; to suspect
+1304	harm; disadvantage
+1305	environmental protection; eco-friendly
+1306	to transfer (trains, buses)
+1307	to reply; to respond
+1308	to write back; reply letter
+1309	to recall; memories
+1310	member
+1311	alive; to live
+1312	activity; to move about
+1313	lively; vivacious
+1314	fire
+1315	goods
+1316	to obtain; to get
+1317	to win an award
+1318	to acquire; to obtain
+1319	basic; fundamental
+1320	basically
+1321	foundation; basis
+1322	excited; to excite
+1323	active; positive
+1324	to accumulate
+1325	timely; promptly
+1326	even if
+1327	already; both...and
+1328	to mail; to send by post
+1329	plan; to plan
+1330	since; now that
+1331	technology; skill
+1332	to continue
+1333	reporter; journalist
+1334	to work overtime
+1335	furniture
+1336	to speed up
+1337	to strengthen
+1338	to join; to add
+1339	plus; in addition
+1340	family; household
+1341	hometown
+1342	to refuel; go for it!
+1343	gas station
+1344	parent; guardian
+1345	fake; false
+1346	price
+1347	price
+1348	holiday; day off
+1349	to subtract; to reduce
+1350	to lighten; to ease
+1351	to decrease; to reduce
+1352	to work out; to exercise
+1353	gym
+1354	to suggest; suggestion
+1355	river
+1356	will; shall
+1357	the future
+1358	will; be going to
+1359	prize; award
+1360	bonus; award money
+1361	scholarship
+1362	to drop; to fall
+1363	to lower; to reduce
+1364	to cut the price
+1365	to land; to descend
+1366	to cool down
+1367	to hand over; to pay
+1368	proud; pride
+1369	traffic police
+1370	to exchange; to communicate
+1371	suburbs; outskirts
+1372	traffic; transportation
+1373	coach; trainer
+1374	teacher
+1375	professor
+1376	teaching; instruction
+1377	education; to educate
+1378	to be called
+1379	street
+1380	to accept
+1381	then; to catch
+1382	result; as a result
+1383	public holiday
+1384	to save; to economize
+1385	to pay the bill
+1386	to explain; explanation
+1387	from now on
+1388	only; merely
+1389	although; feel free to
+1390	only; merely
+1391	nervous; tense
+1392	to enter
+1393	to carry out; to conduct
+1394	to prohibit; to forbid
+1395	wonderful; brilliant
+1396	economy
+1397	Beijing opera
+1398	to experience; experience
+1399	experience
+1400	police officer
+1401	tourist attraction
+1402	scenic area
+1403	scenery; view
+1404	unexpectedly
+1405	to compete; competition
+1406	mirror
+1407	after all; exactly
+1408	exactly; even if
+1409	to lift; to raise
+1410	to hold (an event)
+1411	to give an example
+1412	to hold (a meeting)
+1413	to gather; to assemble
+1414	to dine together; group meal
+1415	party; to gather
+1416	to refuse; to reject
+1417	distance; to be apart from
+1418	theater
+1419	to joke; to kid around
+1420	view; opinion
+1421	to roast; to grill; to bake
+1422	to consider; to think over
+1423	exam candidate
+1424	classifier for trees, plants
+1425	science and technology
+1426	science; scientific
+1427	to cough
+1428	to cough
+1429	it's a pity; unfortunate
+1430	gram
+1431	course; curriculum
+1432	polite; courteous
+1433	classroom
+1434	living room
+1435	definitely; to affirm
+1436	empty
+1437	air
+1438	I'm afraid; probably
+1439	free time; vacant
+1440	spoken language
+1441	bitter; hard (suffering)
+1442	fast food
+1443	express delivery
+1444	fast; rapid
+1445	sleepy; tired
+1446	difficult; difficulty
+1447	to pull
+1448	trash; garbage
+1449	spicy
+1450	not enough time; too late
+1451	there's enough time
+1452	lazy
+1453	to waste
+1454	romantic
+1455	tiger
+1456	hometown
+1457	old age
+1458	always
+1459	calm; cool-headed
+1460	to get a haircut
+1461	to understand
+1462	manners; polite
+1463	ideal; dream
+1464	amazing; intense; severe
+1465	physical strength
+1466	for example
+1467	example
+1468	two (of us/them)
+1469	even; including
+1470	to contact; connection
+1471	cool; cold
+1472	to measure
+1473	tael (unit of weight)
+1474	bright; to shine
+1475	to line up; row
+1476	below zero
+1477	pocket money
+1478	small change
+1479	snacks
+1480	another; other
+1481	another; besides
+1482	to stay; to leave behind
+1483	to flow
+1484	fluent
+1485	to leave behind; to stay
+1486	popular; trendy
+1487	to pass by
+1488	hotel
+1489	traveler; passenger
+1490	to travel; trip
+1491	lawyer
+1492	messy; carelessly
+1493	to fall; to drop
+1494	troublesome; to bother
+1495	steamed bun
+1496	full; to fill
+1497	towel
+1498	sweater
+1499	hat; cap
+1500	beautiful
+1501	beautiful; wonderful
+1502	beautiful scenery
+1503	beautiful
+1504	delicious food; cuisine
+1505	dream
+1506	dream; to dream of
+1507	password; PIN code
+1508	free of charge
+1509	to face; to confront
+1510	job interview; to interview
+1511	second (unit of time)
+1512	ethnic group; nationality
+1513	the end; final part
+1514	mother and daughter
+1515	mother
+1516	mother and child
+1517	goal; target
+1518	purpose; goal
+1519	destination
+1520	currently; at present
+1521	patience; patient
+1522	southern part; the south
+1523	don't tell me; surely not
+1524	gentleman; man
+1525	to feel unwell; to suffer
+1526	unforgettable
+1527	male; the male sex
+1528	inside; within
+1529	content; substance
+1530	inner heart; innermost feelings
+1531	whether or not; is it possible
+1532	to be able to; can
+1533	ability; capability
+1534	uh-huh; yeah (agreement)
+1535	end of the year
+1536	age (of a person)
+1537	rural area; countryside
+1538	to do; to make; to fiddle with
+1539	woman; the female sex
+1540	warm; nice and warm
+1541	occasionally; once in a while
+1542	to pat; to take (a photo)
+1543	row; line; to arrange in order
+1544	sign; brand; playing card
+1545	to line up; to queue
+1546	volleyball
+1547	sign; brand
+1548	to judge; judgment
+1549	to accompany; to keep company
+1550	to criticize; criticism
+1551	skin
+1552	temper; temperament
+1553	leather shoes
+1554	classifier for articles, essays
+1555	slice; piece; classifier for flat items
+1556	table tennis; ping-pong
+1557	usual; ordinary
+1558	broken; to break
+1559	grape
+1560	wine
+1561	common; widespread
+1562	ordinary; common
+1563	Mandarin Chinese
+1564	classifier for periods, issues, terms
+1565	end of term; end of semester
+1566	midterm
+1567	next; secondly
+1568	among these; therein
+1569	to have (an effect); to play (a role)
+1570	air; gas; to get angry
+1571	climate
+1572	soda pop; soft drink
+1573	air temperature
+1574	kilogram
+1575	be sure to; absolutely (must)
+1576	visa; to issue a visa
+1577	ahead; the front
+1578	around (a time); front and back
+1579	strong; powerful
+1580	to knock; to strike
+1581	bridge
+1582	clever; skillful; coincidentally
+1583	chocolate
+1584	relative (family)
+1585	musical instrument (esp. stringed)
+1586	light (not heavy); gentle
+1587	youth; young person
+1588	relaxed; easy
+1589	situation; circumstances
+1590	to celebrate
+1591	sports team
+1592	sports fan
+1593	area; district
+1594	difference; to distinguish
+1595	to take; to get
+1596	to obtain; to achieve
+1597	to cancel
+1598	whole; entire; all
+1599	all; the whole
+1600	all; every one
+1601	global; worldwide
+1602	the whole body
+1603	to lack; to be short of
+1604	shortcoming; weakness
+1605	to lack; to be short of
+1606	but; however
+1607	indeed; really
+1608	however; but
+1609	lively; bustling
+1610	human life
+1611	number of people
+1612	personnel; staff
+1613	any; whichever
+1614	task; mission
+1615	to throw; to throw away
+1616	still; yet
+1617	still; as before
+1618	daily; everyday
+1619	diary
+1620	date (calendar)
+1621	day; date; life (days)
+1622	to enter; to join
+1623	entrance
+1624	to start school; to enroll
+1625	to check in; to move in
+1626	to take a walk
+1627	to scan a QR code
+1628	forest
+1629	to discuss; to talk over
+1630	goods; merchandise
+1631	sad; heartbroken
+1632	to drop by; to visit
+1633	slightly; a little
+1634	a little bit; slightly
+1635	rare; seldom seen
+1636	a small amount
+1637	minority; small number
+1638	young person; teenager
+1639	society
+1640	degrees Celsius
+1641	body; classifier for outfits
+1642	deep
+1643	ID card
+1644	to apply (for something)
+1645	even; to the point that
+1646	to be born; to give birth; to grow
+1647	raw; uncooked
+1648	life (living creature)
+1649	business
+1650	province; to save (money)
+1651	to remain; to be left over
+1652	to fail; to lose
+1653	master; skilled worker
+1654	to lose
+1655	teachers and students
+1656	disappointed
+1657	very; extremely
+1658	actual; practical
+1659	schedule; timetable
+1660	actually; in fact
+1661	food; foodstuff
+1662	cafeteria; dining hall
+1663	food
+1664	really; honest
+1665	intersection; crossroads
+1666	to make; to cause
+1667	embassy; consulate
+1668	to use
+1669	market
+1670	whether or not
+1671	to suit; to fit
+1672	century
+1673	video
+1674	downtown; city center
+1675	exam question
+1676	to adapt (to)
+1677	to charge a fee
+1678	income; to take in
+1679	to tidy up; to pack
+1680	to listen to (radio)
+1681	classifier for poems, songs
+1682	capital city
+1683	first of all
+1684	can't stand; unbearable
+1685	ticket seller; conductor
+1686	to be injured; wounded
+1687	to lose (a game, competition)
+1688	familiar; ripe; cooked
+1689	to be familiar with
+1690	summer vacation
+1691	number; several
+1692	quantity; amount
+1693	woods; grove
+1694	number; digit; digital
+1695	handsome; cool
+1696	conveniently; in passing
+1697	smooth; without a hitch
+1698	sequence; order
+1699	way of saying it; statement
+1700	to explain; explanation
+1701	instruction manual
+1702	master's degree
+1703	to die; dead
+1704	speed
+1705	plastic
+1706	sour
+1707	yogurt
+1708	to calculate; to count as
+1709	casual; as one pleases
+1710	along with; as
+1711	granddaughter
+1712	grandson
+1713	all; every
+1714	classifier for machines, vehicles
+1715	to lift; to carry
+1716	to raise one's head; to look up
+1717	attitude
+1718	to play (a string instrument)
+1719	to talk; to chat
+1720	soup
+1721	to lie down
+1722	classifier for trips
+1723	to discuss
+1724	annoying; to dislike
+1725	characteristic; feature
+1726	to mention; to raise (an issue)
+1727	to propose; to raise (an issue)
+1728	to mention
+1729	to provide
+1730	to move up (a date); in advance
+1731	to remind
+1732	medical check-up
+1733	body temperature
+1734	body weight
+1735	to fill in (a form)
+1736	condition; requirement
+1737	listening ability
+1738	listeners; audience
+1739	to stop; to park
+1740	to park (a car)
+1741	parking lot
+1742	to stop; to halt
+1743	to go through; to connect
+1744	to pass (a test); through
+1745	to notify; notice
+1746	childhood
+1747	at the same time
+1748	same; similarly
+1749	bucket; barrel
+1750	painful; ache
+1751	to have a headache
+1752	picture; diagram; map
+1753	picture; photo
+1754	soil; earth
+1755	to push
+1756	to postpone
+1757	to launch; to release
+1758	to take off (clothes)
+1759	socks
+1760	to go out (travel)
+1761	coat; jacket
+1762	complete; completely
+1763	good night
+1764	dinner
+1765	to shop online
+1766	often; usually
+1767	web page
+1768	online friend; netizen
+1769	web address; URL
+1770	dangerous; danger
+1771	to act as; to be
+1772	taste; flavor
+1773	taste; flavor
+1774	hygiene; sanitary
+1775	temperature
+1776	to smell; to sniff
+1777	document; file
+1778	article; essay
+1779	writing; written language
+1780	to pollute
+1781	without; not to have
+1782	unable to
+1783	bored; boring
+1784	no matter (what/how)
+1785	lunch
+1786	to misunderstand; misunderstanding
+1787	to inhale; to suck in
+1788	western part; the west
+1789	tomato
+1790	to attract
+1791	thin; fine; delicate
+1792	careful; attentive
+1793	to decrease; to drop
+1794	fresh; delicious
+1795	fresh flowers
+1796	salty
+1797	cash
+1798	to envy; to admire
+1799	online
+1800	offline
+1801	currently existing; available
+1802	fragrant; sweet-smelling
+1803	to compare
+1804	opposite; contrary
+1805	mutual; each other
+1806	identical; the same
+1807	detailed
+1808	to sound; to ring; loud
+1809	idea; way of thinking
+1810	classifier for items, tasks, clauses
+1811	news; message
+1812	snack; street food
+1813	young man; lad
+1814	novel; fiction
+1815	small group
+1816	effect; result
+1817	joke; to laugh at
+1818	blood
+1819	heart; mind
+1820	hard; exhausting; to work hard
+1821	mood; frame of mind
+1822	signal
+1823	information; message
+1824	confidence
+1825	excited; excitement
+1826	star; the stars
+1827	to wake up
+1828	nature; suffix -ness/-ity
+1829	gender; sex
+1830	happy; happiness
+1831	personality; character
+1832	brothers
+1833	bear
+1834	to repair; to build; to study
+1835	to repair; to fix
+1836	many; a lot of
+1837	tuition fee
+1838	college; institute
+1839	to press; to push down
+1840	pressure; stress
+1841	toothpaste
+1842	Asia
+1843	cigarette; smoke
+1844	salt
+1845	strict; rigorous
+1846	to research; research
+1847	graduate student
+1848	serious; severe
+1849	to perform; to act
+1850	to sing (for an audience)
+1851	to perform; a performance
+1852	glasses; spectacles
+1853	in front of one's eyes; now
+1854	actor; performer
+1855	sunshine
+1856	to form (a habit); to develop
+1857	appearance; look
+1858	to invite; invitation
+1859	if
+1860	key
+1861	perhaps; maybe
+1862	night
+1863	night; nighttime
+1864	leaf
+1865	everything; all
+1866	already
+1867	within; less than
+1868	opinion; suggestion
+1869	one's whole life
+1870	art
+1871	thus; therefore
+1872	to cause; to give rise to
+1873	impression
+1874	to win
+1875	to win; to gain
+1876	to apply for a job
+1877	brave; courageous
+1878	forever
+1879	to be used for
+1880	to be used for; to apply to
+1881	strength; merit; advantage
+1882	humorous; humor
+1883	outstanding; excellent
+1884	from; by; via; because of
+1885	oil
+1886	especially
+1887	to have fun; to go sightseeing
+1888	due to; because
+1889	friendly
+1890	friendship
+1891	interesting; fun
+1892	effective; valid
+1893	friendship
+1894	to have; to possess
+1895	happy; pleasant
+1896	so; thereupon; as a result
+1897	and; with
+1898	grammar
+1899	to prepare a lesson (before class)
+1900	originally; it turns out
+1901	to forgive; to excuse
+1902	reason; cause
+1903	to stay far away from
+1904	dean; head of an institution
+1905	courtyard; yard
+1906	to arrange to meet; approximately
+1907	date; appointment
+1908	mooncake
+1909	to read; reading
+1910	month
+1911	cloud
+1912	to allow; to permit
+1913	magazine
+1914	once more; again
+1915	moreover; besides; to put off
+1916	temporary; for now
+1917	to pause; to suspend; timeout
+1918	breakfast
+1919	early morning
+1920	responsibility
+1921	to increase; to raise
+1922	to grow; to increase
+1923	to recruit; to hire
+1924	to fall asleep; to catch fire
+1925	to catch fire
+1926	particle meaning 'the one who' or '-er'
+1927	real; genuine; really
+1928	whole; entire; tidy
+1929	whole; entire
+1930	to tidy up; to sort out
+1931	certificate; proof; ID
+1932	normal
+1933	just right; just in time; by chance
+1934	ID; papers; credentials
+1935	to prove; proof; certificate
+1936	correct
+1937	formal; official
+1938	(literary) possessive particle
+1939	to support
+1940	to pay (money)
+1941	after; afterwards
+1942	between; among
+1943	before; prior to
+1944	knowledge
+1945	in the middle of; among
+1946	to be worth; on duty
+1947	to be worth (doing)
+1948	direct; immediate
+1949	plant
+1950	occupation; profession
+1951	finger; to point at
+1952	to point out
+1953	to have no choice but to
+1954	tissue; paper towel
+1955	quality
+1956	at least
+1957	Chinese food
+1958	middle age
+1959	to plant; to grow
+1960	heavy; serious
+1961	key point; to focus on
+1962	to value; to take seriously
+1963	surroundings; around
+1964	idea; plan
+1965	to wish (sb well)
+1966	to congratulate
+1967	famous
+1968	specially; specialized
+1969	major; specialty; professional
+1970	to turn; to change direction
+1971	to forward; to repost
+1972	to change planes; a turn for the better
+1973	to earn; to make money
+1974	to install; to pretend; to pack
+1975	accurate; to allow; definitely
+1976	accurate; precise
+1977	on time; punctual
+1978	data; material; information
+1979	careful; attentive
+1980	self; from; since
+1981	nature; natural; naturally
+1982	to study on one's own
+1983	self-confident; confidence
+1984	to teach oneself; self-study
+1985	to sum up; a summary
+1986	to rent
+1987	group; team; to organize
+1988	final; ultimate; in the end
+1989	to respect
+1990	approximately; left and right
+1991	seat; classifier for large structures
+1992	way of doing something; method
+1993	author; writer
+1994	to dream
+1995	a work (of art, literature)
+1996	to act as; as; in the capacity of
+1997	seat
+1998	to write an essay; essay
+1999	function; effect; role
+2000	author; writer
+2001	hey!; interjection of surprise
+2002	oh!; wow (interjection of surprise)
+2003	sigh; oh dear (interjection)
+2004	to cherish; to take care of
+2005	calm; peaceful; safe
+2006	seat belt
+2007	to comfort; to console
+2008	to install
+2009	dark; secret; hidden
+2010	to stay up late
+2011	to grasp; confidence; certainty
+2012	white; in vain
+2013	midnight; in the night
+2014	evening; dusk
+2015	package; parcel; to wrap up
+2016	to contain; to include
+2017	to include
+2018	to package; packaging
+2019	thin
+2020	treasure; precious
+2021	to protect; to guarantee
+2022	security guard; to ensure safety
+2023	treasure; darling; baby
+2024	to keep; to maintain
+2025	to preserve; to save
+2026	valuable; precious
+2027	to keep; to retain
+2028	insurance; safe; secure
+2029	shelf life; expiration date
+2030	to check in; to report for duty
+2031	to report (news); a news report
+2032	report; to report; a talk
+2033	to call the police; to sound an alarm
+2034	rainstorm; torrential rain
+2035	to complain
+2036	the back; to recite from memory
+2037	behind; at the back
+2038	background
+2039	quilt; blanket
+2040	this; original; originally
+2041	local; this area
+2042	skill; ability
+2043	myself; the person in question
+2044	essence; nature
+2045	each other
+2046	score (of a game)
+2047	proportion; ratio
+2048	metaphor; to compare to
+2049	certainly; must
+2050	after all
+2051	to avoid
+2052	closing ceremony
+2053	inevitable; certain
+2054	essential; indispensable
+2055	necessary
+2056	convenient; then (literary)
+2057	to change; to fluctuate
+2058	convenient
+2059	convenience store
+2060	title; headline
+2061	sign; symbol; to symbolize
+2062	to express
+2063	surface; outward appearance
+2064	to make clear; to indicate
+2065	facial expression
+2066	to leave; to part (from)
+2067	flatbread; cake; cookie
+2068	hospital ward
+2069	patient's condition
+2070	to dial; to call
+2071	glass
+2072	museum
+2073	unfavorable; disadvantageous
+2074	unfortunate; misfortune
+2075	it doesn't matter; not serious
+2076	to supplement; to add
+2077	extremely; terribly (serious)
+2078	inconsistent; not matching
+2079	bad; harmful; unhealthy
+2080	otherwise; or else
+2081	to walk; to go on foot
+2082	insufficient; not enough
+2083	talent; ability
+2084	referee; umpire; to judge
+2085	to interview
+2086	to adopt (a measure); to take
+2087	color; multicolored
+2088	to adopt; to use
+2089	to consult; for reference
+2090	food and beverage; catering
+2091	to participate; to take part
+2092	to hide; to store
+2093	to operate
+2094	classifier for books
+2095	to measure; to survey
+2096	to test; a test
+2097	once; before (past-tense marker)
+2098	once; formerly; ever (in the past)
+2099	to insert; to stick in
+2100	difference; distinction
+2101	gap; disparity
+2102	fork
+2103	to tear down; to take apart
+2104	to produce
+2105	output; yield
+2106	product; goods
+2107	industry
+2108	strong point; strength
+2109	length
+2110	long-lasting; long-term
+2111	long-term; long time
+2112	common sense
+2113	to try; to attempt
+2114	long-distance
+2115	long-term; far-reaching
+2116	place; location
+2117	to exceed; to surpass
+2118	to exceed; to go beyond
+2119	super; ultra
+2120	to speed; to exceed the limit
+2121	facing; towards
+2122	noisy; to quarrel
+2123	to stir-fry; to fire (sb)
+2124	car accident
+2125	garage
+2126	vehicle
+2127	train car; carriage
+2128	car owner
+2129	thorough; complete
+2130	to sink; heavy
+2131	silent; taciturn
+2132	to weigh
+2133	to call; to name
+2134	to be called; to be known as
+2135	to praise; to commend
+2136	cost (of production)
+2137	to undertake; to assume
+2138	degree; extent; level
+2139	ingredient; component
+2140	achievement; result
+2141	achievement; to achieve
+2142	to establish; to found
+2143	to become an adult
+2144	urban area; city district
+2145	adult
+2146	to admit; to recognize
+2147	to bear; to endure
+2148	mature; ripe
+2149	flight/train attendant
+2150	procedure; computer program
+2151	member
+2152	to grow up; growth
+2153	orange (fruit)
+2154	pond; pool
+2155	to continue; to last
+2156	ruler (for measuring)
+2157	wing
+2158	to rinse; to rush
+2159	to charge (a battery)
+2160	sufficient; full
+2161	to be full of
+2162	to top up (a card, account)
+2163	sufficient; abundant
+2164	to repeat
+2165	insect; bug
+2166	pet
+2167	to draw out; to pull out
+2168	ugly
+2169	smelly; stinky
+2170	at first; beginning
+2171	to publish
+2172	junior; beginner level
+2173	initial stage; early period
+2174	outstanding; remarkable
+2175	to sell; to offer for sale
+2176	to attend (a meeting, event)
+2177	to come from
+2178	Lunar New Year's Eve
+2179	to get along with; to handle
+2180	to handle; to deal with
+2181	to be in (a state, condition)
+2182	place; part; office
+2183	to pass on; to spread
+2184	to spread; to disseminate
+2185	to pass on; to transmit
+2186	legend; folktale
+2187	tradition; traditional
+2188	windowsill
+2189	bed sheet
+2190	innovation; to innovate
+2191	to start a business
+2192	to create
+2193	to create (a work); a creation
+2194	vocabulary
+2195	to resign (from a job)
+2196	after this; from now on
+2197	before this; previously
+2198	now; at this moment
+2199	to stimulate; exciting
+2200	never
+2201	thus; thereby
+2202	in the past; once
+2203	to engage in; to undertake
+2204	to promote; to boost
+2205	to prompt; to spur
+2206	to promote sales
+2207	to urge; to hurry (sb)
+2208	to store; to deposit
+2209	savings; to deposit money
+2210	to exist
+2211	measure; step (taken)
+2212	to reach (an agreement)
+2213	to dress up; to decorate
+2214	to pack up; to box up
+2215	to interrupt
+2216	to break; to smash
+2217	to ask about; to inquire
+2218	bold; daring
+2219	mostly; for the most part
+2220	conference; general assembly
+2221	vigorously; energetically
+2222	older woman; auntie
+2223	rice (uncooked)
+2224	brain
+2225	a large quantity of
+2226	large building; tower
+2227	major event; big deal
+2228	elephant
+2229	large-scale
+2230	elderly man; uncle
+2231	greater than
+2232	the public; the masses
+2233	generation; to replace
+2234	representative; to represent
+2235	to drive; to spur on
+2236	to replace; to substitute
+2237	pay; treatment; benefits
+2238	single; only; alone
+2239	alone; by oneself
+2240	to serve as; to hold (a post)
+2241	single; sole
+2242	unit (of a building, book)
+2243	timid; cowardly
+2244	bland; light (in taste, color)
+2245	local
+2246	back then; in those days
+2247	current; at present
+2248	among; in the middle
+2249	to block; to obstruct
+2250	to regard as; to treat as
+2251	to regard as; to take to be
+2252	to treat as; to regard as
+2253	to fall down; to collapse
+2254	director; to direct (a film)
+2255	to lead to; to cause
+2256	to arrive; to reach
+2257	reason; sense; logic
+2258	to expire; to fall due
+2259	to climb; to mount
+2260	lighting; light
+2261	to register
+2262	to log in
+2263	to wait; to wait for
+2264	to wait for
+2265	to equal; to be equal to
+2266	to bow one's head; to yield
+2267	really; indeed
+2268	enemy
+2269	to hand over; to pass
+2270	geography
+2271	ground; floor; surface
+2272	region; area
+2273	status; position
+2274	underground
+2275	earthquake
+2276	snack; pastry; dim sum
+2277	to like (on social media)
+2278	battery
+2279	electric; battery-powered
+2280	electrical appliance
+2281	e-commerce
+2282	TV station
+2283	digital edition; e-version
+2284	to transfer; to move
+2285	to research; to survey
+2286	regular; periodic
+2287	to lose (an item)
+2288	to freeze
+2289	hole; cave
+2290	animation; cartoon
+2291	touching; moving
+2292	to get to work; to touch
+2293	tofu
+2294	soy milk
+2295	independent; to stand alone
+2296	unique; distinctive
+2297	pronunciation
+2298	alone; by oneself
+2299	to block (a road, pipe)
+2300	degree; to spend (time)
+2301	shortcoming; weakness
+2302	short-term
+2303	to break; to snap
+2304	pile; heap; to pile up
+2305	to contrast; contrast
+2306	to treat (sb, sth)
+2307	opponent; rival
+2308	team; troops; queue
+2309	target; boyfriend/girlfriend
+2310	ton (unit of weight)
+2311	classifier for flowers, clouds
+2312	to hide; to dodge
+2313	children; sons and daughters
+2314	second-hand; used
+2315	QR code
+2316	to publish; to issue
+2317	to release; to announce
+2318	developed; to develop
+2319	to bring out; to display
+2320	to invent; invention
+2321	to initiate; to launch
+2322	to speak up; a statement
+2323	pronunciation; to pronounce
+2324	to punish; to fine
+2325	fine (penalty); to fine
+2326	court (of law)
+2327	to flip over; to translate
+2328	tomato
+2329	prosperous; booming
+2330	opposite; to oppose
+2331	instead; on the contrary
+2332	repeatedly; over and over
+2333	to return; to go back
+2334	reaction; to react
+2335	to reflect; to report
+2336	anyway; in any case
+2337	scope; range
+2338	square; direction
+2339	plan; proposal
+2340	to guard against; to prevent
+2341	house; building
+2342	to prevent; to avoid
+2343	as if; seemingly
+2344	to visit
+2345	to fly; flight
+2346	pilot
+2347	Africa
+2348	to separate; separately
+2349	distributed; spread out
+2350	one after another
+2351	to classify; to sort
+2352	to separate
+2353	to distribute; to assign
+2354	to break up; to split up
+2355	to analyze; analysis
+2356	to share
+2357	to strive; to struggle
+2358	rich and colorful
+2359	style
+2360	crazy; frenzied
+2361	custom; tradition
+2362	risk; hazard
+2363	to deny; negative
+2364	to deny
+2365	married couple
+2366	to support; to help up
+2367	good fortune; blessing
+2368	clothing; costume
+2369	classifier for pairs, sets
+2370	rich; wealthy
+2371	to pay; to put in (effort)
+2372	burden; to bear (a cost)
+2373	woman
+2374	wealthy; rich in
+2375	to copy; to duplicate
+2376	reform; to reform
+2377	to improve
+2378	to improve
+2379	another day; some other time
+2380	to correct; to fix
+2381	lid; cover; to cover
+2382	to summarize; to sum up
+2383	concept; idea
+2384	to dare to; to be bold
+2385	just right; exactly
+2386	tall; towering
+2387	high-grade; upscale
+2388	height; altitude
+2389	advanced; high-level
+2390	high technology
+2391	efficient
+2392	to do; to make (informal)
+2393	to say goodbye; to leave
+2394	song lyrics
+2395	song
+2396	to separate; apart
+2397	especially; extra
+2398	just a few; individual
+2399	all trades; every profession
+2400	individual; personal
+2401	personality
+2402	each; respectively
+2403	root; classifier for slender objects
+2404	basic; fundamental
+2405	to replace
+2406	to update
+2407	to announce; to publish
+2408	engineering; project
+2409	engineer
+2410	tool; instrument
+2411	function
+2412	fair; impartial
+2413	civil servant
+2414	to congratulate; congratulations
+2415	industry
+2416	arts and crafts
+2417	apartment building
+2418	to contribute; a contribution
+2419	to share
+2420	to communicate
+2421	to form; to constitute
+2422	ancient; old
+2423	drum; to beat a drum
+2424	ancient times
+2425	ancient; age-old
+2426	to applaud; to clap
+2427	to fix; fixed
+2428	hometown
+2429	to register (e.g. at a clinic)
+2430	strange; odd
+2431	to close; to shut down
+2432	to observe
+2433	point of view
+2434	concept; notion
+2435	champion
+2436	to visit (honorific)
+2437	bright; light
+2438	light; a light ray
+2439	wide; broad
+2440	public square; plaza
+2441	vast; extensive
+2442	wide; extensive
+2443	pattern; law (of nature)
+2444	scale; scope
+2445	rule; regulation
+2446	your surname? (polite)
+2447	cupboard; cabinet
+2448	to roll; Get lost!
+2449	pot; pan; wok
+2450	traditional Chinese painting
+2451	National Day
+2452	sure enough; as expected
+2453	fruit; results (of effort)
+2454	excessive
+2455	excessive; going too far
+2456	allergic
+2457	to expire; overdue
+2458	excessively; too
+2459	ha! (laughter)
+2460	customs (border checkpoint)
+2461	overseas
+2462	seafood
+2463	to contain
+2464	content (amount contained)
+2465	to contain
+2466	sweat
+2467	line of business; a row
+2468	industry; trade
+2469	positive review
+2470	good luck
+2471	to improve; to get better
+2472	to be fond of; to like
+2473	curious
+2474	to combine; to fit together
+2475	legal; lawful
+2476	boxed meal
+2477	reasonable; rational
+2478	river
+2479	contract
+2480	group photo
+2481	to cooperate
+2482	black; dark
+2483	red
+2484	monkey
+2485	thickness
+2486	consequences
+2487	to ignore; to neglect
+2488	to breathe
+2489	lake
+2490	butterfly
+2491	alley; lane
+2492	to interact
+2493	outdoors
+2494	to spend (time or money)
+2495	slippery; to slide
+2496	to row (a boat)
+2497	-ize; to change into
+2498	phone bill
+2499	scene; picture
+2500	topic
+2501	chemistry
+2502	part (of a process); link
+2503	to relieve; to ease
+2504	slow
+2505	cucumber
+2506	gold
+2507	gray; ash
+2508	to wave
+2509	to recover; to restore
+2510	gray; pessimistic
+2511	to recycle
+2512	exchange rate
+2513	wedding ceremony
+2514	classifier for groups (of people)
+2515	partner; companion
+2516	hotpot
+2517	or; either one or the other
+2518	goods; merchandise
+2519	perhaps; maybe
+2520	organization; agency
+2521	intense; fierce
+2522	machine
+2523	robot
+2524	muscle
+2525	and; up to
+2526	level; grade
+2527	to gather; classifier for episodes
+2528	disease; illness
+2529	to pass (an exam)
+2530	to gather; to assemble
+2531	about to; soon
+2532	hastily
+2533	extremely
+2534	collective; group
+2535	to urgently need
+2536	emergency treatment (medical)
+2537	to concentrate; focused
+2538	to squeeze; crowded
+2539	to tie; to fasten
+2540	quarter (of a year)
+2541	to record; a record
+2542	a record
+2543	documentary (film)
+2544	skill
+2545	to commemorate; a keepsake
+2546	anniversary
+2547	to calculate
+2548	computer
+2549	to remember; memory
+2550	to record (in writing)
+2551	honored guest
+2552	household appliance
+2553	to process (materials)
+2554	to heat
+2555	to deepen
+2556	to accelerate
+2557	housework
+2558	first (in a list); "A"
+2559	if
+2560	frame; classifier for planes
+2561	to drive; to pilot
+2562	driver's license
+2563	value; worth
+2564	difficult; arduous
+2565	strong; resilient
+2566	to pick up
+2567	to cut (with scissors)
+2568	scissors
+2569	to lose weight
+2570	résumé; CV
+2571	simply; really
+2572	to build; to establish
+2573	key (on a keyboard)
+2574	gradually
+2575	to establish
+2576	keyboard
+2577	to build; to develop
+2578	to construct
+2579	building; to construct
+2580	almost; nearly
+2581	to speak; a speech
+2582	to be particular about
+2583	to reward; a reward
+2584	to narrate; to tell
+2585	lecture (series)
+2586	precipitation (rain or snow)
+2587	to water (plants)
+2588	to exchange; to swap
+2589	to associate with
+2590	to trade; a transaction
+2591	footstep
+2592	angle; point of view
+2593	compared to; relatively
+2594	teaching material
+2595	to contact; to touch
+2596	to receive (guests)
+2597	stage; phase
+2598	to approach
+2599	to receive
+2600	knot; to tie
+2601	structure
+2602	to combine; to integrate
+2603	conclusion
+2604	to save (time or money)
+2605	classifier for events, years
+2606	today
+2607	tight; urgent
+2608	urgent
+2609	as soon as possible
+2610	as much as possible
+2611	closely knit; inseparable
+2612	cautious; prudent
+2613	progress; to improve
+2614	modern times (history)
+2615	to import; entrance
+2616	to try one's best
+2617	in recent years
+2618	recently; soon
+2619	recently; these days
+2620	further; a step further
+2621	classic; the classics
+2622	energy; vigor
+2623	energy; spirit; lively
+2624	pleasant surprise
+2625	to run (a business)
+2626	quiet; still
+2627	bar (for drinks)
+2628	ancient; long ago
+2629	to save; to rescue
+2630	ambulance
+2631	to get a job; employment
+2632	resident
+2633	unexpectedly
+2634	to reside; to live
+2635	tangerine
+2636	according to; based on
+2637	distance; apart from
+2638	to possess; to have
+2639	theater
+2640	huge; enormous
+2641	it is said that
+2642	concrete; specific
+2643	to have; to possess
+2644	to donate
+2645	absolute; absolutely
+2646	the finals (of a contest)
+2647	role; character
+2648	determination
+2649	to develop (a resource)
+2650	to open; open (to public)
+2651	to open (an event)
+2652	opening ceremony
+2653	boiled water
+2654	to open (a service or line)
+2655	to open for business
+2656	to launch; to carry out
+2657	to look after; to watch
+2658	to visit (a person)
+2659	to regard as
+2660	to rely on; to lean against
+2661	to approach; to draw near
+2662	classifier for small round things
+2663	scientific research
+2664	it is clear that; visible
+2665	reliable
+2666	scary; terrible
+2667	to overcome
+2668	customer service
+2669	objective; impartial
+2670	client; customer
+2671	space; room
+2672	in the sky; in the air
+2673	to control
+2674	pocket; bag
+2675	taste; flavor
+2676	warehouse; storehouse
+2677	wide; broad
+2678	width
+2679	to lose money; luckily
+2680	insect
+2681	to expand; to enlarge
+2682	source; origin
+2683	labor; physical work
+2684	ordinary people
+2685	boss
+2686	husband (informal)
+2687	maternal grandmother
+2688	wife (informal)
+2689	maternal grandfather
+2690	optimistic
+2691	joy; delight
+2692	tears
+2693	kind; type; category
+2694	tears; teardrops
+2695	similar; analogous
+2696	type; category
+2697	pear
+2698	to divorce
+2699	centimeter
+2700	to resign; to leave a job
+2701	theory; to argue
+2702	inside; interior
+2703	reason; justification
+2704	power; strength
+2705	immediately
+2706	immediately; at once
+2707	strength; power
+2708	profit
+2709	benefit; interest
+2710	to use; to make use of
+2711	to unite; joint
+2712	to connect; to link
+2713	promptly; right away
+2714	continuous; in a row
+2715	complexion; look on one's face
+2716	to be in love; romance
+2717	good; favorable
+2718	grain; food
+2719	quantity; amount
+2720	amazing; terrific
+2721	train
+2722	temporary; last-minute
+2723	bell
+2724	flexible; agile
+2725	collar; to lead
+2726	necktie
+2727	to lead; leader
+2728	to receive; to collect
+2729	to lead; to be ahead
+2730	field; domain
+2731	to order; command
+2732	to spread; to circulate
+2733	flu
+2734	to browse; to skim
+2735	to leave a message
+2736	dragon
+2737	to leak; to miss
+2738	to record
+2739	dry land
+2740	to admit; to hire
+2741	passer-by; stranger
+2742	route; itinerary
+2743	one after another
+2744	to record (audio)
+2745	travel agency
+2746	paper; thesis
+2747	logic
+2748	to scold; to curse
+2749	business; trade
+2750	to satisfy; content
+2751	busy
+2752	writing brush
+2753	flaw; problem
+2754	conflict; contradiction
+2755	no way; can't help it
+2756	rose (flower)
+2757	media
+2758	art; fine arts
+2759	delicious food
+2760	charm; charisma
+2761	outpatient clinic
+2762	fan; to be crazy about
+2763	to get lost
+2764	secret
+2765	close; closely related
+2766	secretary
+2767	side; aspect
+2768	area (size)
+2769	to face; to confront
+2770	to face; oriented towards
+2771	to describe
+2772	sensitive
+2773	name (of a thing)
+2774	famous brand
+2775	business card
+2776	clear; to clarify
+2777	obvious; clear
+2778	star; celebrity
+2779	life; fate
+2780	fate; destiny
+2781	to touch; to feel
+2782	vague; blurry
+2783	pattern; mode
+2784	unfamiliar; strange
+2785	some; a certain
+2786	gaze; look in eyes
+2787	wood; log
+2788	even if; even though
+2789	rare; hard to come by
+2790	difficulty
+2791	hard to; difficult to
+2792	man; male
+2793	noisy; to make a fuss
+2794	alarm clock
+2795	internal; inside
+2796	capable; competent
+2797	start of the year
+2798	era; decade
+2799	age
+2800	New Year's Eve dinner
+2801	to read aloud; to study
+2802	jeans
+2803	strong; concentrated
+2804	farmer
+2805	agriculture; farming
+2806	woman; female
+2807	oh (interjection)
+2808	Europe
+2809	by chance; occasional
+2810	to shoot (photo/film)
+2811	to arrange in order
+2812	to send; to dispatch
+2813	local police station
+2814	track; runway
+2815	to compensate for loss
+2816	to accompany
+2817	to train
+2818	to cultivate; to train
+2819	to match; to pair
+2820	to coordinate; cooperate
+2821	to deliver (goods)
+2822	basin; pot
+2823	to touch; to bump into
+2824	to run into; to meet
+2825	classifier for batches
+2826	to criticize; to approve
+2827	to approve; to ratify
+2828	classifier for horses/cloth
+2829	to cheat; to deceive
+2830	to put together; to spell
+2831	pinyin (phonetic system)
+2832	product; item
+2833	brand name
+2834	quality; character
+2835	variety; breed
+2836	to hire; to engage
+2837	flat; even; level
+2838	to comment; to judge
+2839	to rely on; based on
+2840	safe and sound
+2841	balance; to balance
+2842	to evaluate; evaluation
+2843	to rely on; by means of
+2844	calm; tranquil
+2845	average
+2846	screen (device)
+2847	platform
+2848	to destroy; to damage
+2849	to spread widely; popular
+2850	to look forward to; expect
+2851	period of time; during
+2852	neat; even; together
+2853	his; her; its; their
+2854	miracle; wonder
+2855	the rest; the others
+2856	company; enterprise
+2857	balloon
+2858	gasoline
+2859	to sign (one's name)
+2860	to sign (a contract)
+2861	to sign; signature
+2862	to sign (a document)
+2863	to advance; go forward
+2864	to come (formal)
+2865	future prospects
+2866	to go to; to head for
+2867	shallow; light (color)
+2868	to owe; to lack
+2869	wall
+2870	powerful; strong
+2871	to emphasize; to stress
+2872	intensity; strength
+2873	strong; intense
+2874	to grab; to rob
+2875	to rescue
+2876	quietly; secretly
+2877	to cut; to slice
+2878	close; to kiss
+2879	dear; beloved
+2880	friends and family
+2881	warm; friendly
+2882	family love; affection
+2883	close relative; family
+2884	personally; in person
+2885	hardworking; diligent
+2886	green; blue
+2887	easily; rashly
+2888	seriousness; severity
+2889	emotion; feeling
+2890	scene; situation
+2891	mood; feeling
+2892	to ask for advice
+2893	to request; a request
+2894	poor
+2895	trend; tendency
+2896	area; region
+2897	to pass away; to die
+2898	power; right; authority
+2899	right (entitlement)
+2900	with all one's strength
+2901	all-around; comprehensive
+2902	all; entire
+2903	brand-new
+2904	to advise; to persuade
+2905	to lack; to be short of
+2906	to ensure; to guarantee
+2907	certain; to determine
+2908	to confirm; to verify
+2909	group; crowd
+2910	group; community
+2911	to burn; to combust
+2912	to wind; to go around
+2913	to love deeply
+2914	heat; calorie value
+2915	warm; enthusiastic
+2916	enthusiastic; warm-hearted
+2917	talent; talented person
+2918	artificial; manpower
+2919	interpersonal
+2920	population
+2921	humanity; mankind
+2922	manpower; labor
+2923	the people
+2924	Renminbi (Chinese currency)
+2925	crowd
+2926	human body
+2927	person; figure
+2928	to bear; to endure
+2929	to recognize; to admit
+2930	calendar
+2931	daily necessities
+2932	like; as; such as
+2933	like this; so
+2934	how; in what way
+2935	nowadays; now
+2936	like; as
+2937	as follows
+2938	soft; flexible
+2939	software
+2940	weak
+2941	to sprinkle; to spill
+2942	competition field
+2943	color; tint
+2944	desert
+2945	sand
+2946	foolish; silly
+2947	to dry in the sun
+2948	to delete
+2949	to fan; to slap
+2950	to delete; to cancel
+2951	mountain area
+2952	to be good at
+2953	kind; good-hearted
+2954	to be good at; adept
+2955	fan (hand-held)
+2956	injury; to injure
+2957	to harm; to injure
+2958	merchant; business
+2959	merchant; businessman
+2960	business affairs
+2961	business; commerce
+2962	to reward; to appreciate
+2963	to upload
+2964	to rise; to go up
+2965	up and down; or so
+2966	to rise (price, level)
+2967	to burn; fever
+2968	barbecue
+2969	snake
+2970	reluctant to part with
+2971	willing to part with
+2972	equipment; facilities
+2973	to design; design
+2974	to set up; to establish
+2975	community
+2976	facilities
+2977	photography
+2978	to set up; to install
+2979	to stretch; to extend
+2980	figure; body build
+2981	depth
+2982	identity; status
+2983	deep; profound
+2984	profound; deep
+2985	to go deep; thorough
+2986	far-reaching; profound
+2987	myth; legend
+2988	mysterious
+2989	to rise; to ascend
+2990	to produce; to manufacture
+2991	to survive; to exist
+2992	vivid; lively
+2993	to upgrade
+2994	to heat up; to intensify
+2995	organism; living thing
+2996	Chinese zodiac animal
+2997	to grow; to grow up
+2998	to save; to economize
+2999	province
+3000	provincial capital
+3001	to win; to defeat; to beat
+3002	victory; to win
+3003	poem; poetry
+3004	wet; damp
+3005	to break up (romantically)
+3006	to have insomnia
+3007	poet
+3008	mistake; to slip up
+3009	to be unemployed
+3010	time difference; jet lag
+3011	often; frequently
+3012	era; age; time period
+3013	to practice; to carry out
+3014	moment; constantly
+3015	strength; power
+3016	period; phase
+3017	to implement; to carry out
+3018	stone; rock
+3019	to intern; internship
+3020	to achieve; to realize
+3021	to implement; to carry out
+3022	experiment; to experiment
+3023	laboratory
+3024	practical; functional
+3025	edible; to eat
+3026	to make; to cause
+3027	all along; from start to end
+3028	-style; -type (suffix)
+3029	suitable; appropriate
+3030	like; as if (after a noun)
+3031	accident
+3032	event; incident
+3033	exam paper; test paper
+3034	city resident; citizen
+3035	fact
+3036	to regard as; to view as
+3037	thing; object
+3038	in advance; beforehand
+3039	experiment; test
+3040	career; cause; undertaking
+3041	to try out; on probation
+3042	applicable; suitable for use
+3043	harvest; to gain; reward
+3044	to collect; to gather
+3045	to watch (TV program)
+3046	to guard; to keep watch
+3047	first; for the first time
+3048	method; means; trick
+3049	handmade; manual work
+3050	surgery; operation
+3051	glove; mitten
+3052	procedure; formalities
+3053	finger
+3054	selling price
+3055	vegetables
+3056	calligraphy
+3057	study (room); den
+3058	bookshelf
+3059	to input; to enter (data)
+3060	comfortable; cozy
+3061	skilled; proficient
+3062	acquaintance
+3063	to count; to consider as
+3064	(computer) mouse
+3065	to belong to
+3066	bunch; bundle; classifier
+3067	data
+3068	trees
+3069	to fall; to drop and break
+3070	both sides; both parties
+3071	moisture; water content
+3072	tax
+3073	sleep
+3074	along; to follow; smooth
+3075	maybe; can't say for sure
+3076	to persuade; to convince
+3077	to think; to ponder
+3078	private; personal
+3079	thinking; thought
+3080	thought; idea; ideology
+3081	everywhere; all around
+3082	it seems; as if
+3083	all around; on every side
+3084	to search; to look for
+3085	to search
+3086	dormitory
+3087	life's joys and sorrows (idiom)
+3088	to follow; to comply with
+3089	soon after; subsequently
+3090	anytime; at any moment
+3091	in passing; without extra trouble
+3092	as one likes; at will; casual
+3093	to break into pieces; broken
+3094	to harm; to damage
+3095	loss; to lose
+3096	to shorten; to reduce
+3097	to shrink; to reduce
+3098	place; classifier for buildings
+3099	lock; to lock
+3100	other people; others
+3101	desk lamp; table lamp
+3102	steps; stairs
+3103	wife; Mrs.; madam
+3104	to talk; conversation
+3105	peach
+3106	set; classifier for sets
+3107	local specialty
+3108	special feature; characteristic
+3109	special; unusual
+3110	characteristic; unique (to)
+3111	characteristic; feature; trait
+3112	pain; painful; sore
+3113	to advocate; to promote
+3114	to submit (a report etc.)
+3115	topic; title; exam question
+3116	to mention; to bring up
+3117	to promote; to raise
+3118	to ask a question; to quiz
+3119	to realize; understanding
+3120	physical strength
+3121	to embody; to reflect
+3122	to experience firsthand
+3123	to replace; instead of; for
+3124	sky
+3125	the sky; heaven
+3126	to fill in; to fill up
+3127	dessert
+3128	to choose; to pick
+3129	to choose; to select
+3130	to adjust; to mix; to season
+3131	naughty; mischievous
+3132	to adjust; adjustment
+3133	to challenge; a challenge
+3134	high jump (athletics)
+3135	long jump (athletics)
+3136	to stick; to paste; to post
+3137	railroad; railway
+3138	to stay; to stop over
+3139	usual; usually; normally
+3140	to pass through; in use
+3141	same; alike; together; with
+3142	to sympathize; sympathy
+3143	the same; identical
+3144	statistics; to add up
+3145	to unify; unified
+3146	painful; suffering
+3147	to throw; to cast; to invest
+3148	to invest; to put into
+3149	suffix (no meaning)
+3150	prominent; outstanding
+3151	picture; drawing
+3152	books (library, bookstore)
+3153	land; soil; territory
+3154	potato
+3155	rabbit
+3156	group; to gather into a ball
+3157	team
+3158	to push forward; to promote
+3159	to popularize; to promote
+3160	to recommend
+3161	to advance; to push forward
+3162	to retreat; to withdraw
+3163	to withdraw; to quit; to log out
+3164	to return; to refund
+3165	to retire
+3166	slippers
+3167	outside; external
+3168	maternal grandfather
+3169	outward appearance
+3170	maternal grandmother
+3171	outward shape; appearance
+3172	to bend; a curve; bent
+3173	toy
+3174	perfect
+3175	well-developed; to improve
+3176	complete; intact
+3177	just in case; in case
+3178	to go back and forth; round trip
+3179	network; the Internet
+3180	to harm; to endanger
+3181	smile; to smile
+3182	to threaten
+3183	to surround; to encircle
+3184	as; to act as; to be
+3185	to maintain; to keep up
+3186	illegal; to break the law
+3187	to violate (a law, rule)
+3188	scarf
+3189	to revolve around; to focus on
+3190	to maintain; to repair
+3191	only; sole
+3192	tail
+3193	great; grand
+3194	stomach
+3195	to feed (an animal, baby etc.)
+3196	future
+3197	to be located at
+3198	position; place; location
+3199	warm
+3200	literature
+3201	stable; steady; to stabilize
+3202	questionnaire
+3203	to hold; to grasp
+3204	bedroom
+3205	to shake hands
+3206	unrelated; irrelevant
+3207	helpless; to have no choice
+3208	countless; numberless
+3209	unlimited; boundless
+3210	invalid; ineffective
+3211	dance; dancing
+3212	martial arts
+3213	stage (theater); arena
+3214	multicolored; every color
+3215	fog; mist
+3216	(consumer) prices
+3217	physics
+3218	goods; articles; items
+3219	property; real estate
+3220	matter; substance; material
+3221	Western food
+3222	drinking straw
+3223	to absorb; to take in
+3224	suit (business attire)
+3225	play; show; drama
+3226	department; faculty
+3227	detail; particulars
+3228	drama; theater; play
+3229	system; systematic
+3230	to download
+3231	in succession; one after another
+3232	advanced; cutting-edge
+3233	idle; free; at leisure
+3234	to seem; to appear
+3235	clearly; obviously
+3236	to show; to display
+3237	county
+3238	the scene; on-site
+3239	modern; modern times
+3240	modernization; to modernize
+3241	route; line; circuit
+3242	reality; real; realistic
+3243	phenomenon
+3244	to restrict; restriction; limit
+3245	current situation; status quo
+3246	countryside; hometown; township
+3247	to get along (with sb)
+3248	countryside; village
+3249	quite; fairly; equivalent to
+3250	relative; relatively; opposite
+3251	related; relevant
+3252	similar; alike
+3253	to miss (sb/sth)
+3254	noise; sound
+3255	to enjoy; pleasure
+3256	to imagine; imagination
+3257	photo album
+3258	project; item; event
+3259	eraser; rubber
+3260	upward; to strive to improve
+3261	symbol; to symbolize
+3262	to consume; to spend
+3263	consumer
+3264	to digest; to absorb
+3265	negative; passive
+3266	sales volume
+3267	to disappear
+3268	to sell; sales
+3269	Miss; young lady
+3270	small-scale; small-sized
+3271	less than (<)
+3272	efficiency
+3273	slanted; tilted
+3274	agreement; pact
+3275	to write; writing
+3276	groom (at a wedding)
+3277	psychology; mentality
+3278	bride
+3279	newcomer; new recruit
+3280	to appreciate; to enjoy
+3281	mindset; attitude
+3282	new type; new kind
+3283	envelope
+3284	to trust
+3285	credit; trustworthiness
+3286	itinerary; journey
+3287	to form; to take shape
+3288	action; to act
+3289	pedestrian
+3290	to describe
+3291	form; format
+3292	situation; circumstances
+3293	to travel; to drive (vehicles)
+3294	behavior; conduct
+3295	image; figure; vivid
+3296	shape; form
+3297	to walk
+3298	lucky; fortunate
+3299	nature; character (of a thing)
+3300	to revise; to modify
+3301	to build; to construct
+3302	leisure; relaxation
+3303	to need; to require
+3304	need; demand
+3305	open-minded; humble
+3306	to announce; to declare
+3307	to publicize; propaganda
+3308	athlete; contestant
+3309	course credit
+3310	academic subject; discipline
+3311	educational background
+3312	academic year
+3313	academic; scholarly
+3314	scholar
+3315	ice cream bar; popsicle
+3316	to inquire; to ask
+3317	to look for; to seek
+3318	to train; training
+3319	rapid; fast
+3320	ah! (expresses surprise)
+3321	deposit; down payment
+3322	lucky money (New Year gift)
+3323	duck
+3324	tooth
+3325	along; edge
+3326	to extend; to prolong
+3327	research and development
+3328	serious; solemn
+3329	to research and develop
+3330	eye
+3331	to give a speech; lecture
+3332	tear; teardrop
+3333	balcony; porch
+3334	style; type
+3335	waist
+3336	to shake; to rock
+3337	to bite
+3338	otherwise; or else
+3339	if it weren't for
+3340	medicine; medication
+3341	medicine; medication
+3342	nighttime; at night
+3343	night market
+3344	business; professional work
+3345	spare-time; amateur
+3346	basis; according to
+3347	to rely on; to depend on
+3348	medical treatment
+3349	still; as before
+3350	medicine; medical science
+3351	to move; to shift
+3352	one-time; disposable
+3353	generation
+3354	once (something happens)
+3355	to move; mobile
+3356	regret; to regret
+3357	the whole way; all along
+3358	have a good trip! (idiom)
+3359	question; doubt
+3360	consistent; unanimous
+3361	second in a list; letter B
+3362	in order to; by means of
+3363	and; as well as
+3364	since (a point in time)
+3365	hundred million
+3366	consciousness; to realize
+3367	unexpected; accident
+3368	to mean; to imply
+3369	duty; obligation
+3370	meaning; significance
+3371	therefore; as a result
+3372	volume (of sound)
+3373	factor; element
+3374	to introduce (from elsewhere)
+3375	food and drink; diet
+3376	to print; printing
+3377	should; ought to
+3378	to welcome; to greet
+3379	to welcome; to greet
+3380	nutrition
+3381	to do business; to trade
+3382	film; movie
+3383	movies and TV
+3384	hard; stiff
+3385	to deal with; to respond
+3386	hardware
+3387	to apply; application
+3388	to hug; to embrace
+3389	to have; to possess
+3390	courage
+3391	usage; how to use it
+3392	user; customer
+3393	to exert effort; use force
+3394	supplies; goods
+3395	use; application
+3396	discounted; preferential
+3397	long-standing (history)
+3398	fine; first-rate
+3399	graceful; elegant
+3400	advantage; superiority
+3401	excellent quality
+3402	from this; hereby
+3403	to mail; to send by post
+3404	post office
+3405	to go sightseeing; to tour
+3406	postage stamp
+3407	fried dough stick (food)
+3408	to hesitate
+3409	harmful
+3410	powerful; forceful
+3411	advantageous; favorable
+3412	limited; finite
+3413	beneficial; useful
+3414	to help; to contribute to
+3415	kindergarten
+3416	entertainment; to entertain
+3417	tone (of speech)
+3418	rainwater; rainfall
+3419	Chinese (school subject)
+3420	voice; pronunciation
+3421	forecast
+3422	to predict; to forecast
+3423	to book ahead; to reserve
+3424	to prevent; to guard against
+3425	to estimate; to predict
+3426	corn; maize
+3427	to make an appointment
+3428	original; former
+3429	round; circle
+3430	original; former
+3431	New Year's Day
+3432	staff; employee
+3433	principle
+3434	to wish; to be willing
+3435	wish; desire
+3436	to agree on; to arrange
+3437	to transport; fortune
+3438	shipping fee; freight
+3439	luck
+3440	to transport; transportation
+3441	to use; to apply
+3442	to be present; on the scene
+3443	to care about; to mind
+3444	included; among them
+3445	online
+3446	to lie in; to depend on
+3447	to approve; to endorse
+3448	terrible; in a bad state
+3449	terrible; too bad
+3450	early period; early stage
+3451	sooner or later
+3452	long ago; for a long time
+3453	to make; to build
+3454	to cause; to bring about
+3455	to increase; to add to
+3456	to enhance; to promote
+3457	to strengthen; to increase
+3458	to give as a gift
+3459	to give as a gift
+3460	to deep-fry
+3461	to pick (fruit, flowers)
+3462	narrow
+3463	to exhibit; on display
+3464	to unfold; to launch
+3465	exhibition; to exhibit
+3466	to display; to show
+3467	to reveal; to unfold
+3468	to occupy; to take up
+3469	platform (train station)
+3470	busy (phone line)
+3471	to rise (prices, water)
+3472	to rise in price
+3473	applause
+3474	to master; to grasp
+3475	account; username
+3476	account (bank, online)
+3477	to catch a cold
+3478	to convene (a meeting)
+3479	discount
+3480	philosophy
+3481	sincere; genuine
+3482	to target; aimed at
+3483	precious
+3484	true; real
+3485	to treasure; to cherish
+3486	to diagnose
+3487	classifier for a burst, spell
+3488	to strive for; to argue
+3489	to strive for; to fight for
+3490	neat; tidy
+3491	the whole; overall
+3492	a whole; a full amount
+3493	to earn (money)
+3494	government
+3495	evidence; proof
+3496	just as; precisely as
+3497	certificate
+3498	politics; political
+3499	classifier for pens and guns
+3500	well-known; famous
+3501	straight; frank
+3502	to livestream; live broadcast
+3503	workplace
+3504	employee; staff
+3505	to carry out; to implement
+3506	to stop
+3507	to guide; to instruct
+3508	to; until
+3509	to govern; to treat illness
+3510	to work out; to formulate
+3511	to draw up; to formulate
+3512	system; institution
+3513	wisdom
+3514	so far; until now
+3515	to treat illness; therapy
+3516	smart; intelligent (device)
+3517	volunteer
+3518	to manufacture; to make
+3519	to make; to produce
+3520	China; Chinese (formal term)
+3521	the Chinese nation
+3522	intermediate level
+3523	agency; intermediary
+3524	mid-term; middle period
+3525	Chinese and foreign
+3526	center
+3527	traditional Chinese medicine
+3528	Chinese medicine; TCM doctor
+3529	kind; type; category
+3530	seed
+3531	major; significant
+3532	numerous
+3533	weight
+3534	to plant; to grow
+3535	anniversary
+3536	pig
+3537	step by step
+3538	gradually
+3539	bamboo
+3540	to cook; to boil
+3541	to host; to preside over
+3542	proactive; own initiative
+3543	subjective
+3544	owner; host
+3545	director; head
+3546	staple food
+3547	theme; topic
+3548	chairperson; chairman
+3549	to register; to enroll
+3550	housing
+3551	to stay; accommodation
+3552	address
+3553	to emphasize; to focus on
+3554	to grab; to catch
+3555	to grasp firmly; hurry up
+3556	expert; specialist
+3557	focused; attentive
+3558	to change; to transform
+3559	to pass on (a message)
+3560	to decorate; decoration
+3561	to renovate; to decorate
+3562	to bump into; to crash into
+3563	condition; situation
+3564	state; condition
+3565	to chase; to pursue
+3566	to pursue (a goal); to woo
+3567	qualifications
+3568	funds; capital
+3569	posture
+3570	to consult; to seek advice
+3571	resource
+3572	purple
+3573	children (sons and daughters)
+3574	since (a point in time)
+3575	automatic; automatically
+3576	self-aware; conscientious
+3577	letter (of the alphabet)
+3578	itself; oneself
+3579	free; freedom
+3580	comprehensive; to integrate
+3581	headquarters
+3582	altogether; in total
+3583	total; sum
+3584	overall; as a whole
+3585	president (of a country)
+3586	in short; in a word
+3587	rent
+3588	ethnic group; clan
+3589	enough; sufficient
+3590	to form; to make up
+3591	to combine; combination
+3592	to prevent; to block
+3593	to organize; organization
+3594	mouth
+3595	drunk; intoxicated
+3596	at first; initially
+3597	best; optimal
+3598	to respect; to revere
+3599	to abide by; to comply with
+3600	to make (a decision, choice)
+3601	bank; shore
+3602	case; example
+3603	to massage; massage
+3604	to hint; to suggest
+3605	expensive
+3606	in vain; for nothing
+3607	white-collar worker
+3608	to arrange; to display
+3609	to arrange; to set out
+3610	percentage point
+3611	general merchandise
+3612	to break free from; to shake off
+3613	to lose; to be defeated
+3614	to visit; to call on
+3615	to visit for New Year
+3616	edition; page (of a newspaper)
+3617	version; edition
+3618	to accompany; to go along with
+3619	to play the role of
+3620	role model; example
+3621	baseball
+3622	to take care of; to keep safe
+3623	health care
+3624	to keep warm
+3625	warranty; to guarantee repair
+3626	to guarantee; safeguard
+3627	to explode; to burst
+3628	to erupt; to break out
+3629	newspapers and periodicals
+3630	violence; force
+3631	to expose; to reveal
+3632	newspaper (company)
+3633	to explode; explosion
+3634	pessimistic
+3635	tragedy
+3636	sad; sorrowful
+3637	the North Pole; the Arctic
+3638	North America
+3639	passive
+3640	to be forced; to be compelled
+3641	vest; sleeveless top
+3642	spare; backup
+3643	to multiply; to increase greatly
+3644	to run; to dash
+3645	instinct
+3646	itself; in itself
+3647	native land; local
+3648	to force; to compel
+3649	example; analogy
+3650	proportion; specific gravity
+3651	to close; to shut
+3652	to avoid; to escape
+3653	required (course); compulsory
+3654	to compile; to edit; to make up
+3655	to edit; editor
+3656	to compile; to write
+3657	everywhere; all over
+3658	convenient and fast
+3659	to go bad; to deteriorate
+3660	soldier; troops
+3661	virus
+3662	to broadcast; to sow (seeds)
+3663	to sow seeds
+3664	expo; trade fair
+3665	weak; frail
+3666	neck
+3667	impatient
+3668	regardless of; in spite of
+3669	unexpectedly
+3670	unwell; indisposed
+3671	not likely to go so far as
+3672	to mend; to make up for
+3673	to catch; to capture
+3674	to compensate; to make up
+3675	to make up a missed lesson
+3676	to subsidize; subsidy
+3677	to take extra lessons; tutoring
+3678	cloth
+3679	uneasy; anxious
+3680	never; not yet
+3681	won't do; can that be?
+3682	must not; cannot
+3683	army; troops
+3684	can't help (doing sth)
+3685	from time to time
+3686	part (of the body)
+3687	not allowed; must not
+3688	unsuitable; inadvisable
+3689	endlessly (after a verb)
+3690	to arrange; to decorate
+3691	more than; not limited to
+3692	step; procedure
+3693	to guess; to speculate
+3694	property; assets
+3695	wealth; riches
+3696	talent (esp. artistic)
+3697	talent; ability
+3698	finance; financial affairs
+3699	property; belongings
+3700	material (that sth is made of)
+3701	to step on; to tread
+3702	to purchase; to procure
+3703	rainbow
+3704	to gather; to collect
+3705	to adopt (a suggestion)
+3706	lottery ticket
+3707	to exhibit at a trade show
+3708	disability; handicap
+3709	warehouse; storehouse
+3710	grassland; prairie
+3711	the side; to lean
+3712	to plan; to scheme
+3713	to measure; to survey
+3714	strategy; tactics
+3715	level; layer
+3716	aspect; level
+3717	fork; to cross
+3718	difference; discrepancy
+3719	electrical socket; outlet
+3720	to inquire; to check
+3721	to tear down; to demolish
+3722	to produce; output
+3723	place of origin
+3724	intestines
+3725	length; mishap
+3726	convention; routine
+3727	all year round
+3728	long-lived; longevity
+3729	room temperature
+3730	screening (of a film)
+3731	site; venue
+3732	venue; arena
+3733	occasion; situation
+3734	factory; manufacturer
+3735	scene; situation
+3736	scene; spectacle
+3737	manufacturer; producer
+3738	unobstructed; free-flowing
+3739	to sell well; bestselling
+3740	to copy; to plagiarize
+3741	to surpass; to exceed
+3742	dynasty
+3743	trend; current
+3744	damp; moist
+3745	to mock; to ridicule
+3746	to trade stocks
+3747	to quarrel; to argue
+3748	to withdraw; to retract
+3749	to revoke; to cancel
+3750	heavy; serious
+3751	while; taking advantage of
+3752	to prop up; to hold up
+3753	title; designation
+3754	to address (sb) as
+3755	to be called; to be known as
+3756	one tenth; unit of 10%
+3757	to ride (a vehicle); to multiply
+3758	to hold; to contain (food)
+3759	to undertake; to host
+3760	to punish; punishment
+3761	to close a deal
+3762	to promise; a commitment
+3763	countless; thousands upon thousands
+3764	to appear; to present itself
+3765	effect; result
+3766	honesty; trustworthiness
+3767	idiom; set phrase
+3768	town
+3769	lasting; enduring
+3770	to hold (a view, document)
+3771	Chinese foot; a ruler
+3772	size; dimensions
+3773	impulse; impulsive
+3774	to strike; to impact
+3775	substantial; to enrich
+3776	conflict; to clash
+3777	to worship; adoration
+3778	to rebuild
+3779	towards; strong (smell/taste)
+3780	to draw a prize; raffle
+3781	abstract
+3782	to worry
+3783	to prepare (for an event)
+3784	initial; preliminary
+3785	to appear; to come on stage
+3786	elementary
+3787	to leave the country
+3788	to exert effort; to help
+3789	well-known; to become famous
+3790	discrepancy; a difference
+3791	to show; to produce (a document)
+3792	to go on an outing
+3793	to stem from; out of
+3794	to remove; except (for)
+3795	unless; only if
+3796	to store; to stockpile
+3797	to penalize; to punish
+3798	to save money; savings
+3799	everywhere; in every way
+3800	to pass through; to cross
+3801	to pass on (a tradition)
+3802	to convey; to pass on
+3803	to infect; contagious
+3804	infectious disease
+3805	to teach; to pass on (skills)
+3806	to transmit (e.g. data)
+3807	fax
+3808	ship; vessel
+3809	skewer; string of (classifier)
+3810	window; (service) counter
+3811	to rush; to barge in
+3812	to found; to establish
+3813	to found; to establish
+3814	to establish; to found
+3815	creativity; creative idea
+3816	perpendicular; vertical
+3817	pure; simple
+3818	porcelain; chinaware
+3819	this moment; now
+3820	thorn; to stab
+3821	number of times; frequency
+3822	hurried; in a rush
+3823	hasty; hurried
+3824	never
+3825	to work (in a trade)
+3826	vinegar; jealousy (in love)
+3827	crisp; crunchy
+3828	fragile; frail
+3829	village
+3830	to store; storage
+3831	inch (Chinese unit)
+3832	setback; frustration
+3833	to put up; to take (a vehicle)
+3834	to pair up; to match
+3835	to reply; to respond
+3836	to deal with; to interact
+3837	to move (emotionally)
+3838	to strike; to crack down on
+3839	to fight; to scuffle
+3840	to clock in/out; to check in
+3841	to thunder
+3842	to create; to build
+3843	to fight a battle
+3844	minister (of a monarchy)
+3845	astounded; taken aback
+3846	the earth; mother earth
+3847	mostly; for the most part
+3848	generous; poised
+3849	substantially; by a large margin
+3850	everybody; all of us
+3851	ambassador
+3852	master; grandmaster
+3853	Oceania
+3854	roughly; approximately
+3855	foolish; blank (expression)
+3856	to wait; to treat (sb)
+3857	cost; price (fig.)
+3858	loan; to take out a loan
+3859	to act as agent; proxy
+3860	to lead; to guide
+3861	simple; naive
+3862	monotonous
+3863	to delay; to hold up
+3864	to worry; to be concerned
+3865	protein
+3866	to be born
+3867	on the spot
+3868	at that time; originally
+3869	the present era
+3870	nowadays; the present day
+3871	to sb's face; in person
+3872	right now; the present moment
+3873	to be elected
+3874	file; record; archive
+3875	that same day
+3876	island
+3877	to go bankrupt; to close down
+3878	to change buses or trains
+3879	mentor; academic advisor
+3880	morality; ethics
+3881	actually; contrary to expectation
+3882	all right!; that's enough!
+3883	to be able to (thanks to sth)
+3884	to learn (of); to find out
+3885	lantern
+3886	grade; rank
+3887	to drip; a drop (of liquid)
+3888	low-carbon
+3889	to arrive; to reach
+3890	to resist; resistance
+3891	authentic; genuine
+3892	regional; local (government)
+3893	terrain; topography
+3894	region; area
+3895	geology
+3896	to click (a link)
+3897	ceremony
+3898	to ignite; to light
+3899	typical; model example
+3900	electric rice cooker
+3901	electric power
+3902	store; shop
+3903	power source
+3904	to hang; to suspend
+3905	to transfer; to mobilize
+3906	to fish; to angle
+3907	to fall; to tumble
+3908	top; classifier for hats
+3909	order (for goods)
+3910	to get engaged
+3911	to set a price; price
+3912	timed; to set a time
+3913	to position; positioning
+3914	definition; to define
+3915	custom-made; to order custom
+3916	classifier for buildings
+3917	motive; motivation
+3918	motive power; motivation
+3919	anime and comics
+3920	trend; movement; dynamic
+3921	pleasant to listen to
+3922	to tease; funny; amusing
+3923	to struggle; a struggle
+3924	city; metropolis
+3925	poison; poisonous
+3926	to cross (a river); to ferry
+3927	to carry; to hold level
+3928	a shortage
+3929	symmetrical
+3930	to join up; to dock
+3931	to resist; to confront
+3932	to oppose; opposing
+3933	to correspond; corresponding
+3934	to squat; to crouch
+3935	immediately; suddenly
+3936	multitalented
+3937	thanks to; luckily
+3938	multimedia
+3939	superfluous; unnecessary
+3940	multiple; diverse
+3941	to seize; to snatch
+3942	to seize; to capture
+3943	to hide; to avoid; to dodge
+3944	nauseated; disgusting
+3945	vile; very bad
+3946	pediatrics
+3947	earring
+3948	carbon dioxide
+3949	to fall ill; to get sick
+3950	to worry; to fret
+3951	to generate electricity
+3952	to launch; to mobilize
+3953	to issue; to grant
+3954	to shine; to glow
+3955	receipt; invoice
+3956	to publish; to release
+3957	to become inflamed
+3958	to grow; to develop (body)
+3959	legal; statutory
+3960	judge (in court)
+3961	laws and regulations
+3962	classifier for efforts made
+3963	busy; bustling
+3964	every; any; all
+3965	to breed; to reproduce
+3966	feedback; to give feedback
+3967	to reflect on; to review
+3968	to violate; to commit a crime
+3969	all sides; every aspect
+3970	direction; bearing
+3971	dialect
+3972	to hinder; to obstruct
+3973	housing price
+3974	to prevent and treat disease
+3975	to interview; an interview
+3976	to enlarge; to magnify
+3977	to release (to fly)
+3978	rapidly; at high speed
+3979	fat; loose-fitting (clothes)
+3980	fat; obese
+3981	fertile (soil)
+3982	lung
+3983	pneumonia
+3984	to divide up work
+3985	to rank; to grade
+3986	in installments; by stages
+3987	scattered; to scatter
+3988	atmosphere; ambience
+3989	powder; pink
+3990	angry; furious
+3991	to seal off; to close
+3992	scenery; view
+3993	wind force; wind power
+3994	a bumper harvest
+3995	wind and rain
+3996	to dedicate; to devote
+3997	lady; madam; Mrs.
+3998	to obey; to be convinced
+3999	to float
+4000	to obey; to comply with
+4001	extent; range; margin
+4002	symbol; sign
+4003	welfare; benefits
+4004	to take (medicine)
+4005	to tutor; to coach
+4006	to assist; auxiliary
+4007	deputy; vice-; secondary
+4008	to cover
+4009	attachment; accessory
+4010	negative
+4011	prosperous; well-off
+4012	to bestow; to grant
+4013	should; probably; that
+4014	to adapt (a story, etc.)
+4015	to transform; to reform
+4016	probability
+4017	liver
+4018	straightforward; simply
+4019	awkward; embarrassed
+4020	dry; arid
+4021	to disturb; to interfere
+4022	dry (weather, skin, etc.)
+4023	to be grateful
+4024	hurriedly; hastily
+4025	to infect; infection
+4026	impressions; thoughts
+4027	fountain pen
+4028	port; harbor
+4029	post; job position
+4030	high-rise; high-level
+4031	excellent; superb
+4032	advanced; higher (education)
+4033	high-end
+4034	peak; summit
+4035	noble; lofty
+4036	an expert; a master
+4037	high technology
+4038	plateau
+4039	manuscript; article
+4040	draft; manuscript
+4041	to cut
+4042	to sing
+4043	next door
+4044	revolution; revolutionary
+4045	an individual
+4046	to give; to grant
+4047	in front (of); nearby
+4048	to follow
+4049	to track; to follow
+4050	public; fair; just
+4051	palace
+4052	public security; police
+4053	construction site
+4054	time; effort; skill
+4055	announcement; to announce
+4056	to supply; to provide
+4057	to attack
+4058	open; public; to disclose
+4059	citizen
+4060	generally recognized
+4061	effect; efficacy
+4062	work procedure; process
+4063	public welfare
+4064	to supply; to provide
+4065	AD (of the calendar era)
+4066	just; fair
+4067	the public
+4068	princess
+4069	to strengthen; to consolidate
+4070	to total; to add up to
+4071	ditch; gutter
+4072	structure; composition
+4073	lonely; solitary
+4074	aunt (father's sister)
+4075	classical
+4076	historic site
+4077	stock; share (finance)
+4078	people of ancient times
+4079	the stock market
+4080	bone
+4081	to inspire; to encourage
+4082	to look after; to consider
+4083	a solid (physical state)
+4084	adviser; consultant
+4085	malfunction; breakdown
+4086	to turn (a corner); to kidnap
+4087	to turn a corner
+4088	government official
+4089	to care for; to cherish
+4090	official; government-issued
+4091	to sightsee; tourism
+4092	to care for; concern
+4093	to be related; connection
+4094	to view; to admire (scenery)
+4095	an official
+4096	pipeline; tubing
+4097	can; jar; pot
+4098	wide; vast
+4099	to return; to belong to
+4100	standard; norm; to regulate
+4101	a plan; to plan
+4102	to return (something)
+4103	rules; well-behaved
+4104	track; orbit
+4105	to kneel
+4106	precious; valuable
+4107	a stick; a rod
+4108	national treasure
+4109	domestically made
+4110	national anthem
+4111	national flag
+4112	a country's conditions
+4113	king
+4114	transition; interim
+4115	afterward; after that
+4116	outdated; old-fashioned
+4117	at home and abroad
+4118	seacoast; coast
+4119	altitude (above sea level)
+4120	sea surface
+4121	sea area; waters
+4122	to harm; harm
+4123	cold winter
+4124	meaning; implication
+4125	rare; rarely seen
+4126	a drought
+4127	aviation
+4128	not at all
+4129	to have none at all
+4130	millimeter
+4131	milliliter
+4132	very; extremely (emphatic)
+4133	a favorable impression
+4134	with great difficulty
+4135	hospitable
+4136	eager to learn; studious
+4137	to call on; to appeal to
+4138	to merge; to annex
+4139	to synthesize; synthetic
+4140	peace; peaceful
+4141	harmonious
+4142	core; center
+4143	hey!
+4144	dark; darkness
+4145	trace; mark
+4146	ruthless; harsh
+4147	to hate
+4148	horizontal; across
+4149	to weigh up; to consider
+4150	grand; great in scale
+4151	flood
+4152	descendants; later generations
+4153	later period; late stage
+4154	later generations
+4155	to retreat; to back away
+4156	the latter
+4157	to overlook; to ignore
+4158	a pot; a kettle
+4159	beard; mustache
+4160	classifier for households
+4161	to help each other
+4162	a flower
+4163	peanut
+4164	to ice-skate
+4165	to slide; to glide
+4166	to ski
+4167	to draw (a line); to allocate
+4168	to divide up; to partition
+4169	fossil
+4170	microphone
+4171	to put on makeup
+4172	to think of; to harbor feelings
+4173	to miss; to reminisce about
+4174	to be pregnant
+4175	happy; joyous
+4176	ring; to surround
+4177	to restore; to revert
+4178	to suffer from an illness
+4179	to fantasize; a fantasy
+4180	a patient (medical)
+4181	yellow
+4182	emperor
+4183	dust
+4184	discouraged; to lose heart
+4185	to repay; to reciprocate
+4186	to look back; to review
+4187	to turn around; later
+4188	to remit (money)
+4189	to report to a superior
+4190	to draw; to paint
+4191	to meet with (formally)
+4192	to remit money; remittance
+4193	marriage
+4194	to mix; to muddle along
+4195	to mix; to blend
+4196	chaotic; disorderly
+4197	energy; vitality
+4198	active; lively
+4199	a match (for fire)
+4200	a fire (disaster)
+4201	currency; money
+4202	truck; freight van
+4203	to defeat; to beat
+4204	base (of operations)
+4205	motor vehicle
+4206	hungry; starving
+4207	to arouse; to stimulate
+4208	fund (financial)
+4209	to motivate; to encourage
+4210	passion; fervor
+4211	machine; mechanical
+4212	gene
+4213	opportunity; lucky break
+4214	mechanism (system, process)
+4215	even if; even though
+4216	extreme
+4217	to give first aid
+4218	eager; impatient
+4219	group; conglomerate
+4220	extremely
+4221	lucky; auspicious
+4222	to inherit; to carry on
+4223	third place; bronze medal
+4224	discipline (rules of conduct)
+4225	lonely; lonesome
+4226	skill; technique
+4227	craft; artistic skill
+4228	to clip; to squeeze between
+4229	to double
+4230	everyday family life
+4231	every household
+4232	to intensify; to worsen
+4233	home; residence
+4234	family member; dependent
+4235	to apply an action to sth
+4236	home; homeland
+4237	to worsen; to intensify
+4238	to suppose; hypothesis
+4239	to marry (of a woman)
+4240	pointed; sharp
+4241	shoulder
+4242	to monitor
+4243	firm; resolute
+4244	to supervise
+4245	sturdy; solid
+4246	firm; resolute
+4247	difficult; hard
+4248	hardship; arduous
+4249	hard; solid
+4250	part-time job; to moonlight
+4251	to detect; to test
+4252	to simplify
+4253	brief introduction; summary
+4254	to weaken; to diminish
+4255	to reduce pressure; to relax
+4256	to inspect; to test
+4257	sword
+4258	arrow
+4259	to appraise; to authenticate
+4260	gap; interval
+4261	indirect
+4262	sound; robust
+4263	building; structure
+4264	general (military rank)
+4265	to explain
+4266	medal (prize)
+4267	prize; award
+4268	paste; sauce; jam
+4269	soy sauce
+4270	adhesive tape
+4271	focal point; focus
+4272	social interaction
+4273	anxious; worried
+4274	glue
+4275	to chat; to converse
+4276	outskirts
+4277	corner; nook
+4278	footprint
+4279	relatively; fairly
+4280	lesson; to lecture sb
+4281	to bear fruit (of a plant)
+4282	to bear fruit
+4283	one after another
+4284	sturdy; strong
+4285	street
+4286	outstanding; distinguished
+4287	to conserve energy
+4288	ending; conclusion
+4289	up to (a certain date)
+4290	to end; to close (deadline)
+4291	rhythm; tempo
+4292	to untie; to solve
+4293	to answer; to solve
+4294	to interpret; to decode
+4295	to liberate; liberation
+4296	to explain; to narrate
+4297	to learn from (others)
+4298	(finger) ring
+4299	with the help of
+4300	sum of money; amount
+4301	gold medal
+4302	money
+4303	finance; banking
+4304	metal
+4305	gold
+4306	to use up; to exhaust
+4307	and then; and further
+4308	progress; rate of progress
+4309	to evolve; evolution
+4310	recently; lately
+4311	nearsighted; myopic
+4312	to make progress
+4313	exquisite; fine
+4314	accurate; precise
+4315	astonishing
+4316	to do business
+4317	to master; to be proficient
+4318	meticulous; with care
+4319	amazed; astonished
+4320	delicate; exquisite
+4321	precise; accurate
+4322	a well (for water)
+4323	to warn
+4324	landscape; scenery
+4325	scene; sight
+4326	cervical vertebra (neck)
+4327	net (as in net income)
+4328	to compete; contest
+4329	camera lens; shot
+4330	dispute
+4331	to correct
+4332	alcohol (ethanol)
+4333	drinks (on a menu)
+4334	to attend school
+4335	maternal uncle
+4336	Help!; to save a life
+4337	even if
+4338	to rescue; to help
+4339	to provide disaster relief
+4340	to help; aid
+4341	classifier for game rounds
+4342	situation; state of affairs
+4343	chrysanthemum
+4344	situation; state of affairs
+4345	to limit; to confine
+4346	action; move
+4347	script; screenplay
+4348	to gather; assemble
+4349	club
+4350	intense; violent
+4351	to donate money; donation
+4352	to donate
+4353	to roll up; a roll
+4354	volume; examination paper
+4355	policy decision
+4356	to despair; desperate
+4357	army; troops
+4358	soldier; military personnel
+4359	even; evenly distributed
+4360	card
+4361	to start; to found
+4362	switch (power, valve)
+4363	to start; to open
+4364	to open (a business)
+4365	beginning; to start
+4366	to chop; to cut down
+4367	to look down on
+4368	to regard; to view
+4369	to think highly of
+4370	to have high hopes for
+4371	to seem; to appear
+4372	to take a liking to
+4373	to value; regard highly
+4374	to recover (health)
+4375	to inspect; to investigate
+4376	archaeology
+4377	to assess; to evaluate
+4378	to test; trial
+4379	branch of study; department
+4380	science fiction
+4381	academic subject
+4382	science popularization
+4383	tasty; delicious
+4384	pitiful; to pity
+4385	to yearn for; to long for
+4386	feasible
+4387	bus; coach
+4388	research topic; issue
+4389	willing; to agree
+4390	fear; afraid
+4391	vacant land; open space
+4392	free; spare time
+4393	mouthfeel; texture
+4394	slogan
+4395	mouth; oral cavity
+4396	oral; verbal
+4397	to deduct; button
+4398	dull; tedious
+4399	cool; awesome
+4400	to praise; to boast
+4401	to praise; to compliment
+4402	exaggerated; to exaggerate
+4403	accounting; accountant
+4404	quick; fast
+4405	funds; classifier for models
+4406	style; design
+4407	financial loss; deficit
+4408	to trouble; to perplex
+4409	to expand; to extend
+4410	to leave behind; to miss
+4411	chili pepper
+4412	particle marking exclamation
+4413	to approach; to arrive
+4414	to have dealings with
+4415	to blame (someone)
+4416	to block; to stop
+4417	railing; fence; column
+4418	orchid
+4419	rotten; mushy
+4420	wolf
+4421	to read aloud
+4422	prison
+4423	labor force; manpower
+4424	honest; well-behaved
+4425	mouse; rat
+4426	elderly lady
+4427	willing; happy to (do)
+4428	thunder
+4429	category; classification
+4430	reason; to manage
+4431	to manage money
+4432	science (school subject)
+4433	concept; philosophy
+4434	rational; reason
+4435	to stand; to establish
+4436	classifier for small grains
+4437	standpoint; position
+4438	strength; intensity
+4439	to go through; to experience
+4440	over the years
+4441	exception
+4442	interest (on money)
+4443	United Nations
+4444	to connect online
+4445	to associate (in thought)
+4446	to link; hyperlink
+4447	both shores; both sides
+4448	the two poles
+4449	to dry (in the air)
+4450	material; stuff
+4451	to expect; to guess
+4452	to pour; to drench
+4453	early morning (before dawn)
+4454	process; workflow
+4455	to flow; to circulate
+4456	web browser
+4457	flow; (data) traffic
+4458	to flow into
+4459	to circulate (goods, money)
+4460	corridor; hallway
+4461	to reveal; to show
+4462	loophole; gap
+4463	to show; to reveal
+4464	distance traveled; route
+4465	road conditions
+4466	road surface
+4467	to record video; video
+4468	to hire; to employ
+4469	to record (video or audio)
+4470	journey; trip
+4471	journey; trip
+4472	to fulfill; to carry out
+4473	suffix meaning rate; ratio
+4474	to green (with plants)
+4475	wheel; turn; round
+4476	steamship
+4477	to take turns
+4478	wheelchair
+4479	wheel
+4480	forum (discussion)
+4481	to land; to touch down
+4482	to fall behind; backward
+4483	careless; sloppy
+4484	dock; wharf
+4485	ant
+4486	particle stating the obvious
+4487	to bury
+4488	to stride; to step
+4489	microphone
+4490	very long; endless
+4491	comic; cartoon
+4492	blind person
+4493	to emit; to risk
+4494	to take risks; adventure
+4495	trade (commerce)
+4496	coal
+4497	plum blossom
+4498	eyebrow
+4499	attractive; pleasing to eye
+4500	to make up for; compensate
+4501	fascinating; charming
+4502	dense; close-packed
+4503	density
+4504	bee
+4505	dense; crowded together
+4506	cotton
+4507	to exempt; to avoid
+4508	reluctant; forced
+4509	tax-free; duty-free
+4510	immune; immunity
+4511	face (the body part)
+4512	flour
+4513	face; social standing
+4514	to depict; to describe
+4515	to describe; to depict
+4516	clever; wonderful
+4517	to put out; to extinguish
+4518	folk song
+4519	folk, popular; non-governmental
+4520	folk custom
+4521	guesthouse; homestay
+4522	the public; the people
+4523	democracy; democratic
+4524	quota; number of places
+4525	bright; shining
+4526	clearly; obviously
+4527	reputation; fame
+4528	scenic spot; famous site
+4529	order; command
+4530	to name; to designate
+4531	to imitate; to copy
+4532	to simulate; simulated
+4533	fashion model
+4534	motorcycle
+4535	model (small replica)
+4536	silently; without speaking
+4537	appearance; look
+4538	mother; female (animal)
+4539	native language; mother tongue
+4540	wood; timber
+4541	table of contents; catalog
+4542	powdered milk
+4543	a difficulty; sticking point
+4544	Antarctica
+4545	South America
+4546	hard to avoid; inevitable
+4547	head; skull
+4548	brain; mind
+4549	connotation; inner meaning
+4550	internal medicine
+4551	inside and outside
+4552	underwear
+4553	energy
+4554	energy source
+4555	mud
+4556	year (fiscal/school); annual
+4557	year-end; end of the year
+4558	to study; to attend school
+4559	to twist; to sprain
+4560	agricultural produce
+4561	thick; strong (smell, interest)
+4562	farmland
+4563	warm; to warm up
+4564	central heating; heater
+4565	idol (celebrity)
+4566	to eliminate; to rule out
+4567	to emit; to discharge
+4568	to rehearse
+4569	to rank; ranking
+4570	plate, tray; classifier for dishes
+4571	to hope for; to long for
+4572	huge; enormous
+4573	to throw; to toss
+4574	bubble; to soak
+4575	to compensate
+4576	to accompany
+4577	to cultivate; to breed
+4578	to equip; equipment
+4579	to admire
+4580	matching; to complete a set
+4581	to spray; to spurt out
+4582	to hold with both hands
+4583	to collide; collision
+4584	to drape over one's shoulders
+4585	skin, peel; leather
+4586	tired; fatigued
+4587	a moment; a short while
+4588	one-sided
+4589	swindler; con artist
+4590	to float; to flutter
+4591	to float; to drift
+4592	channel (TV or radio)
+4593	frequent
+4594	poor; impoverished
+4595	frequency
+4596	to taste; to sample
+4597	equal; equality
+4598	ordinary; commonplace
+4599	square (math or area unit)
+4600	square meter
+4601	to evaluate; to assess
+4602	to comment; commentary
+4603	to select (by vote)
+4604	slope
+4605	to splash; to spill
+4606	to go bankrupt
+4607	urgent; pressing
+4608	to pounce on; to throw oneself at
+4609	to spread out; to lay
+4610	to extinguish; to stamp out
+4611	plain; simple (not fancy)
+4612	to deceive; to cheat
+4613	to hope for; expectation
+4614	deadline; time limit
+4615	in the meantime; meanwhile
+4616	complete; all there
+4617	chess piece
+4618	at first; originally
+4619	starting point
+4620	to start (a machine); to launch
+4621	to inspire; to enlighten
+4622	a lesson learned; insight
+4623	public notice; announcement
+4624	origin; to originate
+4625	atmosphere; mood
+4626	gas
+4627	smell; odor
+4628	temperament; personal aura
+4629	appropriate; fitting
+4630	just right; as it happens
+4631	exactly; precisely
+4632	to lead (by hand or rope)
+4633	every household; all families
+4634	modest; humble
+4635	prospects; outlook
+4636	potential
+4637	early stage; earlier period
+4638	premise; precondition
+4639	the former (one named first)
+4640	gun; firearm
+4641	wall
+4642	to strengthen; to intensify
+4643	strong; sturdy
+4644	to force; to compel
+4645	to look; to take a look
+4646	bridge
+4647	clever; ingenious
+4648	practical; realistic
+4649	close; intimate
+4650	relatives; kin
+4651	hardworking; diligent
+4652	clear; pure; clean
+4653	early morning
+4654	youth
+4655	puberty; adolescence
+4656	light; not greasy (food)
+4657	clean
+4658	to clear up; to tidy up
+4659	to sweep; to clean up
+4660	to listen carefully
+4661	to wash; to rinse
+4662	clear; distinct
+4663	tendency; to tend toward
+4664	clear-headed; awake
+4665	plot; storyline
+4666	sunny; clear (weather)
+4667	situation; circumstances
+4668	to seek; to ask for
+4669	to propose marriage
+4670	to call for help
+4671	to look for a job
+4672	to ask for help
+4673	to distinguish; to tell apart
+4674	channel; means (of doing sth)
+4675	tune; song
+4676	to marry (a woman)
+4677	to replace; to supersede
+4678	fun; interest
+4679	circle; ring; loop
+4680	the whole way; whole process
+4681	power; authority
+4682	voucher, coupon; ticket
+4683	defect; flaw
+4684	to establish
+4685	the masses; the public
+4686	fuel
+4687	to dye; to catch (a disease)
+4688	hot topic; hotspot
+4689	level of heat; popularity
+4690	popular; trending
+4691	water heater
+4692	hotline
+4693	heated discussion; hot debate
+4694	artificial intelligence (AI)
+4695	other people; oneself (colloq.)
+4696	per capita; per person
+4697	huge crowd; packed with people
+4698	person; public figure
+4699	personnel; human resources
+4700	artificial; man-made
+4701	sidewalk
+4702	to endure; to bear
+4703	to admit a mistake
+4704	to conclude firmly
+4705	to approve; approval
+4706	to identify with; to endorse
+4707	cognition; awareness
+4708	still; as before
+4709	in the future; later on
+4710	the other day; recently
+4711	day and night
+4712	increasingly; more each day
+4713	to blend; to fuse together
+4714	to melt; to thaw
+4715	capacity; volume
+4716	to blend into; to integrate
+4717	honor; glory
+4718	soft
+4719	to enter a country
+4720	basics; intro to a subject
+4721	to be selected
+4722	weak point; weakness
+4723	to scatter; to sprinkle
+4724	to stuff in; to plug up
+4725	sporting event; competition
+4726	scattered; loose
+4727	prose
+4728	to break up; to disperse
+4729	to give off; to distribute
+4730	throat; voice
+4731	to lose (rights, ability)
+4732	to scan
+4733	to kill
+4734	to brake; a brake
+4735	shark
+4736	to filter; to screen
+4737	hilltop; summit
+4738	mountain peak
+4739	hillside
+4740	to flash; to dodge quickly
+4741	lightning
+4742	classifier for doors, windows
+4743	trademark; logo
+4744	wound; cut
+4745	casualties
+4746	wounded person; casualty
+4747	to be fooled; to be duped
+4748	superiors; higher-ups
+4749	to strive to improve; ambitious
+4750	to hit the market; to go public
+4751	aforementioned; above-mentioned
+4752	to take the stage; to come to power
+4753	first ten days of a month
+4754	child; children
+4755	tongue
+4756	agency; organization
+4757	to shoot; to fire (a weapon)
+4758	to involve; to concern
+4759	to shoot; to fire (a gun)
+4760	to film; to videotape
+4761	to imagine; to envisage
+4762	webcam; security camera
+4763	body and mind
+4764	late at night
+4765	god, spirit; amazing
+4766	nerve; mental state
+4767	magical; amazing
+4768	aesthetic sense; taste
+4769	liter (unit of volume)
+4770	to generate; to form
+4771	tone (of voice or a syllable)
+4772	vitality
+4773	ecology; ecosystem
+4774	to advance to the next school
+4775	remaining; surplus
+4776	poetry; verse
+4777	humidity
+4778	master (teacher or craftsman)
+4779	poetry
+4780	lion
+4781	to know; to recognize
+4782	to pick up (off the ground)
+4783	to identify; to recognize
+4784	time; days (of one's life)
+4785	the truth; truthful words
+4786	practical; good value
+4787	the right moment; opportunity
+4788	fashion; trendy
+4789	in real time
+4790	speed per hour
+4791	oil; petroleum
+4792	appetite
+4793	essence; substance
+4794	complete; through and through
+4795	to exert all one's strength
+4796	soldier
+4797	moderate; appropriate
+4798	to demonstrate; to show how
+4799	to release; to set free
+4800	after the fact; in hindsight
+4801	vision; sight
+4802	power; influence
+4803	eyesight
+4804	to attempt; to try
+4805	affairs; business
+4806	item; matter
+4807	suitable; appropriate
+4808	to collect; to store away
+4809	to acquire; to buy up
+4810	to collect; to receive
+4811	earnings; profit
+4812	arm
+4813	technique; skill
+4814	gesture
+4815	most important; primary
+4816	life span; lifetime
+4817	to be hit by disaster
+4818	to output; to export
+4819	painting and calligraphy
+4820	books
+4821	written; in writing
+4822	to transport; to convey
+4823	to write
+4824	to belong to
+4825	potato chips
+4826	vertical; to stand upright
+4827	to establish; to set up
+4828	amount; number
+4829	to digitize
+4830	aging; old and frail
+4831	to lead; to command
+4832	to take the lead; first
+4833	rice (paddy)
+4834	reservoir
+4835	stream; current
+4836	water surface
+4837	cement
+4838	instant; moment
+4839	train of thought
+4840	to miss; to long for
+4841	to die; death
+4842	loose; to relax
+4843	classifier for ships
+4844	to gather; to collect
+4845	to mold; to shape (a character)
+4846	quality; caliber (of a person)
+4847	forget it; let it go
+4848	considered to be; finally
+4849	although
+4850	age (in years)
+4851	years; time (passing)
+4852	to damage
+4853	to harm; to injure
+4854	particle marking 'that which'
+4855	steady; at ease; secure
+4856	pagoda; tower
+4857	typhoon
+4858	billiards; pool
+4859	outer space
+4860	solar energy
+4861	to discuss; to talk about
+4862	to negotiate; negotiation
+4863	flexibility; elasticity
+4864	to explore
+4865	to explore; to discuss
+4866	glutinous rice balls (dessert)
+4867	candy
+4868	scalding hot; to scald
+4869	to fish out (of a pocket)
+4870	to escape; to flee
+4871	to flee; to run away
+4872	naughty; mischievous
+4873	to eliminate; to phase out
+4874	set meal; package deal
+4875	especially; specially
+4876	special skill; strong point
+4877	specially; for a special purpose
+4878	specific; particular
+4879	characteristic; property
+4880	specially; on purpose
+4881	subject matter
+4882	to withdraw; to extract
+4883	to prompt; to remind
+4884	gymnastics
+4885	volume (of space)
+4886	system
+4887	to add
+4888	genius; talent
+4889	to add
+4890	natural
+4891	natural gas
+4892	astronomy
+4893	the whole world; realm
+4894	naive; innocent
+4895	field (farmland)
+4896	track and field
+4897	to adjust; to regulate
+4898	diving (sport); to dive
+4899	close to; intimate
+4900	obedient
+4901	sense of hearing
+4902	to listen to; to hear
+4903	passage; channel
+4904	to ventilate; airy
+4905	to talk on the phone
+4906	to communicate; to correspond
+4907	communications; news dispatch
+4908	universal; interchangeable
+4909	copper
+4910	companion
+4911	colleague; same trade
+4912	fairy tale
+4913	same kind; similar
+4914	bronze medal
+4915	delighted; thoroughly satisfying
+4916	to steal
+4917	secretly; stealthily
+4918	mind; brains
+4919	to vote
+4920	to file a complaint
+4921	to invest; investment
+4922	to penetrate; thoroughly
+4923	to pass through; via
+4924	to reveal; to disclose
+4925	transparent
+4926	to happen suddenly
+4927	to break through; breakthrough
+4928	design; pattern
+4929	chart; diagram
+4930	apprentice
+4931	way; means; channel
+4932	image; picture
+4933	to spit (out)
+4934	soil
+4935	to vomit; to throw up
+4936	to unite; united
+4937	group; organization
+4938	to have a family reunion
+4939	to guess; to speculate
+4940	to market; to promote (sales)
+4941	to implement; to carry out
+4942	tax refund; tax rebate
+4943	to swallow
+4944	to drag; to delay
+4945	to delay; to procrastinate
+4946	to check in (baggage/cargo)
+4947	to dig
+4948	wow! (exclamation)
+4949	baby; doll
+4950	crooked; askew
+4951	outward appearance
+4952	diplomacy
+4953	the outside world
+4954	surgery (medical)
+4955	foreign; external
+4956	nephew (sister's son)
+4957	curved; winding
+4958	tenacious; unyielding
+4959	all things; everything
+4960	prince
+4961	net; network
+4962	from now on
+4963	dealings; contact
+4964	previous years
+4965	to hope; to gaze afar
+4966	crisis
+4967	tiny; minute
+4968	to break the rules
+4969	to safeguard; to maintain
+4970	awkward; to make things difficult
+4971	the game of Go
+4972	lasting (a period of time)
+4973	vitamin
+4974	until (a point)
+4975	to feel wronged; grievance
+4976	to entrust; to commission
+4977	not yet
+4978	not necessarily
+4979	minor (under 18)
+4980	for this reason
+4981	why
+4982	sense of taste
+4983	appetite
+4984	mild; gentle
+4985	gentle and tender
+4986	file; document
+4987	stationery
+4988	liberal arts; humanities
+4989	civilization; civilized
+4990	well-known; famous
+4991	cultural relic
+4992	literature; reference material
+4993	literature and art
+4994	tortoise
+4995	sewage
+4996	not to matter; whatever
+4997	undoubtedly
+4998	weapon
+4999	mistake; error; to delay
+5000	to misunderstand; misunderstanding
+5001	object (physical)
+5002	to absorb; to draw (a lesson)
+5003	wife; daughter-in-law
+5004	custom; tradition
+5005	comedy
+5006	happy occasion; wedding
+5007	to wash up (face, teeth)
+5008	cell (biology)
+5009	bacteria; germ
+5010	series
+5011	Chinese opera
+5012	meticulous; careful
+5013	to scare; to frighten
+5014	to put in hard work
+5015	to place an order
+5016	summer camp
+5017	to go offline
+5018	last third of the month
+5019	vivid; distinct
+5020	before; previously
+5021	bright-colored; vivid
+5022	to dislike; to mind
+5023	to reveal; obvious
+5024	dangerous; danger
+5025	notable; significant
+5026	to limit; to restrict
+5027	thread; line; wire
+5028	existing; in stock
+5029	limit
+5030	goods in stock
+5031	to sink into; to fall into
+5032	clue; lead
+5033	to be limited to
+5034	to differ (by)
+5035	sausage
+5036	legend has it; handed down
+5037	equal
+5038	to be linked; connected
+5039	perfume
+5040	corresponding; relevant
+5041	necklace
+5042	Chinese chess
+5043	comic dialogue (crosstalk)
+5044	to yearn for; to long for
+5045	to eliminate; to remove
+5046	to disinfect
+5047	firefighting
+5048	to consume; to use up
+5049	to eliminate; to wipe out
+5050	wheat
+5051	stingy; petty
+5052	thief
+5053	smile (expression)
+5054	effect (scientific)
+5055	to rest; to take a break
+5056	to carry (with you)
+5057	association; society
+5058	to coordinate; harmonious
+5059	to assist
+5060	beloved; cherished
+5061	bottom of one's heart
+5062	new style; latest model
+5063	mind; soul; heart
+5064	new media (digital)
+5065	in one's mind; impression
+5066	renewable energy
+5067	salary; wage
+5068	to feel sorry for; to love dearly
+5069	emerging; up-and-coming
+5070	original; novel
+5071	wish; cherished desire
+5072	heart (organ)
+5073	to trust; to rely on
+5074	belief; conviction
+5075	to rise; to emerge
+5076	model; type (product)
+5077	shape; form
+5078	value for money
+5079	performance (of a product)
+5080	chest
+5081	to revise
+5082	to restore; to repair
+5083	sleeve
+5084	to allow; to permit
+5085	to narrate; to recount
+5086	to rotate; to spin
+5087	to select (the best)
+5088	to take as an elective
+5089	academic society; institute
+5090	academic degree
+5091	knowledge; learning
+5092	student; trainee
+5093	blood vessel
+5094	blood type
+5095	blood pressure
+5096	blood
+5097	to circulate; cycle
+5098	to seek; to look for
+5099	to compress
+5100	runner-up; second place
+5101	to flood; to submerge
+5102	to submerge; to drown out
+5103	strict; severe
+5104	coastal
+5105	bitterly cold
+5106	to strictly prohibit
+5107	strict; severe
+5108	to postpone; to delay
+5109	scorching hot (weather)
+5110	to extend; to stretch out
+5111	to discuss; to study
+5112	to continue; to last
+5113	words; speech
+5114	inflammation
+5115	vision; judgment; outlook
+5116	soon; to watch it happen
+5117	to perform (music)
+5118	banquet; feast
+5119	to verify; to validate
+5120	to look up; to face upward
+5121	itchy
+5122	to care for the elderly
+5123	nursing home
+5124	oxygen
+5125	kind; type
+5126	distant; remote
+5127	main point; key point
+5128	or; either one or the other
+5129	key element; factor
+5130	wild
+5131	that's fine; might as well
+5132	wild (not domesticated)
+5133	the countryside; outdoors
+5134	industry; line of work
+5135	liquid
+5136	still; as before
+5137	to depend on; to rely on
+5138	first-rate; top quality
+5139	basic necessities of life
+5140	medicine; medical care
+5141	one by one
+5142	aunt (mother's sister)
+5143	a whole lifetime
+5144	heritage; inheritance
+5145	heredity; to inherit a trait
+5146	the area; the region
+5147	together
+5148	consistent; all along
+5149	to doubt; confusion
+5150	uniformly; without exception
+5151	to immigrate; immigrant
+5152	instrument; apparatus
+5153	ceremony
+5154	all along; consistently
+5155	a series of
+5156	again and again
+5157	a burst; a spell of time
+5158	ruins; historic site
+5159	so that; in order to
+5160	so as not to; to avoid
+5161	in the past; formerly
+5162	abnormal; extremely
+5163	benefit
+5164	to go smoothly
+5165	in one breath; at a stretch
+5166	to discuss; comment
+5167	exactly alike; identical
+5168	performer; entertainer
+5169	whole body; a suit of clothes
+5170	for a short while; momentary
+5171	together
+5172	likely to; easy to
+5173	to inhibit; to suppress
+5174	because; reason
+5175	syllable
+5176	silver
+5177	silver medal
+5178	to lead; to attract
+5179	to hide; to conceal
+5180	to guide; to lead
+5181	to trigger; to cause
+5182	to introduce; to bring in
+5183	privacy; private matters
+5184	drinking water
+5185	to print; a seal
+5186	baby; infant
+5187	hero
+5188	shadow
+5189	crowded
+5190	to emerge in large numbers
+5191	to dare to; to be brave enough
+5192	to eat a meal; to dine
+5193	usefulness; use
+5194	hardworking; to study hard
+5195	to hire staff; to manage people
+5196	careful; attentive
+5197	to optimize
+5198	to have priority
+5199	outstanding; excellent
+5200	origin
+5201	tourist; visitor
+5202	just like; similar to
+5203	organic
+5204	energetic; interesting
+5205	orderly; in order
+5206	in; at; to
+5207	balance of an account
+5208	rather than
+5209	down jacket
+5210	to schedule in advance
+5211	to expect; to anticipate
+5212	to expect; to anticipate
+5213	bathroom; shower room
+5214	desire; craving
+5215	originally
+5216	raw materials
+5217	principle; theory
+5218	raw material
+5219	gardens; landscaped park
+5220	satisfactory; successful
+5221	original; primitive
+5222	element
+5223	originally; formerly
+5224	Lantern Festival; rice dumplings
+5225	to originate from
+5226	remote; long-distance
+5227	a distant place
+5228	to restrict; to constrain
+5229	moonlight
+5230	musical instrument
+5231	the moon
+5232	musical piece; melody
+5233	dizzy; to faint
+5234	to get carsick
+5235	to transport; to ship
+5236	to run; to operate
+5237	to operate a business
+5238	mixed; miscellaneous
+5239	disaster; calamity
+5240	disaster; calamity
+5241	disaster; catastrophe
+5242	disaster area
+5243	again and again; repeatedly
+5244	to regenerate; to recycle
+5245	to care about; to mind
+5246	to admire; to appreciate
+5247	to approve of; to agree with
+5248	to suffer; to meet with
+5249	to suffer; to sustain a loss
+5250	to encounter; an experience
+5251	noise
+5252	shape; design; to model
+5253	then; but (literary)
+5254	to prick; to stick into
+5255	to explode; to blow up
+5256	to stick; to glue
+5257	to paste; to stick
+5258	brand new
+5259	proportion; percentage
+5260	to fight; battle
+5261	to occupy
+5262	to defeat; to overcome
+5263	to occupy; to possess
+5264	war
+5265	chapter; section
+5266	elders; older generation
+5267	obstacle; to obstruct
+5268	bill; invoice
+5269	to recruit; to beckon
+5270	to entertain guests
+5271	to enroll students
+5272	to wave; to beckon
+5273	to recruit; to enroll
+5274	lighting; to illuminate
+5275	to break; to fold
+5276	needle
+5277	the truth; real facts
+5278	pearl
+5279	pillow
+5280	small town; to calm down
+5281	rain shower
+5282	to open one's eyes
+5283	to quarrel
+5284	to fight over; to contest
+5285	to argue; to debate
+5286	to solicit opinions
+5287	controversy; dispute
+5288	policy
+5289	regular; standard; formal
+5290	front side; positive
+5291	to confirm; to verify
+5292	justice; righteous
+5293	symptom
+5294	to support; to prop up
+5295	branch; classifier for sticks
+5296	to prop up; to support
+5297	to spend; expenses
+5298	fat
+5299	the reason why
+5300	to be on duty
+5301	position; post
+5302	position; duties
+5303	staff member; office worker
+5304	duty; responsibility
+5305	nephew
+5306	to have no choice but to
+5307	to designate; to appoint
+5308	to focus only on
+5309	to command; conductor
+5310	to instruct; instructions
+5311	to criticize; to blame
+5312	to make; to control
+5313	extremely important; vital
+5314	intelligence
+5315	to govern; to manage
+5316	products; goods
+5317	order in society
+5318	to question; to doubt
+5319	as for; as to
+5320	medium; average
+5321	the finish line; endpoint
+5322	to interrupt; to break off
+5323	lifelong
+5324	hour
+5325	the middle of the month
+5326	center; central government
+5327	to swell; swollen
+5328	to hit a target; to win
+5329	to farm land
+5330	to be poisoned
+5331	to win a prize (lottery)
+5332	everyone; the crowd
+5333	heatstroke
+5334	as everyone knows
+5335	center of gravity; main focus
+5336	state; province (region)
+5337	porridge; congee
+5338	surrounding area; periphery
+5339	thoughtful; considerate
+5340	cycle; period
+5341	classifier for plants; trees
+5342	jewelry
+5343	many; numerous
+5344	to host; to organize
+5345	host; streamer
+5346	leading; to dominate
+5347	in charge; manager
+5348	leading role; protagonist
+5349	mainstream
+5350	to star in; lead actor
+5351	to advocate; a view
+5352	to bless; blessings
+5353	assistant
+5354	assistant; helper
+5355	to wish sb well
+5356	residence; house
+5357	a written work; book
+5358	brick
+5359	specialized subject; school
+5360	patent
+5361	special topic
+5362	for special use; dedicated
+5363	focused; attentive
+5364	to convert; to change
+5365	to pass on to sb
+5366	to transfer ownership
+5367	to turn around
+5368	to shift; to transfer
+5369	to revolve; to spin
+5370	to rotate; to turn
+5371	equipment; to equip
+5372	crops
+5373	to investigate blame
+5374	to catch; to grab
+5375	capital (money)
+5376	assets; property
+5377	proud
+5378	tap water
+5379	self-discipline
+5380	subtitles
+5381	to commit suicide
+5382	self; ego
+5383	to talk to oneself
+5384	voluntary
+5385	self-service
+5386	brown
+5387	CEO; chairman
+5388	to total; grand total
+5389	premier; prime minister
+5390	finally; at long last
+5391	sticky rice dumpling
+5392	corridor; hallway
+5393	enough; sufficient
+5394	enough to; sufficient to
+5395	to obstruct; obstacle
+5396	to block; to stop
+5397	homeland; motherland
+5398	ancestors
+5399	to drill; to bore into
+5400	crime; guilt
