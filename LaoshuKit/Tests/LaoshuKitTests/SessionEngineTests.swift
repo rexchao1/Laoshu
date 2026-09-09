@@ -157,6 +157,162 @@ private func localDate(_ year: Int, _ month: Int, _ day: Int) -> LocalDate {
     ])
 }
 
+// MARK: - Showing what is waiting
+
+@Test func testLevelSummariesCountWordsFromDueBatchesButNotTheEightNewWordsASessionWouldAdd() throws {
+    let dbQueue = try TestFixtures.makeDatabase(levelCounts: [1: 20, 2: 20])
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    let day1 = provider(at: date(2026, 1, 2))
+
+    // Level 1 has a due batch of 3; level 2 has a batch not due until later.
+    try store.createBatch(level: 1, wordIndices: [1, 2, 3], today: day0)
+    try store.createBatch(level: 2, wordIndices: [21, 22], today: day1)
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day1)
+    let summaries = try engine.levelSummaries()
+
+    #expect(summaries.first { $0.level == 1 }?.waitingCount == 3)
+    #expect(summaries.first { $0.level == 2 }?.waitingCount == 0)
+}
+
+@Test func testLevelSummariesRecomputeAsOfEachCall() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 20)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    let day1 = provider(at: date(2026, 1, 2))
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day1)
+    #expect(try engine.levelSummaries().first?.waitingCount == 0)
+
+    try store.createBatch(level: 1, wordIndices: [1, 2, 3], today: day0)
+
+    // Same engine instance, called again: the count reflects the batch
+    // created since the first call, not a value cached at construction.
+    #expect(try engine.levelSummaries().first?.waitingCount == 3)
+}
+
+// MARK: - The summary's schedule line and the eight-more button
+
+@Test func testSessionReportsWhenItsNewWordsComeBack() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 20)
+    let day0 = provider(at: date(2026, 1, 1))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day0)
+
+    let session = try engine.startSession(level: 1)
+    #expect(session.newWordsReturnOn == localDate(2026, 1, 2))
+}
+
+@Test func testSessionHoldingOnlyADueBatchNamesNoReturnDate() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 3)
+    let day0 = provider(at: date(2026, 1, 1))
+    try BatchStore(dbQueue: dbQueue).createBatch(level: 1, wordIndices: [1, 2, 3], today: day0)
+
+    let day1 = provider(at: date(2026, 1, 2))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day1)
+    let session = try engine.startSession(level: 1)
+
+    #expect(session.drawnCount == 3) // the due batch's words; none left unseen to draw as new
+    #expect(session.newWordsReturnOn == nil)
+}
+
+@Test func testHasUnseenWordsRemainingIsFalseOnceASessionsOwnDrawExhaustsThePool() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+
+    let session = try engine.startSession(level: 1)
+    #expect(session.drawnCount == 8)
+    #expect(session.hasUnseenWordsRemaining == false)
+}
+
+@Test func testHasUnseenWordsRemainingIsTrueWhenThePoolOutlastsTheDraw() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 20)
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+
+    let session = try engine.startSession(level: 1)
+    #expect(session.drawnCount == 8)
+    #expect(session.hasUnseenWordsRemaining == true)
+}
+
+@Test func testAllowanceSpentEmptySessionReportsUnseenWordsRemaining() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    try store.createBatch(level: 1, wordIndices: [1, 2, 3], today: day0)
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day0)
+    let session = try engine.startSession(level: 1)
+
+    #expect(session.emptyReason == .allowanceSpent)
+    #expect(session.hasUnseenWordsRemaining == true)
+}
+
+@Test func testWaitingOnLadderEmptySessionReportsNoUnseenWordsAndTheNextReturnDate() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 3)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    try store.createBatch(level: 1, wordIndices: [1, 2, 3], today: day0)
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day0)
+    let session = try engine.startSession(level: 1)
+
+    #expect(session.emptyReason == .waitingOnLadder)
+    #expect(session.hasUnseenWordsRemaining == false)
+    #expect(session.nextBatchReturnOn == localDate(2026, 1, 2))
+}
+
+@Test func testLevelCompleteEmptySessionReportsNoUnseenWordsAndNoReturnDate() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 3)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    let created = try store.createBatch(level: 1, wordIndices: [1, 2, 3], today: day0)
+    let batchID = try #require(created.id)
+
+    let day1 = provider(at: date(2026, 1, 2))
+    try store.recordLook(batchID: batchID, today: day1)
+    let day8 = provider(at: date(2026, 1, 9))
+    try store.recordLook(batchID: batchID, today: day8) // retires
+
+    let afterRetirement = provider(at: date(2026, 1, 10))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: afterRetirement)
+    let session = try engine.startSession(level: 1)
+
+    #expect(session.emptyReason == .levelComplete)
+    #expect(session.hasUnseenWordsRemaining == false)
+    #expect(session.nextBatchReturnOn == nil)
+}
+
+@Test func testBonusSessionIgnoresTheAllowanceAndDrawsEightMoreNewWords() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 20)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+
+    // Spend today's allowance with an ordinary session first.
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day0)
+    let first = try engine.startSession(level: 1)
+    try first.swipe(.right)
+    #expect(try store.hasBatchCreatedToday(today: day0) == true)
+
+    let bonus = try engine.startBonusSession(level: 1)
+    #expect(bonus.drawnCount == 8)
+
+    var seen: [Int] = []
+    while let card = bonus.currentCard {
+        seen.append(card.word.wordIndex)
+        try bonus.swipe(.right)
+    }
+    #expect(Set(seen).count == 8)
+
+    // Its first swipe writes a second batch on the same level, dated the
+    // same day as the first, holding exactly the words it drew.
+    let batchIDs = try dbQueue.read { db in
+        try Int64.fetchAll(db, sql: "SELECT id FROM batch WHERE level = 1 AND created_on = ?;", arguments: [day0.today()])
+    }
+    #expect(batchIDs.count == 2)
+    let secondBatchWords = try store.wordIndices(batchIDs: [try #require(batchIDs.last)])
+    #expect(Set(secondBatchWords) == Set(seen))
+}
+
 @Test func testFirstAttemptRightCountOnlyCountsCleanSwipes() throws {
     let dbQueue = try TestFixtures.makeDatabase(wordCount: 3)
     let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
@@ -460,4 +616,30 @@ private func localDate(_ year: Int, _ month: Int, _ day: Int) -> LocalDate {
 
     #expect(session.drawnCount == 0)
     #expect(session.emptyReason == .levelComplete)
+}
+
+/// The eight-more button is hidden when a level has no unseen words left
+/// (D19, D22), but nothing in the engine's API enforces that. Asking for a
+/// bonus session anyway must name a reason rather than hand back a drawn
+/// count of zero, which renders "0 of 0 right the first time" — the screen
+/// D22 exists to remove.
+@Test func testBonusSessionOnAnExhaustedLevelNamesAReasonRatherThanDrawingNothing() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 3)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    let created = try store.createBatch(level: 1, wordIndices: [1, 2, 3], today: day0)
+    let batchID = try #require(created.id)
+
+    // Every word introduced, one look taken, so a batch is still on the
+    // ladder and the level is not finished.
+    let day1 = provider(at: date(2026, 1, 2))
+    try store.recordLook(batchID: batchID, today: day1)
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day1)
+    let bonus = try engine.startBonusSession(level: 1)
+
+    #expect(bonus.drawnCount == 0)
+    #expect(bonus.emptyReason == .waitingOnLadder)
+    #expect(bonus.nextBatchReturnOn == localDate(2026, 1, 9))
+    #expect(bonus.hasUnseenWordsRemaining == false)
 }

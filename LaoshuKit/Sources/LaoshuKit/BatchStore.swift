@@ -168,6 +168,23 @@ public struct BatchStore: Sendable {
         }
     }
 
+    /// The soonest a still-active batch on `level` comes due, whether or not
+    /// it is due yet — what the waiting-on-ladder empty state names as when
+    /// the words come back.
+    public func earliestActiveLookOn(level: Int) throws -> LocalDate? {
+        try dbQueue.read { db in
+            try LocalDate.fetchOne(
+                db,
+                sql: """
+                SELECT next_look_on FROM batch
+                WHERE level = ? AND next_look_on IS NOT NULL
+                ORDER BY next_look_on ASC LIMIT 1;
+                """,
+                arguments: [level]
+            )
+        }
+    }
+
     /// A word counts as introduced once it belongs to any batch (D14) —
     /// not when a review row exists, which would never be true of a word
     /// parked by three left swipes before its batch was written.
