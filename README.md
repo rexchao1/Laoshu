@@ -3,12 +3,13 @@
 A personal iPhone app for learning Chinese vocabulary.
 
 Pick an HSK level and swipe through a graded session of its words, meeting
-each day's eight new words again the next day and again a week after that;
-or browse a level's row to look back over everything already met there,
-without being tested. A control in the level list's toolbar says which way
-a session asks: pinyin first, showing the pinyin and hanzi and asking for
-the meaning, or English first, showing the meaning and asking for the
-pinyin. Offline, no account, one user.
+each day's new words again the next day and again a week after that; or
+browse a level's row to look back over everything already met there,
+without being tested. Offline, no account, one user.
+
+A gear in the level list's toolbar opens a Settings screen where the day's
+new-word count, the study direction (pinyin first or English first), and
+whether a card speaks its word aloud when first turned over are all set.
 
 A placement test on first launch, and any time after from the level list's
 toolbar, walks up and down the levels and marks the words the user already
