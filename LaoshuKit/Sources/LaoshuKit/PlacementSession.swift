@@ -1,7 +1,7 @@
 import Foundation
 import GRDB
 
-/// The user's answer to a placement test word: does she already know it?
+/// The user's answer to a placement test word: do they already know it?
 public enum PlacementAnswer: Sendable, Equatable {
     case know
     case dontKnow
@@ -9,7 +9,7 @@ public enum PlacementAnswer: Sendable, Equatable {
 
 /// One placement test in progress: drives `PlacementTest`'s pure level walk
 /// with real blocks of words, drawn from the database, and collects which
-/// ones the user says she already knows.
+/// ones the user says they already know.
 ///
 /// D10: a word answered "know it" is written as a retired batch only once
 /// the whole walk finishes, one batch per level marked — never as each
