@@ -1,14 +1,22 @@
 import SwiftUI
 import LaoshuKit
 
-/// The six levels, each with its word count. Tapping one opens a session
-/// card screen for that level.
+/// The two places the level list can push to: a level's study session, or
+/// its browse screen (D13).
+enum LevelDestination: Hashable {
+    case study(Int)
+    case browse(Int)
+}
+
+/// The six levels, each with its word count. Tapping a row opens a session
+/// card screen for that level; tapping its trailing Browse button opens that
+/// level's browse screen instead.
 struct LevelListView: View {
     let engine: SessionEngine
 
     @State private var summaries: [LevelSummary] = []
     @State private var loadError: String?
-    @State private var path: [Int] = []
+    @State private var path: [LevelDestination] = []
     @State private var showPlacementTest = false
 
     var body: some View {
@@ -18,27 +26,53 @@ struct LevelListView: View {
                     DatabaseErrorView(message: loadError)
                 } else {
                     List(summaries, id: \.level) { summary in
-                        NavigationLink(value: summary.level) {
-                            HStack {
-                                Text("Level \(summary.level)")
-                                Spacer()
-                                VStack(alignment: .trailing, spacing: 2) {
-                                    Text("\(summary.wordCount) words")
-                                        .foregroundStyle(.secondary)
-                                    if summary.waitingCount > 0 {
-                                        Text("\(summary.waitingCount) waiting")
-                                            .font(.caption)
-                                            .foregroundStyle(LaoshuTheme.accent)
+                        HStack {
+                            Button {
+                                path.append(.study(summary.level))
+                            } label: {
+                                HStack {
+                                    Text("Level \(summary.level)")
+                                    Spacer()
+                                    VStack(alignment: .trailing, spacing: 2) {
+                                        Text("\(summary.wordCount) words")
+                                            .foregroundStyle(.secondary)
+                                        if summary.waitingCount > 0 {
+                                            Text("\(summary.waitingCount) waiting")
+                                                .font(.caption)
+                                                .foregroundStyle(LaoshuTheme.accent)
+                                        }
                                     }
                                 }
+                                .contentShape(Rectangle())
                             }
+                            .buttonStyle(.plain)
+
+                            Button {
+                                path.append(.browse(summary.level))
+                            } label: {
+                                // `list.bullet` because this opens a list of
+                                // words, and the accent because every other
+                                // coloured thing on this screen is that green
+                                // (D28). A borderless button tints itself
+                                // system blue otherwise, which is the only
+                                // blue in the app.
+                                Image(systemName: "list.bullet")
+                                    .foregroundStyle(LaoshuTheme.accent)
+                            }
+                            .buttonStyle(.borderless)
+                            .accessibilityLabel("Browse level \(summary.level)")
                         }
                     }
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
                     .background(LaoshuTheme.background)
-                    .navigationDestination(for: Int.self) { level in
-                        SessionView(engine: engine, level: level)
+                    .navigationDestination(for: LevelDestination.self) { destination in
+                        switch destination {
+                        case .study(let level):
+                            SessionView(engine: engine, level: level)
+                        case .browse(let level):
+                            LevelBrowseView(level: level)
+                        }
                     }
                 }
             }
@@ -73,7 +107,7 @@ struct LevelListView: View {
                 engine: engine,
                 onFinished: { recommendedLevel in
                     showPlacementTest = false
-                    path.append(recommendedLevel)
+                    path.append(.study(recommendedLevel))
                 },
                 onSkip: {
                     do {
