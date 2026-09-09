@@ -14,6 +14,10 @@ A placement test on first launch, and any time after from the level list's
 toolbar, walks up and down the levels and marks the words the user already
 knows so they are never taught as new.
 
+Every word's English is a short gloss, one plain meaning rather than a
+dictionary entry, written and reviewed for learners and held as data at
+`data/glosses.tsv` rather than derived from CC-CEDICT at build time.
+
 ## Shape
 
 - `LaoshuKit/` — a pure Swift package holding the vocabulary catalogue, the
