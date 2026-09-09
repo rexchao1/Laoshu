@@ -50,7 +50,7 @@ python3 docs/measure.py > /tmp/m.md && diff /tmp/m.md docs/measurements.md
 ```
 
 The iPhone app target needs Xcode, and its compile gate runs on a machine
-that has it (the Mac mini currently only has the command line tools):
+that has it, not one carrying only the command line tools:
 
 ```
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \
