@@ -151,7 +151,9 @@ private func localDate(_ year: Int, _ month: Int, _ day: Int) -> LocalDate {
     let batch = BatchScheduler.replayBatch(level: 1, createdOn: createdOn, today: today)
 
     #expect(batch.isRetired == true)
-    #expect(batch.lookNumber == 1) // retired without the second look ever being taken.
+    #expect(batch.lookNumber == 2) // retired batches carry look number 2, whether the
+    // second look was taken or given up on, so the row shape matches the one
+    // normal operation writes.
 }
 
 @Test func testReplayBatchDoesNotRetireASecondLookExactlySevenDaysBehind() throws {

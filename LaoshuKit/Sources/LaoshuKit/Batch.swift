@@ -47,6 +47,7 @@ public struct Batch: Sendable, Equatable {
     public func retiredForStaleness() -> Batch {
         var next = self
         next.nextLookOn = nil
+        next.lookNumber = 2
         return next
     }
 }

@@ -139,6 +139,7 @@ private func fetchBatches(_ dbQueue: DatabaseQueue) throws -> [BatchRow] {
     let batches = try fetchBatches(dbQueue)
     #expect(batches.count == 1)
     #expect(batches[0].nextLookOn == nil)
+    #expect(batches[0].lookNumber == 2)
 }
 
 @Test func testReplayNeverRunsTwice() throws {
