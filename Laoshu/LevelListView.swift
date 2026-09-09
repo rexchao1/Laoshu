@@ -41,13 +41,16 @@ struct LevelListView: View {
                 }
             }
             .navigationTitle("Laoshu")
-        }
-        // D26: `SessionEngine` isn't `@Observable`, so nothing tells this
-        // view its counts are stale after a session or a day rollover.
-        // `.onAppear` fires again every time this view comes back to the
-        // top of the stack, unlike `.task`, which would only ever run once.
-        .onAppear {
-            loadSummaries()
+            // D26: `SessionEngine` isn't `@Observable`, so nothing tells
+            // this view its counts are stale after a session or a day
+            // rollover. This sits on the content inside the stack, not on
+            // the stack itself: a `NavigationStack` never disappears when a
+            // destination is pushed, so an `.onAppear` out there fires once
+            // and is no better than the `.task` it replaced. In here it
+            // fires again every time the list comes back to the top.
+            .onAppear {
+                loadSummaries()
+            }
         }
     }
 

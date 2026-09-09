@@ -19,7 +19,7 @@ struct SessionSummaryView: View {
                 .font(.headline)
 
             if let newWordsReturnOn = session.newWordsReturnOn {
-                Text("The words you just learned come back on \(newWordsReturnOn.description).")
+                Text("The words you just learned come back \(newWordsReturnOn.friendlyReturnPhrase).")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }

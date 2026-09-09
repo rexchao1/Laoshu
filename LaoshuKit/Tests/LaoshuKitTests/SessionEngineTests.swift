@@ -617,3 +617,29 @@ private func localDate(_ year: Int, _ month: Int, _ day: Int) -> LocalDate {
     #expect(session.drawnCount == 0)
     #expect(session.emptyReason == .levelComplete)
 }
+
+/// The eight-more button is hidden when a level has no unseen words left
+/// (D19, D22), but nothing in the engine's API enforces that. Asking for a
+/// bonus session anyway must name a reason rather than hand back a drawn
+/// count of zero, which renders "0 of 0 right the first time" — the screen
+/// D22 exists to remove.
+@Test func testBonusSessionOnAnExhaustedLevelNamesAReasonRatherThanDrawingNothing() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 3)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    let created = try store.createBatch(level: 1, wordIndices: [1, 2, 3], today: day0)
+    let batchID = try #require(created.id)
+
+    // Every word introduced, one look taken, so a batch is still on the
+    // ladder and the level is not finished.
+    let day1 = provider(at: date(2026, 1, 2))
+    try store.recordLook(batchID: batchID, today: day1)
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day1)
+    let bonus = try engine.startBonusSession(level: 1)
+
+    #expect(bonus.drawnCount == 0)
+    #expect(bonus.emptyReason == .waitingOnLadder)
+    #expect(bonus.nextBatchReturnOn == localDate(2026, 1, 9))
+    #expect(bonus.hasUnseenWordsRemaining == false)
+}

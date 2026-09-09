@@ -57,7 +57,7 @@ struct SessionEmptyStateView: View {
             "Another level already used today's eight new words. This level still has unseen words waiting."
         case .waitingOnLadder:
             if let returnOn = session.nextBatchReturnOn {
-                "Every word here has been introduced. The next batch comes back on \(returnOn.description)."
+                "Every word here has been introduced. The next batch comes back \(returnOn.friendlyReturnPhrase)."
             } else {
                 "Every word here has been introduced. Nothing is due yet."
             }

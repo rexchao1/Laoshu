@@ -340,6 +340,27 @@ public final class SessionEngine {
         let newWordIndices = Array(unseenPool.shuffled(using: &rng).prefix(8))
         let hasUnseenWordsRemaining = unseenPool.count > newWordIndices.count
 
+        // The button that calls this is hidden when a level has no unseen
+        // words (D19, D22), so an empty pool should not reach here. Nothing
+        // in this API enforces that, though, and returning a drawn count of
+        // zero with no reason renders "0 of 0 right the first time" — the
+        // one screen D22 exists to remove. Name the reason instead.
+        guard !newWordIndices.isEmpty else {
+            let reason: Session.EmptyReason
+            var nextBatchReturnOn: LocalDate?
+            if let earliest = try batchStore.earliestActiveLookOn(level: level) {
+                reason = .waitingOnLadder
+                nextBatchReturnOn = earliest
+            } else {
+                reason = .levelComplete
+            }
+            return Session(
+                words: [], dbQueue: dbQueue, today: today, level: level,
+                newWordIndices: [], dueBatchIDs: [], emptyReason: reason,
+                hasUnseenWordsRemaining: false, nextBatchReturnOn: nextBatchReturnOn
+            )
+        }
+
         let words = try words(forIndices: newWordIndices)
         return Session(
             words: words, dbQueue: dbQueue, today: today, level: level,
