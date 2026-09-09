@@ -296,7 +296,7 @@ public final class SessionEngine {
         let dueBatchIDs = dueBatches.compactMap(\.id)
         let dueWordIndices = try batchStore.wordIndices(batchIDs: dueBatchIDs)
 
-        let unseenPool = try unseenWordIndices(level: level)
+        let unseenPool = try batchStore.unseenWordIndices(level: level)
 
         let allowanceSpent = try batchStore.hasBatchCreatedToday(today: today)
         let newWordIndices = allowanceSpent ? [] : Array(unseenPool.shuffled(using: &rng).prefix(8))
@@ -323,7 +323,7 @@ public final class SessionEngine {
             )
         }
 
-        let words = try words(forIndices: chosen)
+        let words = try Word.fetch(indices: chosen, dbQueue: dbQueue)
         return Session(
             words: words, dbQueue: dbQueue, today: today, level: level,
             newWordIndices: newWordIndices, dueBatchIDs: dueBatchIDs, emptyReason: nil,
@@ -336,7 +336,7 @@ public final class SessionEngine {
     /// batch, so its first swipe writes only a second batch on `level`
     /// dated today; nothing here advances a ladder.
     public func startBonusSession(level: Int) throws -> Session {
-        let unseenPool = try unseenWordIndices(level: level)
+        let unseenPool = try batchStore.unseenWordIndices(level: level)
         let newWordIndices = Array(unseenPool.shuffled(using: &rng).prefix(8))
         let hasUnseenWordsRemaining = unseenPool.count > newWordIndices.count
 
@@ -361,7 +361,7 @@ public final class SessionEngine {
             )
         }
 
-        let words = try words(forIndices: newWordIndices)
+        let words = try Word.fetch(indices: newWordIndices, dbQueue: dbQueue)
         return Session(
             words: words, dbQueue: dbQueue, today: today, level: level,
             newWordIndices: newWordIndices, dueBatchIDs: [], emptyReason: nil,
@@ -369,44 +369,11 @@ public final class SessionEngine {
         )
     }
 
-    /// Every word on `level` that belongs to no batch yet, as bare
-    /// `word_index` values, in no particular order. Shuffling happens in
-    /// Swift rather than with SQLite's `RANDOM()`, which is what makes a draw
-    /// reproducible under a seeded generator; the pool is at most 1,800
-    /// integers, so reading all of it costs nothing.
-    private func unseenWordIndices(level: Int) throws -> [Int] {
-        try dbQueue.read { db in
-            try Int.fetchAll(
-                db,
-                sql: """
-                SELECT w.word_index
-                FROM cat.word w
-                WHERE w.level = ?
-                AND NOT EXISTS (SELECT 1 FROM batch_word bw WHERE bw.word_index = w.word_index);
-                """,
-                arguments: [level]
-            )
-        }
-    }
-
-    /// Fetches `indices` and puts them back in `indices`'s order — `IN`
-    /// returns rows in whatever order SQLite likes, which would undo a
-    /// caller's shuffle.
-    private func words(forIndices indices: [Int]) throws -> [Word] {
-        guard !indices.isEmpty else { return [] }
-        let placeholders = databaseQuestionMarks(count: indices.count)
-        let rows = try dbQueue.read { db in
-            try Word.fetchAll(
-                db,
-                sql: """
-                SELECT word_index, level, hanzi, pinyin, pinyin_numbered, definition
-                FROM cat.word
-                WHERE word_index IN (\(placeholders));
-                """,
-                arguments: StatementArguments(indices)
-            )
-        }
-        let byIndex = Dictionary(uniqueKeysWithValues: rows.map { ($0.wordIndex, $0) })
-        return indices.compactMap { byIndex[$0] }
+    /// Starts a placement test (D1): the walk begins at level 2, drawing
+    /// each block from the same unseen pool `startSession` draws from
+    /// (D7c). On finishing, it writes a retired batch per level with words
+    /// answered "know it" (D10).
+    public func startPlacementTest() throws -> PlacementSession {
+        try PlacementSession(dbQueue: dbQueue, batchStore: batchStore, today: today, rng: rng)
     }
 }

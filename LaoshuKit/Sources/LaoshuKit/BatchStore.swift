@@ -88,6 +88,64 @@ public struct BatchStore: Sendable {
         return advanced
     }
 
+    /// Every word on `level` that belongs to no batch yet, as bare
+    /// `word_index` values, in no particular order (D7c) — the pool a study
+    /// session's new-word draw and the placement test's block draw both pull
+    /// from, so a word already batched from either path can never be picked
+    /// by the other.
+    public func unseenWordIndices(level: Int) throws -> [Int] {
+        try dbQueue.read { db in
+            try Int.fetchAll(
+                db,
+                sql: """
+                SELECT w.word_index
+                FROM cat.word w
+                WHERE w.level = ?
+                AND NOT EXISTS (SELECT 1 FROM batch_word bw WHERE bw.word_index = w.word_index);
+                """,
+                arguments: [level]
+            )
+        }
+    }
+
+    /// Writes a batch that is already retired: dated `today`, holding
+    /// `wordIndices`, with no look due and look number 2 (D10) — how the
+    /// placement test records words answered "know it" so each is never
+    /// taught as new again but is never looked at either.
+    @discardableResult
+    public func createRetiredBatch(level: Int, wordIndices: [Int], today: TodayProvider) throws -> Batch {
+        try dbQueue.write { db in
+            try Self.createRetiredBatch(db, level: level, wordIndices: wordIndices, today: today)
+        }
+    }
+
+    /// The raw insert, scoped to a `Database` already inside a transaction —
+    /// see `createBatch(_:level:wordIndices:today:)`.
+    @discardableResult
+    static func createRetiredBatch(_ db: Database, level: Int, wordIndices: [Int], today: TodayProvider) throws -> Batch {
+        let batch = Batch(level: level, createdOn: today.today(), nextLookOn: nil, lookNumber: 2)
+
+        try db.execute(
+            sql: """
+            INSERT INTO batch (level, created_on, next_look_on, look_number)
+            VALUES (?, ?, ?, ?);
+            """,
+            arguments: [batch.level, batch.createdOn, batch.nextLookOn, batch.lookNumber]
+        )
+        let id = db.lastInsertedRowID
+
+        for wordIndex in wordIndices {
+            try db.execute(
+                sql: "INSERT INTO batch_word (batch_id, word_index) VALUES (?, ?);",
+                arguments: [id, wordIndex]
+            )
+        }
+
+        var created = batch
+        created.id = id
+        return created
+    }
+
     public func fetchBatch(id: Int64) throws -> Batch? {
         try dbQueue.read { db in try Self.fetchBatch(db, id: id) }
     }
