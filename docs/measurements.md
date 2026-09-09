@@ -79,7 +79,7 @@ A word collides with another when they share a cleaned definition, or when they 
 | 6 | 1800 | 75 | 4.2% | 24 | 1.3% | 175 | 9.7% | 57 | 3.2% |
 | all | 5400 | 274 | 5.1% | 89 | 1.6% | 708 | 13.1% | 229 | 4.2% |
 
-The all-levels row sums the per-level counts: 274 definition collisions and 708 pinyin collisions counted catalogue-wide, 89 and 229 counted inside the level. This is the measurement decision D9/D9a/D10 rests on: within a level, both kinds of collision stay well under the catalogue-wide rate, which is why the app asks for the Chinese from the English rather than the reverse.
+The all-levels row sums the per-level counts: 274 definition collisions and 708 pinyin collisions counted catalogue-wide, 89 and 229 counted inside the level. Inside a level, a cleaned definition is shared with another word 1.6% of the time and toned pinyin 4.2%. Checkpoint 11 decisions D9, D9a and D10 rest on these four numbers.
 
 ## Source-side disambiguation suffixes
 

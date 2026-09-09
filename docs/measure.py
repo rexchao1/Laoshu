@@ -30,12 +30,12 @@ def clean(definition):
 
 
 def strip_suffix(word):
-    """Drop a source-side disambiguation suffix. See decision D9."""
+    """Drop a source-side disambiguation suffix. See checkpoint 1 decision D9."""
     return re.sub(r'\d+$', '', word)
 
 
 def collapse(rows):
-    """One row per word_index, at the word's lowest level. See decision D15.
+    """One row per word_index, at the word's lowest level. See checkpoint 1 decision D15.
 
     The source relists a word at a higher level when it gains a part of speech.
     Those rows are identical in every field the app shows, so they collapse.
@@ -215,10 +215,9 @@ def main():
     assert def_lvl_total == 89, f'within-level definition collisions changed to {def_lvl_total}'
     assert pin_lvl_total == 229, f'within-level pinyin collisions changed to {pin_lvl_total}'
     out('The all-levels row sums the per-level counts: 274 definition collisions and 708 pinyin '
-        'collisions counted catalogue-wide, 89 and 229 counted inside the level. This is the '
-        'measurement decision D9/D9a/D10 rests on: within a level, both kinds of collision stay '
-        'well under the catalogue-wide rate, which is why the app asks for the Chinese from the '
-        'English rather than the reverse.')
+        'collisions counted catalogue-wide, 89 and 229 counted inside the level. Inside a level, '
+        'a cleaned definition is shared with another word 1.6% of the time and toned pinyin 4.2%. '
+        'Checkpoint 11 decisions D9, D9a and D10 rest on these four numbers.')
     out('')
 
     out('## Source-side disambiguation suffixes')
