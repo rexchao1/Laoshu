@@ -14,6 +14,12 @@ A placement test on first launch, and any time after from the level list's
 toolbar, walks up and down the levels and marks the words the user already
 knows so they are never taught as new.
 
+A flame in the level list's toolbar shows how many days in a row the user
+has studied, in a run that forgives one missed day a week; tapping it opens
+a Progress screen showing that streak, how many words are waiting across
+all six levels today, and for each level how many words it has learned, has
+in progress, and has left.
+
 Every word's English is a short gloss, one plain meaning rather than a
 dictionary entry, written and reviewed for learners and held as data at
 `data/glosses.tsv` rather than derived from CC-CEDICT at build time.
