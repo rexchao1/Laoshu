@@ -8,7 +8,7 @@ import LaoshuKit
 /// (D24). A due batch the session also held is never mentioned by date.
 struct SessionSummaryView: View {
     let session: Session
-    let onDrawEightMore: () -> Void
+    let onDrawMore: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -43,7 +43,7 @@ struct SessionSummaryView: View {
             }
 
             if session.hasUnseenWordsRemaining {
-                Button("Draw eight more", action: onDrawEightMore)
+                Button("Draw \(session.newWordsPerDay) more", action: onDrawMore)
                     .buttonStyle(.borderedProminent)
                     .tint(LaoshuTheme.accent)
             }
