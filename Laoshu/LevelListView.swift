@@ -7,6 +7,7 @@ enum LevelDestination: Hashable {
     case study(Int)
     case browse(Int)
     case progress
+    case settings
 }
 
 /// The six levels, each with its word count. Tapping a row opens a session
@@ -22,7 +23,6 @@ struct LevelListView: View {
     @State private var loadError: String?
     @State private var path: [LevelDestination] = []
     @State private var showPlacementTest = false
-    @State private var direction: StudyDirection = .receptive
     @State private var streak: Streak?
 
     var body: some View {
@@ -80,6 +80,8 @@ struct LevelListView: View {
                             LevelBrowseView(level: level, engine: engine)
                         case .progress:
                             ProgressScreen(streakReader: streakReader, progressStore: progressStore)
+                        case .settings:
+                            SettingsScreen(preferenceStore: preferenceStore)
                         }
                     }
                 }
@@ -120,14 +122,15 @@ struct LevelListView: View {
                 // one glass capsule with no divider, so the checklist glyph
                 // and this word read as a single segmented control.
                 ToolbarSpacer(.fixed, placement: .navigationBarTrailing)
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        toggleDirection()
-                    } label: {
-                        Text(directionLabel(direction))
+                if loadError == nil {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            path.append(.settings)
+                        } label: {
+                            Image(systemName: "gearshape")
+                        }
+                        .accessibilityLabel("Settings")
                     }
-                    .accessibilityLabel("Study direction: \(directionLabel(direction))")
-                    .accessibilityHint("Switches to the other direction")
                 }
             }
             // D26: `SessionEngine` isn't `@Observable`, so nothing tells
@@ -140,7 +143,6 @@ struct LevelListView: View {
             .onAppear {
                 loadSummaries()
                 checkPlacementGate()
-                loadDirection()
                 loadStreak()
             }
         }
@@ -189,25 +191,6 @@ struct LevelListView: View {
         }
     }
 
-    /// D4: the label has to say which way the next session will ask, and
-    /// "Receptive" and "Reverse" are words about the app rather than about
-    /// the card. These read as the card does: what is on the front, then
-    /// what the user has to come up with.
-    private func directionLabel(_ direction: StudyDirection) -> String {
-        switch direction {
-        case .receptive: return "Pinyin first"
-        case .reverse: return "English first"
-        }
-    }
-
-    private func loadDirection() {
-        do {
-            direction = try preferenceStore.direction()
-        } catch {
-            loadError = "\(error)"
-        }
-    }
-
     /// A failed streak read leaves the bare flame rather than failing the
     /// whole level list — the streak is decoration on this screen, not its
     /// content.
@@ -225,22 +208,6 @@ struct LevelListView: View {
         case 0: return "Progress, no days yet"
         case 1: return "Progress, 1 day studied"
         case let n: return "Progress, \(n) days studied"
-        }
-    }
-
-    /// D4a: a failed write leaves the label exactly where it was. The label
-    /// is re-read from the store rather than flipped optimistically, so it
-    /// never claims a direction that a failed write did not actually store.
-    /// Unlike a failed placement decline, this does not set `loadError` —
-    /// losing the whole level list over an unsaved preference is worse than
-    /// the preference silently not saving.
-    private func toggleDirection() {
-        do {
-            let next: StudyDirection = direction == .receptive ? .reverse : .receptive
-            try preferenceStore.setDirection(next)
-            direction = try preferenceStore.direction()
-        } catch {
-            // Intentionally swallowed, per D4a.
         }
     }
 }
