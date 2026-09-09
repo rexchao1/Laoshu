@@ -110,3 +110,28 @@ private func fetchPlacement(_ dbQueue: DatabaseQueue) throws -> PlacementRow {
     let rowCount = try secondOpen.read { try Int.fetchOne($0, sql: "SELECT count(*) FROM placement") }
     #expect(rowCount == 1)
 }
+
+/// The PRD's rule that a declined test carries no recommended level lives in
+/// the schema rather than in a comment, so the writer that arrives in a later
+/// task cannot quietly break it.
+@Test func testPlacementRowsThatContradictThemselvesAreRefused() throws {
+    let (directory, catalogueURL) = try TestFixtures.makeCatalogue(levelCounts: [1: 5])
+    let reviewLogURL = directory.appendingPathComponent("review.sqlite")
+    let dbQueue = try LaoshuDatabase.open(catalogueURL: catalogueURL, reviewLogURL: reviewLogURL)
+
+    #expect(throws: (any Error).self) {
+        try dbQueue.write { db in
+            try db.execute(sql: "UPDATE placement SET status = 'declined', recommended_level = 3;")
+        }
+    }
+    #expect(throws: (any Error).self) {
+        try dbQueue.write { db in
+            try db.execute(sql: "UPDATE placement SET status = 'whatever';")
+        }
+    }
+
+    // The legitimate write still works.
+    try dbQueue.write { db in
+        try db.execute(sql: "UPDATE placement SET status = 'taken', recommended_level = 3;")
+    }
+}

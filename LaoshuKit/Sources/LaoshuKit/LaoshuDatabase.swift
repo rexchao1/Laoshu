@@ -121,8 +121,14 @@ public enum LaoshuDatabase {
             try db.execute(sql: """
                 CREATE TABLE placement (
                     id INTEGER PRIMARY KEY CHECK (id = 1),
-                    status TEXT NOT NULL,
-                    recommended_level INTEGER
+                    status TEXT NOT NULL CHECK (status IN ('not_taken', 'taken', 'declined')),
+                    recommended_level INTEGER,
+                    -- A declined test recommended nothing, and a test that has
+                    -- not been taken cannot have. Written as a constraint
+                    -- rather than a comment because the writer lands in a
+                    -- later task, and a rule the schema does not hold is one
+                    -- a migration has to add back later.
+                    CHECK (status = 'taken' OR recommended_level IS NULL)
                 );
                 """)
 
