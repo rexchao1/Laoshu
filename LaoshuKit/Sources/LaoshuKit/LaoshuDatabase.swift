@@ -209,6 +209,24 @@ public enum LaoshuDatabase {
                 """)
         }
 
+        // Route line 9: one row per level holding its most recent level
+        // test result, replaced by the next attempt rather than kept as
+        // history — the level list only ever needs to show the latest.
+        // `level` is the primary key rather than an autoincrementing id
+        // because there is exactly one row per level, the same shape as
+        // `preference` and `placement` above being exactly one row.
+        migrator.registerMigration("v8_level_test") { db in
+            try db.execute(sql: """
+                CREATE TABLE level_test (
+                    level INTEGER PRIMARY KEY,
+                    taken_on TEXT NOT NULL,
+                    correct_count INTEGER NOT NULL,
+                    total_count INTEGER NOT NULL,
+                    passed INTEGER NOT NULL CHECK (passed IN (0, 1))
+                );
+                """)
+        }
+
         return migrator
     }
 

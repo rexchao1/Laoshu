@@ -1,7 +1,8 @@
 // !$*UTF8*$!
 {
 	archiveVersion = 1;
-	classes = {};
+	classes = {
+	};
 	objectVersion = 77;
 	objects = {
 
@@ -14,11 +15,15 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		1A0000000000000000000003 /* Laoshu */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Laoshu; sourceTree = "<group>"; };
+		1A0000000000000000000003 /* Laoshu */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Laoshu;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		1A0000000000000000000004 = {
+		1A0000000000000000000004 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -52,12 +57,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1A000000000000000000000B /* Build configuration list for PBXNativeTarget "Laoshu" */;
 			buildPhases = (
-				1A0000000000000000000005,
-				1A0000000000000000000004,
-				1A0000000000000000000006,
+				1A0000000000000000000005 /* Sources */,
+				1A0000000000000000000004 /* Frameworks */,
+				1A0000000000000000000006 /* Resources */,
 			);
-			buildRules = ();
-			dependencies = ();
+			buildRules = (
+			);
+			dependencies = (
+			);
 			fileSystemSynchronizedGroups = (
 				1A0000000000000000000003 /* Laoshu */,
 			);
@@ -107,19 +114,21 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		1A0000000000000000000006 = {
+		1A0000000000000000000006 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = ();
+			files = (
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		1A0000000000000000000005 = {
+		1A0000000000000000000005 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = ();
+			files = (
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */

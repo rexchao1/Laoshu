@@ -740,4 +740,27 @@ public final class SessionEngine {
     public func declinePlacementTest() throws {
         try PlacementStore(dbQueue: dbQueue).decline()
     }
+
+    /// Starts a level test on `level` (route line 9): up to `LevelTest.size`
+    /// words sampled from every word the catalogue has for the level, not
+    /// just the words a batch happens to be carrying — reachable only from
+    /// the finished-level screen, where every word is already introduced
+    /// and every batch has already retired, so "every word in the level"
+    /// and "every word already met" are the same set. Asks in whichever
+    /// direction the user currently studies in.
+    public func startLevelTest(level: Int) throws -> LevelTest {
+        let preferences = try preferenceStore.preferences()
+        let allWordIndices = try dbQueue.read { db in
+            try Int.fetchAll(db, sql: "SELECT word_index FROM cat.word WHERE level = ?;", arguments: [level])
+        }
+        let chosen = Array(allWordIndices.shuffled(using: &rng).prefix(LevelTest.size))
+        let words = try Word.fetch(indices: chosen, dbQueue: dbQueue)
+        return LevelTest(words: words, dbQueue: dbQueue, today: today, level: level, direction: preferences.direction, speakOnFlip: preferences.speakOnFlip)
+    }
+
+    /// The last level test attempt recorded for `level`, or `nil` if it has
+    /// never been taken.
+    public func levelTestResult(level: Int) throws -> LevelTestResult? {
+        try LevelTestStore(dbQueue: dbQueue).result(level: level)
+    }
 }

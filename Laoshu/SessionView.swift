@@ -12,6 +12,8 @@ struct SessionView: View {
     @State private var dragOffset: CGSize = .zero
     @State private var swipeError: String?
     @State private var showsResumedNotice = false
+    @State private var levelTestResult: LevelTestResult?
+    @State private var showLevelTest = false
     private let speaker = SpeechSpeaker()
 
     private let swipeThreshold: CGFloat = 100
@@ -26,7 +28,12 @@ struct SessionView: View {
                 if let card = session.currentCard {
                     sessionBody(session: session, card: card)
                 } else if session.emptyReason != nil {
-                    SessionEmptyStateView(session: session, onDrawMore: drawMore)
+                    SessionEmptyStateView(
+                        session: session,
+                        levelTestResult: levelTestResult,
+                        onDrawMore: drawMore,
+                        onTakeLevelTest: { showLevelTest = true }
+                    )
                 } else {
                     SessionSummaryView(session: session, onDrawMore: drawMore)
                 }
@@ -38,6 +45,16 @@ struct SessionView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             startSession()
+        }
+        .fullScreenCover(isPresented: $showLevelTest) {
+            LevelTestView(
+                engine: engine,
+                level: level,
+                onDone: {
+                    showLevelTest = false
+                    loadLevelTestResult()
+                }
+            )
         }
     }
 
@@ -111,8 +128,25 @@ struct SessionView: View {
             let started = try engine.startSession(level: level)
             session = started
             showsResumedNotice = started.isResumed
+            if started.emptyReason == .levelComplete {
+                loadLevelTestResult()
+            }
         } catch {
             loadError = "\(error)"
+        }
+    }
+
+    /// The level test's last result on this level, read fresh whenever the
+    /// empty-state screen might show it — on the initial draw and again
+    /// after a test finishes, so a just-taken attempt replaces the old one
+    /// without leaving the screen.
+    private func loadLevelTestResult() {
+        do {
+            levelTestResult = try engine.levelTestResult(level: level)
+        } catch {
+            // Intentionally swallowed: the score line is decoration on the
+            // empty state, not its content, the same way `LevelListView`
+            // swallows a failed streak read.
         }
     }
 

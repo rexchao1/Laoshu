@@ -7,7 +7,12 @@ import LaoshuKit
 /// bring back at all. Which one shows is decided by `session.emptyReason`.
 struct SessionEmptyStateView: View {
     let session: Session
+    /// The most recent level test attempt on this level, if any — route
+    /// line 9, shown only alongside the `.levelComplete` reason, the one
+    /// state a level test can be taken from.
+    let levelTestResult: LevelTestResult?
     let onDrawMore: () -> Void
+    let onTakeLevelTest: () -> Void
 
     var body: some View {
         VStack(spacing: 16) {
@@ -27,6 +32,17 @@ struct SessionEmptyStateView: View {
             if session.hasUnseenWordsRemaining {
                 Button("Draw \(session.newWordsPerDay) more", action: onDrawMore)
                     .buttonStyle(.borderedProminent)
+                    .tint(LaoshuTheme.accent)
+            }
+
+            if session.emptyReason == .levelComplete {
+                if let levelTestResult {
+                    Text("Last level test: \(levelTestResult.percentCorrect)%\(levelTestResult.passed ? ", passed" : "")")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                Button("Take the level test", action: onTakeLevelTest)
+                    .buttonStyle(.bordered)
                     .tint(LaoshuTheme.accent)
             }
         }
