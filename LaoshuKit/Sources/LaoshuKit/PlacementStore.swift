@@ -6,7 +6,10 @@ import GRDB
 /// in `LaoshuDatabase`).
 public enum PlacementStatus: Sendable, Equatable {
     case notTaken
-    case taken(recommendedLevel: Int)
+    /// The level is optional because a taken placement does not always carry
+    /// one: D13a seeds a phone that already holds study as taken with no
+    /// recommendation, since nothing recommended anything to it.
+    case taken(recommendedLevel: Int?)
     case declined
 }
 
@@ -22,7 +25,13 @@ public struct PlacementStore: Sendable {
 
     public func status() throws -> PlacementStatus {
         try dbQueue.read { db in
-            let row = try Row.fetchOne(db, sql: "SELECT status, recommended_level FROM placement WHERE id = 1;")!
+            // No row at all should be unreachable, since the migration
+            // writes one. Read as not taken rather than trapping: the cost
+            // of being wrong is offering the test again, and this runs on
+            // the first frame after launch, where a trap is a dead app.
+            guard let row = try Row.fetchOne(
+                db, sql: "SELECT status, recommended_level FROM placement WHERE id = 1;"
+            ) else { return .notTaken }
             let status: String = row["status"]
             switch status {
             case "taken":
