@@ -155,4 +155,6 @@ The screens are read at step 9 of the light factory's chain by the planning sess
 
 ## Defects
 
-None found. Every command above ran and every assertion held.
+The streak number did not render. `Label("\(streak.days)", systemImage: "flame")` inside a toolbar button draws as its icon alone on iOS 26, so the level list showed a flame with no number beside it, which is the one thing D17 and D22a exist to show. Setting `.labelStyle(.titleAndIcon)` on the label did not change it. The fix, in `Laoshu/LevelListView.swift`, is an explicit `HStack` holding an `Image` and a `Text`, which renders both. Found at step 9 by reading the screen in the simulator after this record's checks had already passed, which is why the commands above all held: no check in this repository can see a toolbar.
+
+Every other command above ran and every assertion held.
