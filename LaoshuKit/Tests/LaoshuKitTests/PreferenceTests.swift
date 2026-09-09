@@ -62,6 +62,21 @@ private func fetchPreference(_ dbQueue: DatabaseQueue) throws -> PreferenceRow {
 
     let preference = try fetchPreference(dbQueue)
     #expect(preference.direction == "receptive")
+
+    // The failure with the most to lose here is not a missing preference but
+    // a migration that seeds one and drops weeks of study on the way. Assert
+    // every row the fixture wrote is still there afterwards.
+    try dbQueue.read { db in
+        #expect(try Int.fetchOne(db, sql: "SELECT count(*) FROM batch") == 1)
+        #expect(try Int.fetchOne(db, sql: "SELECT count(*) FROM batch_word") == 3)
+        #expect(try Int.fetchOne(db, sql: "SELECT count(*) FROM review") == 1)
+        #expect(try String.fetchOne(db, sql: "SELECT status FROM placement WHERE id = 1") == "taken")
+        let batch = try Row.fetchOne(db, sql: "SELECT level, created_on, next_look_on, look_number FROM batch")
+        #expect(batch?["level"] == 1)
+        #expect(batch?["created_on"] == "2026-01-01")
+        #expect(batch?["next_look_on"] == "2026-01-02")
+        #expect(batch?["look_number"] == 0)
+    }
 }
 
 @Test func testPreferenceMigrationNeverRunsTwice() throws {
