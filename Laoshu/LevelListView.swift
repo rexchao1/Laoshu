@@ -92,7 +92,15 @@ struct LevelListView: View {
                             path.append(.progress)
                         } label: {
                             if let streak, streak.days > 0 {
-                                Label("\(streak.days)", systemImage: "flame")
+                                // An explicit stack rather than a `Label`: a
+                                // toolbar button on iOS 26 draws a `Label` as
+                                // its icon alone, even under
+                                // `.labelStyle(.titleAndIcon)`, which hid the
+                                // number this checkpoint exists to show.
+                                HStack(spacing: 4) {
+                                    Image(systemName: "flame")
+                                    Text("\(streak.days)")
+                                }
                             } else {
                                 Image(systemName: "flame")
                             }
