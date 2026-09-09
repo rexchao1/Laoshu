@@ -13,11 +13,13 @@ enum LevelDestination: Hashable {
 /// level's browse screen instead.
 struct LevelListView: View {
     let engine: SessionEngine
+    let preferenceStore: PreferenceStore
 
     @State private var summaries: [LevelSummary] = []
     @State private var loadError: String?
     @State private var path: [LevelDestination] = []
     @State private var showPlacementTest = false
+    @State private var direction: StudyDirection = .receptive
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -86,6 +88,14 @@ struct LevelListView: View {
                     }
                     .accessibilityLabel("Take placement test")
                 }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        toggleDirection()
+                    } label: {
+                        Text(directionLabel(direction))
+                    }
+                    .accessibilityLabel("Study direction: \(directionLabel(direction)). Tap to switch to the other direction.")
+                }
             }
             // D26: `SessionEngine` isn't `@Observable`, so nothing tells
             // this view its counts are stale after a session or a day
@@ -97,6 +107,7 @@ struct LevelListView: View {
             .onAppear {
                 loadSummaries()
                 checkPlacementGate()
+                loadDirection()
             }
         }
         // D11: presented over the level list rather than replacing it — the
@@ -141,6 +152,37 @@ struct LevelListView: View {
             }
         } catch {
             loadError = "\(error)"
+        }
+    }
+
+    private func directionLabel(_ direction: StudyDirection) -> String {
+        switch direction {
+        case .receptive: return "Receptive"
+        case .reverse: return "Reverse"
+        }
+    }
+
+    private func loadDirection() {
+        do {
+            direction = try preferenceStore.direction()
+        } catch {
+            loadError = "\(error)"
+        }
+    }
+
+    /// D4a: a failed write leaves the label exactly where it was. The label
+    /// is re-read from the store rather than flipped optimistically, so it
+    /// never claims a direction that a failed write did not actually store.
+    /// Unlike a failed placement decline, this does not set `loadError` —
+    /// losing the whole level list over an unsaved preference is worse than
+    /// the preference silently not saving.
+    private func toggleDirection() {
+        do {
+            let next: StudyDirection = direction == .receptive ? .reverse : .receptive
+            try preferenceStore.setDirection(next)
+            direction = try preferenceStore.direction()
+        } catch {
+            // Intentionally swallowed, per D4a.
         }
     }
 }
