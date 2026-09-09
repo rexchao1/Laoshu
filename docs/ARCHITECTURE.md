@@ -20,11 +20,11 @@ Each domain in the kit is a few files, not a directory. That is the right size t
 
 | From | May import | Enforced by |
 |---|---|---|
-| `LaoshuKit/Sources/LaoshuKit` | Foundation, GRDB, Observation | Package builds for macOS 14, where UIKit does not exist; `scripts/check` runs that build. SwiftUI and AVFoundation exist on macOS, so those two are held by review today. See Not yet enforced. |
-| `LaoshuKit/Sources/laoshu-build-db` | LaoshuKit, Foundation, SQLite3, CryptoKit | Package manifest. |
+| `LaoshuKit/Sources/LaoshuKit` | Foundation, GRDB, Observation | `scripts/check-imports`, run by `scripts/check`. |
+| `LaoshuKit/Sources/laoshu-build-db` | LaoshuKit, Foundation, SQLite3, CryptoKit | `scripts/check-imports` and the package manifest. |
 | `LaoshuKit/Tests` | LaoshuKit, GRDB, XCTest | Package manifest. |
-| `Laoshu/` | LaoshuKit, SwiftUI, Foundation, AVFoundation (only `SpeechSpeaker.swift`) | Review today. See Not yet enforced. |
-| `Laoshu/` | GRDB | Never. Views reach the database only through the kit's stores. Review today. |
+| `Laoshu/` | LaoshuKit, SwiftUI, Foundation, AVFoundation (only `SpeechSpeaker.swift`) | `scripts/check-imports`. |
+| `Laoshu/` | GRDB | Never. Views reach the database only through the kit's stores. `scripts/check-imports` fails on it. |
 
 Inside the kit: Study depends on Storage (the connection), Catalogue (`Word`), and `TodayProvider`. Placement writes a known word as a retired batch, but only through `BatchStore`, never with its own SQL against Study's tables. Progress reads Study's tables (`review`, `batch_word`) and writes nothing. Preferences depends on Storage only. Nothing in the kit depends on the app.
 
@@ -46,12 +46,13 @@ One process, one user, no network. iPhone only. Speech comes from the system Man
 
 ## Checks that hold this shape
 
+- `scripts/check-imports`: the three import rules above. `--self-test` plants one forbidden import per rule in a scratch tree and shows the check rejecting exactly those; `scripts/check` runs the self-test and then the real tree.
 - `scripts/check`: the kit test suite, `docs/check_glosses.py`, `docs/measure.py` against `docs/measurements.md`, the level counts and integrity of `data/laoshu.sqlite`, and that the bundled copy equals it.
 - `scripts/build` (in `scripts/check-full`): the app compiles against the kit's public surface.
 
 ## Not yet enforced
 
-- The kit importing SwiftUI or AVFoundation would compile. A boundary check for `LaoshuKit/Sources/LaoshuKit` and for `Laoshu/` importing GRDB is the next thing to add, with a fixture that shows it rejecting a forbidden import. Until then these two rows are held by review.
+- Import rules say which module a file may reach, not what it does with it. A view that reaches a store it should not, or a kit type that decides a view's layout, is still caught only by review and by the rule that every kit rule has a test.
 - `Laoshu/laoshu.sqlite` is a byte copy of `data/laoshu.sqlite` rather than a build step. `scripts/check` catches drift; the duplication stays because Xcode resources are simplest as a checked-in file.
 
 ## Reference implementation

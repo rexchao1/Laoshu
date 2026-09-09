@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+"""Holds the import boundaries in docs/ARCHITECTURE.md.
+
+    scripts/check-imports              check this repository
+    scripts/check-imports --self-test  prove the check rejects forbidden imports, then check the tree
+    scripts/check-imports --root DIR   check another tree (used by the self-test)
+
+Each rule names a directory, the modules its Swift files may import, and what
+to do instead when a file wants something else. Exit 1 on any violation.
+"""
+import argparse
+import os
+import re
+import sys
+import tempfile
+
+RULES = [
+    {
+        "dir": "LaoshuKit/Sources/LaoshuKit",
+        "allowed": {"Foundation", "GRDB", "Observation"},
+        "fix": "The kit holds rules and storage, not views or devices. Keep the type here without "
+               "the import and put the SwiftUI, UIKit, or AVFoundation part in Laoshu/.",
+    },
+    {
+        "dir": "LaoshuKit/Sources/laoshu-build-db",
+        "allowed": {"Foundation", "SQLite3", "CryptoKit", "LaoshuKit"},
+        "fix": "The builder turns TSV into the catalogue and needs nothing else.",
+    },
+    {
+        "dir": "Laoshu",
+        "allowed": {"SwiftUI", "Foundation", "LaoshuKit"},
+        "per_file": {"SpeechSpeaker.swift": {"AVFoundation"}},
+        "fix": "Views reach the database only through a kit store or the engine. If the store lacks "
+               "the read or write you need, add it in LaoshuKit with a test and call that. "
+               "AVFoundation belongs in SpeechSpeaker.swift alone.",
+    },
+]
+
+IMPORT = re.compile(
+    r"^\s*(?:@\w+\s+)*import\s+"
+    r"(?:(?:typealias|struct|class|enum|protocol|let|var|func)\s+)?"
+    r"([A-Za-z_][A-Za-z0-9_]*)"
+)
+
+
+def imports_of(path):
+    with open(path, encoding="utf-8") as f:
+        for n, line in enumerate(f, 1):
+            m = IMPORT.match(line)
+            if m:
+                yield n, m.group(1)
+
+
+def check(root):
+    problems = []
+    for rule in RULES:
+        base = os.path.join(root, rule["dir"])
+        if not os.path.isdir(base):
+            problems.append(f"{rule['dir']}: directory missing; update RULES in scripts/check-imports if it moved")
+            continue
+        for dirpath, _, files in os.walk(base):
+            for name in sorted(files):
+                if not name.endswith(".swift"):
+                    continue
+                allowed = rule["allowed"] | rule.get("per_file", {}).get(name, set())
+                path = os.path.join(dirpath, name)
+                for n, module in imports_of(path):
+                    if module not in allowed:
+                        rel = os.path.relpath(path, root)
+                        problems.append(f"{rel}:{n} imports {module}, which {rule['dir']} may not. {rule['fix']}")
+    return problems
+
+
+def self_test():
+    """A scratch tree with one forbidden import per rule must fail with exactly those findings."""
+    with tempfile.TemporaryDirectory() as tmp:
+        files = {
+            "LaoshuKit/Sources/LaoshuKit/Fine.swift": "import Foundation\nimport GRDB\n",
+            "LaoshuKit/Sources/LaoshuKit/Bad.swift": "import Foundation\nimport SwiftUI\n",
+            "LaoshuKit/Sources/laoshu-build-db/main.swift": "import Foundation\nimport UIKit\n",
+            "Laoshu/Fine.swift": "import SwiftUI\nimport LaoshuKit\n",
+            "Laoshu/SpeechSpeaker.swift": "import AVFoundation\n",
+            "Laoshu/Bad.swift": "import SwiftUI\nimport GRDB\n",
+            "Laoshu/AlsoBad.swift": "@preconcurrency import AVFoundation\n",
+        }
+        for rel, body in files.items():
+            path = os.path.join(tmp, rel)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(body)
+        found = check(tmp)
+        expected = {
+            "LaoshuKit/Sources/LaoshuKit/Bad.swift:2 imports SwiftUI",
+            "LaoshuKit/Sources/laoshu-build-db/main.swift:2 imports UIKit",
+            "Laoshu/Bad.swift:2 imports GRDB",
+            "Laoshu/AlsoBad.swift:1 imports AVFoundation",
+        }
+        got = {p.split(", which")[0] for p in found}
+        if got != expected:
+            print("self-test: the check did not find exactly the planted violations")
+            print("  expected:", sorted(expected))
+            print("  got:     ", sorted(got))
+            return False
+    print(f"self-test: ok, {len(expected)} planted violations rejected, allowed imports accepted")
+    return True
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--root", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+    ap.add_argument("--self-test", action="store_true")
+    args = ap.parse_args()
+    if args.self_test and not self_test():
+        return 1
+    problems = check(os.path.abspath(args.root))
+    for p in problems:
+        print(p)
+    if not problems:
+        print("imports: ok")
+    return 1 if problems else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

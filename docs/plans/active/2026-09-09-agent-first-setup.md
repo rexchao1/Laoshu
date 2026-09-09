@@ -25,7 +25,7 @@ Laoshu is the pilot for a workflow change across the user's repositories: short 
 ## Steps
 
 1. Record the state of every existing check. Done 2026-09-09: all green.
-2. Add `scripts/`, `AGENTS.md`, `CLAUDE.md`, `docs/ARCHITECTURE.md`. Verify each script end to end.
-3. Add the first boundary check (kit imports, app never imports GRDB) with fixtures. Register it in `scripts/check`.
+2. Add `scripts/`, `AGENTS.md`, `CLAUDE.md`, `docs/ARCHITECTURE.md`. Verify each script end to end. Done 2026-09-09.
+3. Add the first boundary check (kit imports, app never imports GRDB) with fixtures. Register it in `scripts/check`. Done 2026-09-09: `scripts/check-imports`.
 4. Run one real change through the setup in a fresh session and fix whatever confused it.
 5. Move this plan to `docs/plans/completed/` with a Result.
