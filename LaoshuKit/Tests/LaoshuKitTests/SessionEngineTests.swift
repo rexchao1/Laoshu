@@ -287,10 +287,15 @@ private func localDate(_ year: Int, _ month: Int, _ day: Int) -> LocalDate {
     let store = BatchStore(dbQueue: dbQueue)
     let day0 = provider(at: date(2026, 1, 1))
 
-    // Spend today's allowance with an ordinary session first.
+    // Spend today's allowance with an ordinary session first, finishing it
+    // so its `session` row is `done` rather than `live` — the bonus session
+    // below is a second live session on the same level, which the schema
+    // only allows once the first has stopped being live.
     let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day0)
     let first = try engine.startSession(level: 1)
-    try first.swipe(.right)
+    while first.currentCard != nil {
+        try first.swipe(.right)
+    }
     #expect(try store.hasBatchCreatedToday(today: day0) == true)
 
     let bonus = try engine.startBonusSession(level: 1)
@@ -972,4 +977,153 @@ private struct WriteSnapshot: Equatable {
     let result = try engine.browse(level: 1)
 
     #expect(Set(result.words.map(\.wordIndex)) == Set([1, 2, 3]))
+}
+
+// MARK: - Writing a session down as it is swiped (D4a, D8, D11, D11b, D12, D12a, D16)
+
+/// A clock whose instant can move mid-test, so a test can put the draw on
+/// one side of a day boundary and the first swipe on the other — a single
+/// fixed-instant `TodayProvider` (`provider(at:)`) cannot do this since draw
+/// and swipe would read the same instant.
+private final class MutableClock: @unchecked Sendable {
+    var instant: Date
+    init(_ instant: Date) { self.instant = instant }
+}
+
+@Test func testEnteringAndLeavingWithoutSwipingWritesNoSessionRow() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+
+    let session = try engine.startSession(level: 1)
+    #expect(session.drawnCount == 8)
+    // Abandoned: never swiped.
+
+    let store = SessionStore(dbQueue: dbQueue)
+    #expect(try store.liveSession(level: 1) == nil)
+    let sessionCount = try dbQueue.read { db in try Int.fetchOne(db, sql: "SELECT count(*) FROM session;") }
+    #expect(sessionCount == 0)
+}
+
+@Test func testASwipeWhoseWriteThrowsLeavesTheCardAtTheHeadOfTheQueue() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+    let session = try engine.startSession(level: 1)
+    let first = try #require(session.currentCard?.word.wordIndex)
+
+    // A live session already parked on the level trips
+    // `session_one_live_per_level` the moment this session's first swipe
+    // tries to insert its own session row.
+    let store = SessionStore(dbQueue: dbQueue)
+    try store.insertSession(StoredSession(
+        level: 1, createdOn: localDate(2026, 1, 1), direction: .receptive, speakOnFlip: true,
+        status: .live, cards: [StoredSessionCard(wordIndex: 1, position: 0)]
+    ))
+
+    #expect(throws: (any Error).self) {
+        try session.swipe(.right)
+    }
+
+    #expect(session.currentCard?.word.wordIndex == first)
+    #expect(session.isFinished == false)
+    #expect(session.finishedCount == 0)
+    #expect(session.drawnCount == 8)
+
+    // Only the pre-existing session's row is on the level — this session's
+    // own write left nothing behind.
+    let liveCards = try #require(try store.liveSession(level: 1)?.cards)
+    #expect(liveCards.count == 1)
+}
+
+@Test func testALeftSwipedCardResumesAtThePlaceTheLeftSwipePutIt() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+    let session = try engine.startSession(level: 1)
+    let sent = try #require(session.currentCard?.word.wordIndex)
+
+    try session.swipe(.left) // requeued at min(3, 7) == 3
+
+    let store = SessionStore(dbQueue: dbQueue)
+    let stored = try #require(try store.liveSession(level: 1))
+    let pending = stored.cards.filter { $0.outcome == nil }
+
+    #expect(pending.count == 8)
+    #expect(pending.map(\.position) == Array(0..<8))
+    #expect(pending[3].wordIndex == sent)
+    #expect(session.currentCard?.word.wordIndex == pending[0].wordIndex)
+}
+
+@Test func testParkedWordsKeepTheirOrderAcrossAResume() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 3)
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+    let session = try engine.startSession(level: 1)
+
+    // Left-swipe whatever is current until exactly two words have parked,
+    // leaving the third still pending so the session stays live.
+    while session.parkedCount < 2 {
+        try session.swipe(.left)
+    }
+    #expect(session.isFinished == false)
+    #expect(session.parkedWords.map(\.wordIndex).count == 2)
+
+    let store = SessionStore(dbQueue: dbQueue)
+    let stored = try #require(try store.liveSession(level: 1))
+    let settled = stored.cards
+        .filter { $0.outcome != nil }
+        .sorted { $0.settledOrder! < $1.settledOrder! }
+
+    #expect(settled.map(\.wordIndex) == session.parkedWords.map(\.wordIndex))
+    #expect(settled.allSatisfy { $0.outcome == .parked })
+}
+
+@Test func testAFinishedSessionIsMarkedDoneAndIsNotResumed() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 3)
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+    let session = try engine.startSession(level: 1)
+
+    while session.currentCard != nil {
+        try session.swipe(.right)
+    }
+    #expect(session.isFinished)
+
+    let store = SessionStore(dbQueue: dbQueue)
+    #expect(try store.liveSession(level: 1) == nil)
+
+    let status = try dbQueue.read { db in
+        try String.fetchOne(db, sql: "SELECT status FROM session WHERE level = 1;")
+    }
+    #expect(status == "done")
+}
+
+@Test func testTheSummaryNamesTheReturnDateTheBatchHoldsWhenTheFirstSwipeCrossesMidnight() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+
+    // The draw happens just before midnight; the first swipe lands just
+    // after. Business day stays the same across that boundary (it turns at
+    // 04:00), but D4a's wall-clock floor turns right at midnight, so the
+    // batch's first look computed at the draw is one day earlier than the
+    // one actually written by the swipe.
+    let drawInstant = testCalendar.date(from: DateComponents(year: 2026, month: 1, day: 1, hour: 23, minute: 55))!
+    let swipeInstant = testCalendar.date(from: DateComponents(year: 2026, month: 1, day: 2, hour: 0, minute: 5))!
+    let clock = MutableClock(drawInstant)
+    let today = TodayProvider(calendar: testCalendar, clock: { clock.instant })
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: today)
+
+    let session = try engine.startSession(level: 1)
+    let preview = session.newWordsReturnOn
+    #expect(preview == localDate(2026, 1, 2))
+
+    clock.instant = swipeInstant
+    try session.swipe(.right)
+
+    #expect(session.newWordsReturnOn == localDate(2026, 1, 3))
+    #expect(session.newWordsReturnOn != preview)
+
+    // The summary's date matches what the batch itself actually holds.
+    let store = SessionStore(dbQueue: dbQueue)
+    let stored = try #require(try store.liveSession(level: 1))
+    let batchID = try #require(stored.newWordsBatchID)
+    let nextLookOn = try dbQueue.read { db in
+        try LocalDate.fetchOne(db, sql: "SELECT next_look_on FROM batch WHERE id = ?;", arguments: [batchID])
+    }
+    #expect(nextLookOn == session.newWordsReturnOn)
 }

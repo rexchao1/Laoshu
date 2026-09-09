@@ -102,6 +102,7 @@ public final class Session {
     private let newWordIndices: [Int]
     private let dueBatchIDs: [Int64]
     private var hasWrittenFirstSwipe = false
+    private var sessionID: Int64?
     private var queue: [Card]
 
     /// Which way this session asks, captured once at the draw and fixed for
@@ -136,10 +137,13 @@ public final class Session {
     public private(set) var parkedWords: [Word] = []
 
     /// When the words this session introduced come back for their first
-    /// look, or `nil` when the session introduced none. Computed the same
-    /// way the batch actually written on the first swipe will be scheduled,
-    /// so it never drifts from what gets written (D24).
-    public let newWordsReturnOn: LocalDate?
+    /// look, or `nil` when the session introduced none. Set at the draw as a
+    /// preview computed the same way `BatchScheduler.createBatch` schedules
+    /// it (D24), then overwritten on the first swipe with the `nextLookOn`
+    /// of the `Batch` `BatchStore.createBatch` actually returns (D8) — the
+    /// two agree unless the first swipe crosses midnight between the draw
+    /// and the write.
+    public private(set) var newWordsReturnOn: LocalDate?
 
     /// Whether the level still has unseen words left after this session's
     /// own draw — what decides whether the "eight more" button appears.
@@ -199,45 +203,133 @@ public final class Session {
     /// placement below), or parks it without requeuing on the third left
     /// swipe.
     ///
-    /// The first swipe of a session also writes the batch of new words it
-    /// drew (if any) and advances every due batch it drew from, all inside
-    /// the same transaction as this swipe's review row (D7, D7a).
+    /// The first swipe of a session also writes the `session` row and every
+    /// `session_card` row it holds, the batch of new words it drew (if any),
+    /// and advances every due batch it drew from, all inside the same
+    /// transaction as this swipe's review row (D7, D7a, D11). Every swipe —
+    /// the first included — settles or requeues the card and rebuilds the
+    /// pending queue as local values before writing anything (D11b, D12a),
+    /// so a write that throws leaves `queue` and every count exactly as they
+    /// were: nothing here is committed to `self` until the transaction
+    /// succeeds.
     public func swipe(_ direction: SwipeDirection) throws {
         guard !queue.isEmpty else { return }
-        var card = queue.removeFirst()
+        let outgoing = queue[0]
+        let rest = Array(queue.dropFirst())
         let grade: Grade = direction == .right ? .good : .again
 
+        var settled: (card: Card, outcome: SessionCardOutcome)?
+        var requeuedCard: Card?
+        let pendingAfter: [Card]
+
+        switch direction {
+        case .right:
+            settled = (outgoing, .finished)
+            pendingAfter = rest
+
+        case .left:
+            var requeued = outgoing
+            requeued.requeued()
+            if requeued.leftSwipeCount >= 3 {
+                settled = (requeued, .parked)
+                pendingAfter = rest
+            } else {
+                requeuedCard = requeued
+                var after = rest
+                after.insert(requeued, at: min(3, rest.count))
+                pendingAfter = after
+            }
+        }
+
+        var createdBatch: Batch?
+        var insertedSessionID: Int64?
+
         try dbQueue.write { db in
-            try ReviewLog.record(db, wordIndex: card.word.wordIndex, grade: grade, at: Date())
+            try ReviewLog.record(db, wordIndex: outgoing.word.wordIndex, grade: grade, at: Date())
 
             if !self.hasWrittenFirstSwipe {
                 if !self.newWordIndices.isEmpty {
-                    try BatchStore.createBatch(db, level: self.level, wordIndices: self.newWordIndices, today: self.today)
+                    createdBatch = try BatchStore.createBatch(db, level: self.level, wordIndices: self.newWordIndices, today: self.today)
                 }
                 for batchID in self.dueBatchIDs {
                     try BatchStore.recordLook(db, batchID: batchID, today: self.today)
                 }
+
+                let stored = StoredSession(
+                    level: self.level,
+                    createdOn: self.today.today(),
+                    direction: self.direction,
+                    speakOnFlip: self.speakOnFlip,
+                    newWordsBatchID: createdBatch?.id,
+                    status: pendingAfter.isEmpty ? .done : .live,
+                    cards: self.initialStoredCards(pendingAfter: pendingAfter, settled: settled)
+                )
+                insertedSessionID = try SessionStore.insertSession(db, stored).id
+            } else {
+                let sessionID = self.sessionID!
+                if let settled {
+                    try SessionStore.settleCard(db, sessionID: sessionID, wordIndex: settled.card.word.wordIndex, outcome: settled.outcome)
+                } else if let requeuedCard {
+                    try SessionStore.recordLeftSwipe(db, sessionID: sessionID, wordIndex: requeuedCard.word.wordIndex, leftSwipeCount: requeuedCard.leftSwipeCount)
+                }
+                try SessionStore.rewritePendingPositions(db, sessionID: sessionID, order: pendingAfter.map(\.word.wordIndex))
+                if pendingAfter.isEmpty {
+                    try SessionStore.setStatus(db, sessionID: sessionID, status: .done)
+                }
             }
         }
-        hasWrittenFirstSwipe = true
 
+        if !hasWrittenFirstSwipe {
+            hasWrittenFirstSwipe = true
+            sessionID = insertedSessionID
+            if let createdBatch {
+                newWordsReturnOn = createdBatch.nextLookOn
+            }
+        }
+
+        queue = pendingAfter
         switch direction {
         case .right:
             finishedCount += 1
-            if card.leftSwipeCount == 0 {
+            if outgoing.leftSwipeCount == 0 {
                 firstAttemptRightCount += 1
             }
 
         case .left:
-            card.requeued()
-            if card.leftSwipeCount >= 3 {
+            if let settled {
                 parkedCount += 1
-                parkedWords.append(card.word)
-            } else {
-                let insertIndex = min(3, queue.count)
-                queue.insert(card, at: insertIndex)
+                parkedWords.append(settled.card.word)
             }
         }
+    }
+
+    /// The full `session_card` row set for the session's first swipe: every
+    /// card as originally drawn (`queue`, still untouched at this point),
+    /// overlaid with `pendingAfter`'s positions for every card still pending
+    /// and with `settled`'s outcome for the one this swipe settled, if any —
+    /// the D5a position rewrite collapsed into a single insert since there
+    /// is nothing yet to rewrite.
+    private func initialStoredCards(
+        pendingAfter: [Card],
+        settled: (card: Card, outcome: SessionCardOutcome)?
+    ) -> [StoredSessionCard] {
+        var byWordIndex: [Int: StoredSessionCard] = [:]
+        for card in queue {
+            byWordIndex[card.word.wordIndex] = StoredSessionCard(wordIndex: card.word.wordIndex, position: nil, leftSwipeCount: card.leftSwipeCount)
+        }
+        for (position, card) in pendingAfter.enumerated() {
+            byWordIndex[card.word.wordIndex] = StoredSessionCard(wordIndex: card.word.wordIndex, position: position, leftSwipeCount: card.leftSwipeCount)
+        }
+        if let settled {
+            byWordIndex[settled.card.word.wordIndex] = StoredSessionCard(
+                wordIndex: settled.card.word.wordIndex,
+                position: nil,
+                leftSwipeCount: settled.card.leftSwipeCount,
+                outcome: settled.outcome,
+                settledOrder: 0
+            )
+        }
+        return queue.map { byWordIndex[$0.word.wordIndex]! }
     }
 }
 
