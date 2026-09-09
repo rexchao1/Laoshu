@@ -40,7 +40,7 @@ public struct Card: Sendable, Equatable {
     /// Whether the meaning has been shown at least once in this presentation.
     public private(set) var hasBeenRevealed = false
 
-    init(word: Word, direction: StudyDirection) {
+    init(word: Word, direction: StudyDirection, leftSwipeCount: Int = 0) {
         self.word = word
         switch direction {
         case .receptive:
@@ -50,6 +50,7 @@ public struct Card: Sendable, Equatable {
             promptFace = .meaning
             answerFace = .chinese
         }
+        self.leftSwipeCount = leftSwipeCount
     }
 
     mutating func flip() {
@@ -69,9 +70,13 @@ public struct Card: Sendable, Equatable {
 /// One study session: an in-memory queue of cards drawn from a single level,
 /// and the rules for what a swipe does to that queue.
 ///
-/// D22: session state lives only in memory. Closing the app abandons
-/// whatever is left in the queue; the swipes already logged to `ReviewLog`
-/// stand regardless.
+/// Every swipe after the session's first also rewrites the queue's order and
+/// each card's left-swipe count into `session` and `session_card` (D2), so a
+/// session closed mid-queue and reopened on the same business day resumes
+/// exactly where the swiping left it — see
+/// `SessionEngine.startSession(level:)`. Before the first swipe nothing is
+/// written at all (below), so closing the app before then leaves no trace
+/// and the swipes already logged to `ReviewLog` stand regardless.
 ///
 /// D3, D7: the words are drawn up front, but the batch they came from (if
 /// any is due) only advances its ladder, and the batch of new words among
@@ -102,7 +107,15 @@ public final class Session {
     private let newWordIndices: [Int]
     private let dueBatchIDs: [Int64]
     private var hasWrittenFirstSwipe = false
-    private var sessionID: Int64?
+
+    /// Nil until the first swipe writes the `session` row, except for a
+    /// resumed session, which already has one (D30).
+    public private(set) var sessionID: Int64?
+
+    /// Whether this session was handed back by `startSession(level:)` as an
+    /// existing live row rather than freshly drawn (D30).
+    public private(set) var isResumed = false
+
     private var queue: [Card]
 
     /// Which way this session asks, captured once at the draw and fixed for
@@ -153,6 +166,20 @@ public final class Session {
     /// `.waitingOnLadder` empty reason.
     public let nextBatchReturnOn: LocalDate?
 
+    /// Everything a resumed session needs beyond what a fresh draw computes:
+    /// the queue and every count rebuilt from `session_card` (D6), and the
+    /// row it came from (D30).
+    struct ResumeData {
+        let sessionID: Int64
+        let queue: [Card]
+        let drawnCount: Int
+        let finishedCount: Int
+        let parkedCount: Int
+        let firstAttemptRightCount: Int
+        let parkedWords: [Word]
+        let newWordsReturnOn: LocalDate?
+    }
+
     init(
         words: [Word],
         dbQueue: DatabaseQueue,
@@ -165,7 +192,8 @@ public final class Session {
         speakOnFlip: Bool,
         emptyReason: EmptyReason? = nil,
         hasUnseenWordsRemaining: Bool = false,
-        nextBatchReturnOn: LocalDate? = nil
+        nextBatchReturnOn: LocalDate? = nil,
+        resumed resumeData: ResumeData? = nil
     ) {
         self.dbQueue = dbQueue
         self.today = today
@@ -175,14 +203,28 @@ public final class Session {
         self.direction = direction
         self.newWordsPerDay = newWordsPerDay
         self.speakOnFlip = speakOnFlip
-        self.queue = words.map { Card(word: $0, direction: direction) }
-        self.drawnCount = words.count
         self.emptyReason = emptyReason
-        self.newWordsReturnOn = newWordIndices.isEmpty
-            ? nil
-            : BatchScheduler.createBatch(level: level, today: today).nextLookOn
         self.hasUnseenWordsRemaining = hasUnseenWordsRemaining
         self.nextBatchReturnOn = nextBatchReturnOn
+
+        if let resumeData {
+            self.queue = resumeData.queue
+            self.drawnCount = resumeData.drawnCount
+            self.finishedCount = resumeData.finishedCount
+            self.parkedCount = resumeData.parkedCount
+            self.firstAttemptRightCount = resumeData.firstAttemptRightCount
+            self.parkedWords = resumeData.parkedWords
+            self.newWordsReturnOn = resumeData.newWordsReturnOn
+            self.sessionID = resumeData.sessionID
+            self.hasWrittenFirstSwipe = true
+            self.isResumed = true
+        } else {
+            self.queue = words.map { Card(word: $0, direction: direction) }
+            self.drawnCount = words.count
+            self.newWordsReturnOn = newWordIndices.isEmpty
+                ? nil
+                : BatchScheduler.createBatch(level: level, today: today).nextLookOn
+        }
     }
 
     /// D20: the session ends once every drawn word has been swiped right
@@ -447,6 +489,16 @@ public final class SessionEngine {
     /// there is nothing to draw — see `Session.EmptyReason`.
     public func startSession(level: Int) throws -> Session {
         let preferences = try preferenceStore.preferences()
+        let sessionStore = SessionStore(dbQueue: dbQueue)
+
+        if let live = try sessionStore.liveSession(level: level), let liveID = live.id {
+            if live.createdOn == today.today(),
+                let resumed = try resumeSession(live, sessionID: liveID, preferences: preferences) {
+                return resumed
+            }
+            try sessionStore.setStatus(sessionID: liveID, status: .abandoned)
+        }
+
         let dueBatches = try batchStore.dueBatches(level: level, today: today)
         let dueBatchIDs = dueBatches.compactMap(\.id)
         let dueWordIndices = try batchStore.wordIndices(batchIDs: dueBatchIDs)
@@ -487,6 +539,70 @@ public final class SessionEngine {
             newWordsPerDay: preferences.newWordsPerDay, speakOnFlip: preferences.speakOnFlip,
             emptyReason: nil,
             hasUnseenWordsRemaining: hasUnseenWordsRemaining, nextBatchReturnOn: nil
+        )
+    }
+
+    /// Rebuilds a live `session` row into a resumable `Session`: the same
+    /// queue in the same order with each card's left-swipe count intact, and
+    /// every count rebuilt from `session_card` rather than stored anywhere
+    /// (D2, D6, D10). Returns `nil` — asking the caller to abandon the row
+    /// and draw fresh instead — when the row holds no cards, or when the
+    /// words it names no longer resolve against the catalogue.
+    private func resumeSession(_ stored: StoredSession, sessionID: Int64, preferences: Preferences) throws -> Session? {
+        guard !stored.cards.isEmpty else { return nil }
+
+        let pendingCards = stored.cards
+            .filter { $0.position != nil }
+            .sorted { $0.position! < $1.position! }
+        let settledCards = stored.cards
+            .filter { $0.outcome != nil }
+            .sorted { ($0.settledOrder ?? 0) < ($1.settledOrder ?? 0) }
+
+        let pendingWordIndices = pendingCards.map(\.wordIndex)
+        let pendingWords = try Word.fetch(indices: pendingWordIndices, dbQueue: dbQueue)
+        guard pendingWords.count == pendingWordIndices.count else { return nil }
+
+        let settledWordIndices = settledCards.map(\.wordIndex)
+        let settledWords = try Word.fetch(indices: settledWordIndices, dbQueue: dbQueue)
+        guard settledWords.count == settledWordIndices.count else { return nil }
+        let settledByIndex = Dictionary(uniqueKeysWithValues: zip(settledWordIndices, settledWords))
+
+        let queue = zip(pendingCards, pendingWords).map { card, word in
+            Card(word: word, direction: stored.direction, leftSwipeCount: card.leftSwipeCount)
+        }
+
+        let finishedCount = stored.cards.filter { $0.outcome == .finished }.count
+        let parkedCount = stored.cards.filter { $0.outcome == .parked }.count
+        let firstAttemptRightCount = stored.cards.filter { $0.outcome == .finished && $0.leftSwipeCount == 0 }.count
+        let parkedWords = settledCards
+            .filter { $0.outcome == .parked }
+            .compactMap { settledByIndex[$0.wordIndex] }
+
+        let hasUnseenWordsRemaining = try batchStore.unseenWordIndices(level: stored.level).isEmpty == false
+
+        var newWordsReturnOn: LocalDate?
+        if let batchID = stored.newWordsBatchID {
+            newWordsReturnOn = try batchStore.fetchBatch(id: batchID)?.nextLookOn
+        }
+
+        let resumeData = Session.ResumeData(
+            sessionID: sessionID,
+            queue: queue,
+            drawnCount: stored.cards.count,
+            finishedCount: finishedCount,
+            parkedCount: parkedCount,
+            firstAttemptRightCount: firstAttemptRightCount,
+            parkedWords: parkedWords,
+            newWordsReturnOn: newWordsReturnOn
+        )
+
+        return Session(
+            words: [], dbQueue: dbQueue, today: today, level: stored.level,
+            newWordIndices: [], dueBatchIDs: [], direction: stored.direction,
+            newWordsPerDay: preferences.newWordsPerDay, speakOnFlip: stored.speakOnFlip,
+            emptyReason: nil,
+            hasUnseenWordsRemaining: hasUnseenWordsRemaining, nextBatchReturnOn: nil,
+            resumed: resumeData
         )
     }
 

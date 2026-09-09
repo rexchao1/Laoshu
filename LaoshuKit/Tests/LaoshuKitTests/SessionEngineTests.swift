@@ -658,17 +658,22 @@ private struct WriteSnapshot: Equatable {
     let batch: [Row]
     let batchWord: [Row]
     let placement: [Row]
+    let session: [Row]
+    let sessionCard: [Row]
 
     init(_ dbQueue: DatabaseQueue) throws {
         review = try dbQueue.read { try Row.fetchAll($0, sql: "SELECT * FROM review ORDER BY rowid;") }
         batch = try dbQueue.read { try Row.fetchAll($0, sql: "SELECT * FROM batch ORDER BY id;") }
         batchWord = try dbQueue.read { try Row.fetchAll($0, sql: "SELECT * FROM batch_word ORDER BY batch_id, word_index;") }
         placement = try dbQueue.read { try Row.fetchAll($0, sql: "SELECT * FROM placement ORDER BY id;") }
+        session = try dbQueue.read { try Row.fetchAll($0, sql: "SELECT * FROM session ORDER BY id;") }
+        sessionCard = try dbQueue.read { try Row.fetchAll($0, sql: "SELECT * FROM session_card ORDER BY session_id, word_index;") }
     }
 
     static func == (lhs: WriteSnapshot, rhs: WriteSnapshot) -> Bool {
         lhs.review == rhs.review && lhs.batch == rhs.batch
             && lhs.batchWord == rhs.batchWord && lhs.placement == rhs.placement
+            && lhs.session == rhs.session && lhs.sessionCard == rhs.sessionCard
     }
 }
 
@@ -1126,4 +1131,266 @@ private final class MutableClock: @unchecked Sendable {
         try LocalDate.fetchOne(db, sql: "SELECT next_look_on FROM batch WHERE id = ?;", arguments: [batchID])
     }
     #expect(nextLookOn == session.newWordsReturnOn)
+}
+
+// MARK: - Picking a session back up where it was left (checkpoint 7)
+
+@Test func testASessionSwipedPartwayComesBackWithTheSameQueueInTheSameOrder() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let day = provider(at: date(2026, 1, 1))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+
+    let original = try engine.startSession(level: 1)
+    try original.swipe(.right)
+    try original.swipe(.left)
+
+    let store = SessionStore(dbQueue: dbQueue)
+    let stored = try #require(try store.liveSession(level: 1))
+    let expectedOrder = stored.cards
+        .filter { $0.position != nil }
+        .sorted { $0.position! < $1.position! }
+        .map(\.wordIndex)
+
+    let secondEngine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+    let resumed = try secondEngine.startSession(level: 1)
+    #expect(resumed.isResumed)
+
+    var actual: [Int] = []
+    while let card = resumed.currentCard {
+        actual.append(card.word.wordIndex)
+        try resumed.swipe(.right)
+    }
+    #expect(actual == expectedOrder)
+}
+
+@Test func testAResumedSessionKeepsEachCardsLeftSwipeCount() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 3)
+    let day = provider(at: date(2026, 1, 1))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+    let original = try engine.startSession(level: 1)
+    let target = try #require(original.currentCard?.word.wordIndex)
+
+    try original.swipe(.left) // requeued to the end with a 3-word queue
+    try original.swipe(.right)
+    try original.swipe(.right)
+    try original.swipe(.left) // target's second left swipe
+
+    #expect(original.currentCard?.word.wordIndex == target)
+    #expect(original.currentCard?.leftSwipeCount == 2)
+    #expect(original.isFinished == false)
+
+    let secondEngine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+    let resumed = try secondEngine.startSession(level: 1)
+
+    #expect(resumed.currentCard?.word.wordIndex == target)
+    #expect(resumed.currentCard?.leftSwipeCount == 2)
+}
+
+@Test func testAResumedSessionsSummaryCountsTheWholeSessionNotJustThePartAfterResuming() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 5)
+    let day = provider(at: date(2026, 1, 1))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+    let original = try engine.startSession(level: 1)
+
+    try original.swipe(.right) // finished, first attempt right
+    try original.swipe(.left) // requeued, still pending
+
+    let secondEngine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+    let resumed = try secondEngine.startSession(level: 1)
+
+    #expect(resumed.drawnCount == 5)
+    #expect(resumed.finishedCount == 1)
+    #expect(resumed.firstAttemptRightCount == 1)
+    #expect(resumed.parkedCount == 0)
+
+    while let card = resumed.currentCard {
+        _ = card
+        try resumed.swipe(.right)
+    }
+
+    #expect(resumed.drawnCount == 5)
+    #expect(resumed.finishedCount == 5)
+}
+
+@Test func testASessionFromAnEarlierBusinessDayIsAbandonedAndAFreshOneDrawn() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let day0 = provider(at: date(2026, 1, 1))
+    let engine0 = TestFixtures.makeEngine(dbQueue: dbQueue, today: day0)
+    let yesterday = try engine0.startSession(level: 1)
+    try yesterday.swipe(.left)
+
+    let day1 = provider(at: date(2026, 1, 2))
+    let engine1 = TestFixtures.makeEngine(dbQueue: dbQueue, today: day1)
+    let fresh = try engine1.startSession(level: 1)
+
+    #expect(fresh.isResumed == false)
+    #expect(fresh.drawnCount == 8)
+
+    let store = SessionStore(dbQueue: dbQueue)
+    #expect(try store.liveSession(level: 1) == nil)
+    let statuses = try dbQueue.read { db in
+        try String.fetchAll(db, sql: "SELECT status FROM session WHERE level = 1 ORDER BY id;")
+    }
+    #expect(statuses == ["abandoned"])
+}
+
+@Test func testASessionOnOneLevelDoesNotDisturbALiveSessionOnAnother() throws {
+    let dbQueue = try TestFixtures.makeDatabase(levelCounts: [1: 8, 2: 8])
+    let day = provider(at: date(2026, 1, 1))
+
+    // Level 2 draws from a batch already due today rather than the day's new
+    // word allowance, which is spent globally (not per level) the moment
+    // level 1 draws its own eight — see
+    // testAllowanceSpentAtOneLevelLeavesAnotherLevelsDueBatchesButNoNewWords.
+    let batchStore = BatchStore(dbQueue: dbQueue)
+    let dayBefore = provider(at: date(2025, 12, 31))
+    try batchStore.createBatch(level: 2, wordIndices: [9, 10, 11], today: dayBefore)
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+
+    let level1 = try engine.startSession(level: 1)
+    try level1.swipe(.left)
+    let level2 = try engine.startSession(level: 2)
+    try level2.swipe(.right)
+
+    let secondEngine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+    let resumed1 = try secondEngine.startSession(level: 1)
+    let resumed2 = try secondEngine.startSession(level: 2)
+
+    #expect(resumed1.isResumed)
+    #expect(resumed2.isResumed)
+    #expect(resumed1.drawnCount == 8)
+    #expect(resumed2.drawnCount == 3)
+    #expect(resumed1.finishedCount == 0)
+    #expect(resumed2.finishedCount == 1)
+}
+
+@Test func testAResumedSessionKeepsTheSettingsItWasDrawnWith() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let day = provider(at: date(2026, 1, 1))
+    let preferenceStore = PreferenceStore(dbQueue: dbQueue)
+    try preferenceStore.setDirection(.reverse)
+    try preferenceStore.setSpeakOnFlip(false)
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+    let original = try engine.startSession(level: 1)
+    #expect(original.direction == .reverse)
+    #expect(original.speakOnFlip == false)
+    try original.swipe(.left)
+
+    // Settings change after the draw; the resumed session keeps what it was
+    // drawn with, not whatever preferences say now (D25).
+    try preferenceStore.setDirection(.receptive)
+    try preferenceStore.setSpeakOnFlip(true)
+
+    let secondEngine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+    let resumed = try secondEngine.startSession(level: 1)
+
+    #expect(resumed.direction == .reverse)
+    #expect(resumed.speakOnFlip == false)
+}
+
+@Test func testADrawOnANewDayRetiresYesterdaysRowAndWritesNothingElse() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let day0 = provider(at: date(2026, 1, 1))
+    let engine0 = TestFixtures.makeEngine(dbQueue: dbQueue, today: day0)
+    let yesterday = try engine0.startSession(level: 1)
+    try yesterday.swipe(.left)
+
+    let day1 = provider(at: date(2026, 1, 2))
+    let engine1 = TestFixtures.makeEngine(dbQueue: dbQueue, today: day1)
+
+    let beforeReview = try dbQueue.read { db in try Row.fetchAll(db, sql: "SELECT * FROM review ORDER BY rowid;") }
+    let beforeBatch = try dbQueue.read { db in try Row.fetchAll(db, sql: "SELECT * FROM batch ORDER BY id;") }
+    let beforeCards = try dbQueue.read { db in try Row.fetchAll(db, sql: "SELECT * FROM session_card ORDER BY session_id, word_index;") }
+
+    _ = try engine1.startSession(level: 1)
+
+    let afterReview = try dbQueue.read { db in try Row.fetchAll(db, sql: "SELECT * FROM review ORDER BY rowid;") }
+    let afterBatch = try dbQueue.read { db in try Row.fetchAll(db, sql: "SELECT * FROM batch ORDER BY id;") }
+    let afterCards = try dbQueue.read { db in try Row.fetchAll(db, sql: "SELECT * FROM session_card ORDER BY session_id, word_index;") }
+    #expect(beforeReview == afterReview)
+    #expect(beforeBatch == afterBatch)
+    #expect(beforeCards == afterCards)
+
+    let sessionRows = try dbQueue.read { db in try Row.fetchAll(db, sql: "SELECT id, status FROM session ORDER BY id;") }
+    #expect(sessionRows.count == 1)
+    #expect((sessionRows[0]["status"] as String) == "abandoned")
+}
+
+@Test func testAFutureDatedLiveSessionIsRetiredRatherThanBlockingTheLevel() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let store = SessionStore(dbQueue: dbQueue)
+    try store.insertSession(StoredSession(
+        level: 1, createdOn: localDate(2026, 1, 5), direction: .receptive, speakOnFlip: true,
+        status: .live, cards: (1...8).map { StoredSessionCard(wordIndex: $0, position: $0 - 1) }
+    ))
+
+    let today = provider(at: date(2026, 1, 1))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: today)
+    let session = try engine.startSession(level: 1)
+
+    #expect(session.isResumed == false)
+    #expect(session.drawnCount == 8)
+
+    let status = try dbQueue.read { db in try String.fetchOne(db, sql: "SELECT status FROM session WHERE level = 1;") }
+    #expect(status == "abandoned")
+}
+
+@Test func testAResumedSessionNamesTheReturnDateTheBatchActuallyHolds() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let day = provider(at: date(2026, 1, 1))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+    let original = try engine.startSession(level: 1)
+    try original.swipe(.right)
+    let expectedReturnOn = original.newWordsReturnOn
+
+    let secondEngine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+    let resumed = try secondEngine.startSession(level: 1)
+
+    #expect(resumed.newWordsReturnOn != nil)
+    #expect(resumed.newWordsReturnOn == expectedReturnOn)
+}
+
+@Test func testASessionDrawnBeforeAndFirstSwipedAfterTheDayBoundaryIsResumable() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let drawInstant = testCalendar.date(from: DateComponents(year: 2026, month: 1, day: 1, hour: 23, minute: 55))!
+    let swipeInstant = testCalendar.date(from: DateComponents(year: 2026, month: 1, day: 2, hour: 0, minute: 5))!
+    let resumeInstant = testCalendar.date(from: DateComponents(year: 2026, month: 1, day: 2, hour: 2, minute: 0))!
+    let clock = MutableClock(drawInstant)
+    let today = TodayProvider(calendar: testCalendar, clock: { clock.instant })
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: today)
+
+    let original = try engine.startSession(level: 1)
+    clock.instant = swipeInstant
+    try original.swipe(.left)
+
+    clock.instant = resumeInstant
+    let secondEngine = TestFixtures.makeEngine(dbQueue: dbQueue, today: today)
+    let resumed = try secondEngine.startSession(level: 1)
+
+    #expect(resumed.isResumed)
+    #expect(resumed.drawnCount == 8)
+}
+
+@Test func testAResumeWhoseWordsNoLongerResolveAbandonsTheSessionAndDrawsFresh() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let store = SessionStore(dbQueue: dbQueue)
+    let day = provider(at: date(2026, 1, 1))
+    try store.insertSession(StoredSession(
+        level: 1, createdOn: localDate(2026, 1, 1), direction: .receptive, speakOnFlip: true,
+        status: .live, cards: [
+            StoredSessionCard(wordIndex: 1, position: 0),
+            StoredSessionCard(wordIndex: 999, position: 1),
+        ]
+    ))
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+    let session = try engine.startSession(level: 1)
+
+    #expect(session.isResumed == false)
+    #expect(session.drawnCount == 8)
+
+    let status = try dbQueue.read { db in try String.fetchOne(db, sql: "SELECT status FROM session WHERE level = 1;") }
+    #expect(status == "abandoned")
 }
