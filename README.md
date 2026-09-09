@@ -2,8 +2,9 @@
 
 A personal iPhone app for learning Chinese vocabulary.
 
-Pick an HSK level, swipe through its words, and see each word again on the day
-you are about to forget it. Offline, no account, one user.
+Pick an HSK level, swipe through its words, and meet each day's eight new
+words again the next day and again a week after that. Offline, no account,
+one user.
 
 ## Shape
 
