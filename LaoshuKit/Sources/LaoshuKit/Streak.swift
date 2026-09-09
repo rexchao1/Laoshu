@@ -28,7 +28,7 @@ public struct StreakReader: Sendable {
     private let dbQueue: DatabaseQueue
     private let today: TodayProvider
 
-    public init(dbQueue: DatabaseQueue, today: TodayProvider) {
+    public init(dbQueue: DatabaseQueue, today: TodayProvider = TodayProvider()) {
         self.dbQueue = dbQueue
         self.today = today
     }
