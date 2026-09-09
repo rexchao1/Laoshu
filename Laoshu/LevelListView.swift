@@ -50,7 +50,14 @@ struct LevelListView: View {
                             Button {
                                 path.append(.browse(summary.level))
                             } label: {
-                                Image(systemName: "square.grid.2x2")
+                                // `list.bullet` because this opens a list of
+                                // words, and the accent because every other
+                                // coloured thing on this screen is that green
+                                // (D28). A borderless button tints itself
+                                // system blue otherwise, which is the only
+                                // blue in the app.
+                                Image(systemName: "list.bullet")
+                                    .foregroundStyle(LaoshuTheme.accent)
                             }
                             .buttonStyle(.borderless)
                             .accessibilityLabel("Browse level \(summary.level)")
