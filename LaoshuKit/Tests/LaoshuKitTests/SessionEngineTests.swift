@@ -438,6 +438,44 @@ private func localDate(_ year: Int, _ month: Int, _ day: Int) -> LocalDate {
     #expect(first == second)
 }
 
+@Test func testSessionCapsDueBatchesAtThreeAndCarriesTheRestOver() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 10)
+    let store = BatchStore(dbQueue: dbQueue)
+
+    // Five batches, each due a day later than the last, so all five are
+    // overdue by the time the session draws — the backlog route line 10
+    // exists for — and `next_look_on` breaks the tie deterministically.
+    let batchA = try store.createBatch(level: 1, wordIndices: [1, 2], today: provider(at: date(2026, 1, 1)))
+    let batchB = try store.createBatch(level: 1, wordIndices: [3, 4], today: provider(at: date(2026, 1, 2)))
+    let batchC = try store.createBatch(level: 1, wordIndices: [5, 6], today: provider(at: date(2026, 1, 3)))
+    let batchD = try store.createBatch(level: 1, wordIndices: [7, 8], today: provider(at: date(2026, 1, 4)))
+    let batchE = try store.createBatch(level: 1, wordIndices: [9, 10], today: provider(at: date(2026, 1, 5)))
+    let farLater = provider(at: date(2026, 1, 20))
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: farLater)
+    let session = try engine.startSession(level: 1)
+
+    // Only the three oldest-due batches' six words are drawn; nothing is
+    // left unseen to draw as new on top of them.
+    #expect(session.drawnCount == 6)
+    var seen: [Int] = []
+    while let card = session.currentCard {
+        seen.append(card.word.wordIndex)
+        try session.swipe(.right)
+    }
+    #expect(Set(seen) == Set([1, 2, 3, 4, 5, 6]))
+
+    // D and E were never touched: still due, still on their first look,
+    // ready to be picked up by a later session.
+    let stillDue = try store.dueBatches(level: 1, today: farLater)
+    #expect(stillDue.map(\.id) == [batchD.id, batchE.id])
+    #expect(stillDue.allSatisfy { $0.lookNumber == 0 })
+
+    // A, B and C actually advanced.
+    let noLongerDue = try store.dueBatches(level: 1, today: farLater).map(\.id)
+    #expect(![batchA.id, batchB.id, batchC.id].contains { noLongerDue.contains($0) })
+}
+
 @Test func testWordParkedByThreeLeftSwipesIsNeverDrawnAsNewAgain() throws {
     let dbQueue = try TestFixtures.makeDatabase(wordCount: 2)
     let store = BatchStore(dbQueue: dbQueue)
