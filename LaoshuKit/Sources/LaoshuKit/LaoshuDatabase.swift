@@ -142,6 +142,20 @@ public enum LaoshuDatabase {
             )
         }
 
+        // D5: a single row recording which way a study session asks, shaped
+        // like `placement` above. Lives in the database, not `UserDefaults`,
+        // so a test can reach it (checkpoint 1 D10). One setting for the
+        // whole app, seeded receptive.
+        migrator.registerMigration("v5_preference") { db in
+            try db.execute(sql: """
+                CREATE TABLE preference (
+                    id INTEGER PRIMARY KEY CHECK (id = 1),
+                    direction TEXT NOT NULL CHECK (direction IN ('receptive', 'reverse'))
+                );
+                """)
+            try db.execute(sql: "INSERT INTO preference (id, direction) VALUES (1, 'receptive');")
+        }
+
         return migrator
     }
 

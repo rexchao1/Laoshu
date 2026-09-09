@@ -8,6 +8,14 @@ public enum SwipeDirection: Sendable {
     case right
 }
 
+/// One of a card's two faces: the Chinese side (pinyin and hanzi, with its
+/// spoken audio — D6a leaves where those sit inside this face to the view)
+/// or the meaning alone.
+public enum CardFace: Sendable, Equatable {
+    case chinese
+    case meaning
+}
+
 /// One word on screen during a session.
 ///
 /// D20: a requeued card is a new presentation, so `isFlipped` resets to
@@ -19,14 +27,29 @@ public enum SwipeDirection: Sendable {
 /// The two differ as soon as the card is flipped back to re-read the pinyin.
 public struct Card: Sendable, Equatable {
     public let word: Word
+
+    /// Which face asks and which answers, fixed by the session's direction
+    /// at the draw (D2, D3). The view renders a face given its kind and
+    /// never branches on the direction itself (D6a).
+    public let promptFace: CardFace
+    public let answerFace: CardFace
+
     public private(set) var leftSwipeCount = 0
     public private(set) var isFlipped = false
 
     /// Whether the meaning has been shown at least once in this presentation.
     public private(set) var hasBeenRevealed = false
 
-    init(word: Word) {
+    init(word: Word, direction: StudyDirection) {
         self.word = word
+        switch direction {
+        case .receptive:
+            promptFace = .chinese
+            answerFace = .meaning
+        case .reverse:
+            promptFace = .meaning
+            answerFace = .chinese
+        }
     }
 
     mutating func flip() {
@@ -81,6 +104,11 @@ public final class Session {
     private var hasWrittenFirstSwipe = false
     private var queue: [Card]
 
+    /// Which way this session asks, captured once at the draw and fixed for
+    /// its lifetime (D2, D3): every card in `queue` is built from this same
+    /// value, so a session's direction cannot change once it has started.
+    public let direction: StudyDirection
+
     /// How many words this session actually drew: every due batch's words
     /// plus up to eight new ones (D6), unless the level had fewer of either
     /// left (D20).
@@ -120,6 +148,7 @@ public final class Session {
         level: Int,
         newWordIndices: [Int],
         dueBatchIDs: [Int64],
+        direction: StudyDirection,
         emptyReason: EmptyReason? = nil,
         hasUnseenWordsRemaining: Bool = false,
         nextBatchReturnOn: LocalDate? = nil
@@ -129,7 +158,8 @@ public final class Session {
         self.level = level
         self.newWordIndices = newWordIndices
         self.dueBatchIDs = dueBatchIDs
-        self.queue = words.map(Card.init)
+        self.direction = direction
+        self.queue = words.map { Card(word: $0, direction: direction) }
         self.drawnCount = words.count
         self.emptyReason = emptyReason
         self.newWordsReturnOn = newWordIndices.isEmpty
@@ -239,6 +269,7 @@ public final class SessionEngine {
     private let dbQueue: DatabaseQueue
     public let reviewLog: ReviewLog
     private let batchStore: BatchStore
+    private let preferenceStore: PreferenceStore
     private let today: TodayProvider
 
     /// Where the shuffle in `startSession` gets its randomness (D17a). The
@@ -254,6 +285,7 @@ public final class SessionEngine {
         self.dbQueue = dbQueue
         self.reviewLog = ReviewLog(dbQueue: dbQueue)
         self.batchStore = BatchStore(dbQueue: dbQueue)
+        self.preferenceStore = PreferenceStore(dbQueue: dbQueue)
         self.today = today
         self.rng = rng
     }
@@ -310,6 +342,7 @@ public final class SessionEngine {
     /// Returns a session with `drawnCount == 0` and `emptyReason` set when
     /// there is nothing to draw — see `Session.EmptyReason`.
     public func startSession(level: Int) throws -> Session {
+        let direction = try preferenceStore.direction()
         let dueBatches = try batchStore.dueBatches(level: level, today: today)
         let dueBatchIDs = dueBatches.compactMap(\.id)
         let dueWordIndices = try batchStore.wordIndices(batchIDs: dueBatchIDs)
@@ -336,7 +369,7 @@ public final class SessionEngine {
             }
             return Session(
                 words: [], dbQueue: dbQueue, today: today, level: level,
-                newWordIndices: [], dueBatchIDs: [], emptyReason: reason,
+                newWordIndices: [], dueBatchIDs: [], direction: direction, emptyReason: reason,
                 hasUnseenWordsRemaining: hasUnseenWordsRemaining, nextBatchReturnOn: nextBatchReturnOn
             )
         }
@@ -344,7 +377,7 @@ public final class SessionEngine {
         let words = try Word.fetch(indices: chosen, dbQueue: dbQueue)
         return Session(
             words: words, dbQueue: dbQueue, today: today, level: level,
-            newWordIndices: newWordIndices, dueBatchIDs: dueBatchIDs, emptyReason: nil,
+            newWordIndices: newWordIndices, dueBatchIDs: dueBatchIDs, direction: direction, emptyReason: nil,
             hasUnseenWordsRemaining: hasUnseenWordsRemaining, nextBatchReturnOn: nil
         )
     }
@@ -354,6 +387,7 @@ public final class SessionEngine {
     /// batch, so its first swipe writes only a second batch on `level`
     /// dated today; nothing here advances a ladder.
     public func startBonusSession(level: Int) throws -> Session {
+        let direction = try preferenceStore.direction()
         let unseenPool = try batchStore.unseenWordIndices(level: level)
         let newWordIndices = Array(unseenPool.shuffled(using: &rng).prefix(8))
         let hasUnseenWordsRemaining = unseenPool.count > newWordIndices.count
@@ -374,7 +408,7 @@ public final class SessionEngine {
             }
             return Session(
                 words: [], dbQueue: dbQueue, today: today, level: level,
-                newWordIndices: [], dueBatchIDs: [], emptyReason: reason,
+                newWordIndices: [], dueBatchIDs: [], direction: direction, emptyReason: reason,
                 hasUnseenWordsRemaining: false, nextBatchReturnOn: nextBatchReturnOn
             )
         }
@@ -382,7 +416,7 @@ public final class SessionEngine {
         let words = try Word.fetch(indices: newWordIndices, dbQueue: dbQueue)
         return Session(
             words: words, dbQueue: dbQueue, today: today, level: level,
-            newWordIndices: newWordIndices, dueBatchIDs: [], emptyReason: nil,
+            newWordIndices: newWordIndices, dueBatchIDs: [], direction: direction, emptyReason: nil,
             hasUnseenWordsRemaining: hasUnseenWordsRemaining, nextBatchReturnOn: nil
         )
     }
