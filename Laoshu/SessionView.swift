@@ -11,6 +11,7 @@ struct SessionView: View {
     @State private var loadError: String?
     @State private var dragOffset: CGSize = .zero
     @State private var swipeError: String?
+    @State private var showsResumedNotice = false
     private let speaker = SpeechSpeaker()
 
     private let swipeThreshold: CGFloat = 100
@@ -46,6 +47,12 @@ struct SessionView: View {
                 .frame(height: 6)
                 .padding(.horizontal)
                 .padding(.top, 8)
+
+            if showsResumedNotice {
+                Text("Picking up where you left off")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
 
             Spacer()
 
@@ -101,7 +108,9 @@ struct SessionView: View {
     private func startSession() {
         guard session == nil, loadError == nil else { return }
         do {
-            session = try engine.startSession(level: level)
+            let started = try engine.startSession(level: level)
+            session = started
+            showsResumedNotice = started.isResumed
         } catch {
             loadError = "\(error)"
         }
@@ -114,6 +123,7 @@ struct SessionView: View {
     private func drawMore() {
         do {
             session = try engine.startBonusSession(level: level)
+            showsResumedNotice = false
         } catch {
             loadError = "\(error)"
         }
@@ -136,6 +146,7 @@ struct SessionView: View {
         do {
             swipeError = nil
             try session.swipe(direction)
+            showsResumedNotice = false
         } catch {
             swipeError = "That swipe was not saved. \(error.localizedDescription)"
         }

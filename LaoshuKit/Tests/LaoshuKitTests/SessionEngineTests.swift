@@ -1394,3 +1394,97 @@ private final class MutableClock: @unchecked Sendable {
     let status = try dbQueue.read { db in try String.fetchOne(db, sql: "SELECT status FROM session WHERE level = 1;") }
     #expect(status == "abandoned")
 }
+
+// MARK: - Draw more over a live session, and the resumed session's line (checkpoint 7)
+
+@Test func testABonusSessionPersistsAndResumesLikeAnyOther() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let day = provider(at: date(2026, 1, 1))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+
+    let bonus = try engine.startBonusSession(level: 1)
+    try bonus.swipe(.right)
+    try bonus.swipe(.left)
+
+    let store = SessionStore(dbQueue: dbQueue)
+    let stored = try #require(try store.liveSession(level: 1))
+    let expectedOrder = stored.cards
+        .filter { $0.position != nil }
+        .sorted { $0.position! < $1.position! }
+        .map(\.wordIndex)
+
+    let secondEngine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+    let resumed = try secondEngine.startSession(level: 1)
+    #expect(resumed.isResumed)
+
+    var actual: [Int] = []
+    while let card = resumed.currentCard {
+        actual.append(card.word.wordIndex)
+        try resumed.swipe(.right)
+    }
+    #expect(actual == expectedOrder)
+}
+
+@Test func testABonusDrawRetiresALiveSessionOnTheSameLevel() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 30)
+    let day = provider(at: date(2026, 1, 1))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+
+    let original = try engine.startSession(level: 1)
+    try original.swipe(.left) // writes the live row, still has pending cards
+    let originalID = try #require(original.sessionID)
+
+    let bonus = try engine.startBonusSession(level: 1)
+    #expect(bonus.drawnCount == 8)
+
+    let originalStatus = try dbQueue.read { db in
+        try String.fetchOne(db, sql: "SELECT status FROM session WHERE id = ?;", arguments: [originalID])
+    }
+    #expect(originalStatus == "abandoned")
+
+    // The bonus session's own first swipe writes its `session` row without
+    // colliding with the now-retired original (`session_one_live_per_level`).
+    try bonus.swipe(.right)
+    let statuses = try dbQueue.read { db in
+        try String.fetchAll(db, sql: "SELECT status FROM session WHERE level = 1 ORDER BY id;")
+    }
+    #expect(statuses == ["abandoned", "live"])
+}
+
+@Test func testABonusDrawOnAnExhaustedLevelLeavesTheLiveSessionAlone() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let day = provider(at: date(2026, 1, 1))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+
+    let original = try engine.startSession(level: 1)
+    try original.swipe(.left) // writes the live row; the level's 8 words are now all seen
+    let originalID = try #require(original.sessionID)
+
+    let bonus = try engine.startBonusSession(level: 1)
+    #expect(bonus.drawnCount == 0)
+    #expect(bonus.emptyReason != nil)
+
+    let status = try dbQueue.read { db in
+        try String.fetchOne(db, sql: "SELECT status FROM session WHERE id = ?;", arguments: [originalID])
+    }
+    #expect(status == "live")
+}
+
+@Test func testAResumedSessionsDrawMoreButtonShowsTheCurrentSetting() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 30)
+    let day = provider(at: date(2026, 1, 1))
+    let preferenceStore = PreferenceStore(dbQueue: dbQueue)
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+
+    let original = try engine.startSession(level: 1)
+    #expect(original.newWordsPerDay == 8)
+    try original.swipe(.left)
+
+    try preferenceStore.setNewWordsPerDay(4)
+
+    let secondEngine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day)
+    let resumed = try secondEngine.startSession(level: 1)
+
+    #expect(resumed.isResumed)
+    #expect(resumed.newWordsPerDay == 4)
+}

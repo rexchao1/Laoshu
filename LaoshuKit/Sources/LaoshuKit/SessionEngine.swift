@@ -610,6 +610,14 @@ public final class SessionEngine {
     /// allowance entirely — the "eight more" button's action. Holds no due
     /// batch, so its first swipe writes only a second batch on `level`
     /// dated today; nothing here advances a ladder.
+    ///
+    /// D18: a live session on `level` — the one this draw is replacing — is
+    /// retired here rather than left for the bonus session's first swipe to
+    /// collide with (`session_one_live_per_level`), but only once the draw
+    /// is non-empty. A bonus request on a level with no unseen words returns
+    /// its reason below and leaves any live session exactly as it was, so a
+    /// resumable session is never destroyed for a draw that hands back
+    /// nothing.
     public func startBonusSession(level: Int) throws -> Session {
         let preferences = try preferenceStore.preferences()
         let unseenPool = try batchStore.unseenWordIndices(level: level)
@@ -637,6 +645,11 @@ public final class SessionEngine {
                 emptyReason: reason,
                 hasUnseenWordsRemaining: false, nextBatchReturnOn: nextBatchReturnOn
             )
+        }
+
+        let sessionStore = SessionStore(dbQueue: dbQueue)
+        if let live = try sessionStore.liveSession(level: level), let liveID = live.id {
+            try sessionStore.setStatus(sessionID: liveID, status: .abandoned)
         }
 
         let words = try Word.fetch(indices: newWordIndices, dbQueue: dbQueue)
