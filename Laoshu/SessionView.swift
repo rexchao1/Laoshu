@@ -25,9 +25,9 @@ struct SessionView: View {
                 if let card = session.currentCard {
                     sessionBody(session: session, card: card)
                 } else if session.emptyReason != nil {
-                    SessionEmptyStateView(session: session, onDrawEightMore: drawEightMore)
+                    SessionEmptyStateView(session: session, onDrawMore: drawMore)
                 } else {
-                    SessionSummaryView(session: session, onDrawEightMore: drawEightMore)
+                    SessionSummaryView(session: session, onDrawMore: drawMore)
                 }
             } else {
                 ProgressView()
@@ -59,7 +59,7 @@ struct SessionView: View {
                     // tap is the first look at the meaning.
                     let isFirstReveal = !card.isFlipped && !card.hasBeenRevealed
                     session.flipCurrentCard()
-                    if isFirstReveal {
+                    if isFirstReveal && session.speakOnFlip {
                         speaker.speak(card.word.hanzi)
                     }
                 },
@@ -107,11 +107,11 @@ struct SessionView: View {
         }
     }
 
-    /// The "eight more" button's action, on both the summary and the
+    /// The "draw more" button's action, on both the summary and the
     /// allowance-spent empty state: replaces the finished session with a
-    /// fresh one drawing another eight new words, ignoring the day's
-    /// allowance.
-    private func drawEightMore() {
+    /// fresh one drawing another configured batch of new words, ignoring the
+    /// day's allowance.
+    private func drawMore() {
         do {
             session = try engine.startBonusSession(level: level)
         } catch {

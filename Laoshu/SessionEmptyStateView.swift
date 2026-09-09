@@ -7,7 +7,7 @@ import LaoshuKit
 /// bring back at all. Which one shows is decided by `session.emptyReason`.
 struct SessionEmptyStateView: View {
     let session: Session
-    let onDrawEightMore: () -> Void
+    let onDrawMore: () -> Void
 
     var body: some View {
         VStack(spacing: 16) {
@@ -25,7 +25,7 @@ struct SessionEmptyStateView: View {
                 .padding(.horizontal)
 
             if session.hasUnseenWordsRemaining {
-                Button("Draw eight more", action: onDrawEightMore)
+                Button("Draw \(session.newWordsPerDay) more", action: onDrawMore)
                     .buttonStyle(.borderedProminent)
                     .tint(LaoshuTheme.accent)
             }
@@ -54,7 +54,7 @@ struct SessionEmptyStateView: View {
     private var detail: String {
         switch session.emptyReason {
         case .allowanceSpent:
-            "Another level already used today's eight new words. This level still has unseen words waiting."
+            "Another level already used today's new words. This level still has unseen words waiting."
         case .waitingOnLadder:
             if let returnOn = session.nextBatchReturnOn {
                 "Every word here has been introduced. The next batch comes back \(returnOn.friendlyReturnPhrase)."
