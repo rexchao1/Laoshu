@@ -22,10 +22,12 @@ struct SessionView: View {
             if let loadError {
                 DatabaseErrorView(message: loadError)
             } else if let session {
-                if session.isFinished {
-                    SessionSummaryView(session: session)
-                } else if let card = session.currentCard {
+                if let card = session.currentCard {
                     sessionBody(session: session, card: card)
+                } else if session.emptyReason != nil {
+                    SessionEmptyStateView(session: session, onDrawEightMore: drawEightMore)
+                } else {
+                    SessionSummaryView(session: session, onDrawEightMore: drawEightMore)
                 }
             } else {
                 ProgressView()
@@ -100,6 +102,18 @@ struct SessionView: View {
         guard session == nil, loadError == nil else { return }
         do {
             session = try engine.startSession(level: level)
+        } catch {
+            loadError = "\(error)"
+        }
+    }
+
+    /// The "eight more" button's action, on both the summary and the
+    /// allowance-spent empty state: replaces the finished session with a
+    /// fresh one drawing another eight new words, ignoring the day's
+    /// allowance.
+    private func drawEightMore() {
+        do {
+            session = try engine.startBonusSession(level: level)
         } catch {
             loadError = "\(error)"
         }

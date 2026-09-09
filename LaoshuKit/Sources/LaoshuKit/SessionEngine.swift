@@ -99,6 +99,20 @@ public final class Session {
     /// Words parked by a third left swipe, in the order they parked (D27).
     public private(set) var parkedWords: [Word] = []
 
+    /// When the words this session introduced come back for their first
+    /// look, or `nil` when the session introduced none. Computed the same
+    /// way the batch actually written on the first swipe will be scheduled,
+    /// so it never drifts from what gets written (D24).
+    public let newWordsReturnOn: LocalDate?
+
+    /// Whether the level still has unseen words left after this session's
+    /// own draw — what decides whether the "eight more" button appears.
+    public let hasUnseenWordsRemaining: Bool
+
+    /// When the level's next active batch comes back, set only for the
+    /// `.waitingOnLadder` empty reason.
+    public let nextBatchReturnOn: LocalDate?
+
     init(
         words: [Word],
         dbQueue: DatabaseQueue,
@@ -106,7 +120,9 @@ public final class Session {
         level: Int,
         newWordIndices: [Int],
         dueBatchIDs: [Int64],
-        emptyReason: EmptyReason? = nil
+        emptyReason: EmptyReason? = nil,
+        hasUnseenWordsRemaining: Bool = false,
+        nextBatchReturnOn: LocalDate? = nil
     ) {
         self.dbQueue = dbQueue
         self.today = today
@@ -116,6 +132,11 @@ public final class Session {
         self.queue = words.map(Card.init)
         self.drawnCount = words.count
         self.emptyReason = emptyReason
+        self.newWordsReturnOn = newWordIndices.isEmpty
+            ? nil
+            : BatchScheduler.createBatch(level: level, today: today).nextLookOn
+        self.hasUnseenWordsRemaining = hasUnseenWordsRemaining
+        self.nextBatchReturnOn = nextBatchReturnOn
     }
 
     /// D20: the session ends once every drawn word has been swiped right
@@ -178,11 +199,21 @@ public final class Session {
     }
 }
 
-/// A level as it appears on the level list: its number and how many words
-/// the catalogue holds for it, regardless of review state (D3).
+/// A level as it appears on the level list: its number, how many words the
+/// catalogue holds for it regardless of review state (D3), and how many of
+/// those are waiting today — held by a batch of that level whose look is due
+/// on or before today. `waitingCount` never counts the eight new words a
+/// session would add.
 public struct LevelSummary: Sendable, Equatable {
     public let level: Int
     public let wordCount: Int
+    public let waitingCount: Int
+
+    public init(level: Int, wordCount: Int, waitingCount: Int = 0) {
+        self.level = level
+        self.wordCount = wordCount
+        self.waitingCount = waitingCount
+    }
 }
 
 /// Decides which words come next and hands out sessions.
@@ -210,14 +241,38 @@ public final class SessionEngine {
     }
 
     /// The six levels in the catalogue, in level order, each with its total
-    /// word count. Counts the whole level, not what is left unseen.
+    /// word count (the whole level, not what is left unseen) and how many
+    /// words are waiting today. Recomputed fresh on every call, since a day
+    /// rollover or a session held elsewhere can change the answer between
+    /// calls.
     public func levelSummaries() throws -> [LevelSummary] {
-        try dbQueue.read { db in
-            try Row.fetchAll(
+        let now = today.today()
+        return try dbQueue.read { db in
+            let counts = try Row.fetchAll(
                 db,
                 sql: "SELECT level, COUNT(*) AS word_count FROM cat.word GROUP BY level ORDER BY level ASC;"
-            ).map { row in
-                LevelSummary(level: row["level"], wordCount: row["word_count"])
+            )
+            let waiting = try Row.fetchAll(
+                db,
+                sql: """
+                SELECT b.level AS level, COUNT(*) AS waiting_count
+                FROM batch b
+                JOIN batch_word bw ON bw.batch_id = b.id
+                WHERE b.next_look_on IS NOT NULL AND b.next_look_on <= ?
+                GROUP BY b.level;
+                """,
+                arguments: [now]
+            )
+            let waitingByLevel = Dictionary(uniqueKeysWithValues: waiting.map { row in
+                (row["level"] as Int, row["waiting_count"] as Int)
+            })
+            return counts.map { row in
+                let level: Int = row["level"]
+                return LevelSummary(
+                    level: level,
+                    wordCount: row["word_count"],
+                    waitingCount: waitingByLevel[level] ?? 0
+                )
             }
         }
     }
@@ -241,12 +296,65 @@ public final class SessionEngine {
         let dueBatchIDs = dueBatches.compactMap(\.id)
         let dueWordIndices = try batchStore.wordIndices(batchIDs: dueBatchIDs)
 
-        // The unseen pool is read as bare `word_index` values, shuffled
-        // here, and only the drawn rows are fetched. Shuffling in Swift
-        // rather than with SQLite's `RANDOM()` is what makes the draw
-        // reproducible under a seeded generator; the pool is at most 1,800
-        // integers, so reading all of it costs nothing.
-        let unseenPool = try dbQueue.read { db in
+        let unseenPool = try unseenWordIndices(level: level)
+
+        let allowanceSpent = try batchStore.hasBatchCreatedToday(today: today)
+        let newWordIndices = allowanceSpent ? [] : Array(unseenPool.shuffled(using: &rng).prefix(8))
+        let hasUnseenWordsRemaining = unseenPool.count > newWordIndices.count
+
+        var chosen = dueWordIndices + newWordIndices
+        chosen.shuffle(using: &rng)
+
+        guard !chosen.isEmpty else {
+            let reason: Session.EmptyReason
+            var nextBatchReturnOn: LocalDate?
+            if !unseenPool.isEmpty {
+                reason = .allowanceSpent
+            } else if let earliest = try batchStore.earliestActiveLookOn(level: level) {
+                reason = .waitingOnLadder
+                nextBatchReturnOn = earliest
+            } else {
+                reason = .levelComplete
+            }
+            return Session(
+                words: [], dbQueue: dbQueue, today: today, level: level,
+                newWordIndices: [], dueBatchIDs: [], emptyReason: reason,
+                hasUnseenWordsRemaining: hasUnseenWordsRemaining, nextBatchReturnOn: nextBatchReturnOn
+            )
+        }
+
+        let words = try words(forIndices: chosen)
+        return Session(
+            words: words, dbQueue: dbQueue, today: today, level: level,
+            newWordIndices: newWordIndices, dueBatchIDs: dueBatchIDs, emptyReason: nil,
+            hasUnseenWordsRemaining: hasUnseenWordsRemaining, nextBatchReturnOn: nil
+        )
+    }
+
+    /// Draws another eight new words on `level`, ignoring the day's
+    /// allowance entirely — the "eight more" button's action. Holds no due
+    /// batch, so its first swipe writes only a second batch on `level`
+    /// dated today; nothing here advances a ladder.
+    public func startBonusSession(level: Int) throws -> Session {
+        let unseenPool = try unseenWordIndices(level: level)
+        let newWordIndices = Array(unseenPool.shuffled(using: &rng).prefix(8))
+        let hasUnseenWordsRemaining = unseenPool.count > newWordIndices.count
+
+        let words = try words(forIndices: newWordIndices)
+        return Session(
+            words: words, dbQueue: dbQueue, today: today, level: level,
+            newWordIndices: newWordIndices, dueBatchIDs: [], emptyReason: nil,
+            hasUnseenWordsRemaining: hasUnseenWordsRemaining, nextBatchReturnOn: nil
+        )
+    }
+
+    /// Every word on `level` that belongs to no batch yet, as bare
+    /// `word_index` values, in no particular order. Shuffling happens in
+    /// Swift rather than with SQLite's `RANDOM()`, which is what makes a draw
+    /// reproducible under a seeded generator; the pool is at most 1,800
+    /// integers, so reading all of it costs nothing.
+    private func unseenWordIndices(level: Int) throws -> [Int] {
+        try dbQueue.read { db in
             try Int.fetchAll(
                 db,
                 sql: """
@@ -258,29 +366,14 @@ public final class SessionEngine {
                 arguments: [level]
             )
         }
+    }
 
-        let allowanceSpent = try batchStore.hasBatchCreatedToday(today: today)
-        let newWordIndices = allowanceSpent ? [] : Array(unseenPool.shuffled(using: &rng).prefix(8))
-
-        var chosen = dueWordIndices + newWordIndices
-        chosen.shuffle(using: &rng)
-
-        guard !chosen.isEmpty else {
-            let reason: Session.EmptyReason
-            if !unseenPool.isEmpty {
-                reason = .allowanceSpent
-            } else if try batchStore.hasActiveBatch(level: level) {
-                reason = .waitingOnLadder
-            } else {
-                reason = .levelComplete
-            }
-            return Session(
-                words: [], dbQueue: dbQueue, today: today, level: level,
-                newWordIndices: [], dueBatchIDs: [], emptyReason: reason
-            )
-        }
-
-        let placeholders = databaseQuestionMarks(count: chosen.count)
+    /// Fetches `indices` and puts them back in `indices`'s order — `IN`
+    /// returns rows in whatever order SQLite likes, which would undo a
+    /// caller's shuffle.
+    private func words(forIndices indices: [Int]) throws -> [Word] {
+        guard !indices.isEmpty else { return [] }
+        let placeholders = databaseQuestionMarks(count: indices.count)
         let rows = try dbQueue.read { db in
             try Word.fetchAll(
                 db,
@@ -289,17 +382,10 @@ public final class SessionEngine {
                 FROM cat.word
                 WHERE word_index IN (\(placeholders));
                 """,
-                arguments: StatementArguments(chosen)
+                arguments: StatementArguments(indices)
             )
         }
-
-        // `IN` returns rows in whatever order SQLite likes, which would undo
-        // the shuffle. Put them back into the drawn order.
         let byIndex = Dictionary(uniqueKeysWithValues: rows.map { ($0.wordIndex, $0) })
-        let words = chosen.compactMap { byIndex[$0] }
-        return Session(
-            words: words, dbQueue: dbQueue, today: today, level: level,
-            newWordIndices: newWordIndices, dueBatchIDs: dueBatchIDs, emptyReason: nil
-        )
+        return indices.compactMap { byIndex[$0] }
     }
 }

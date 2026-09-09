@@ -20,8 +20,15 @@ struct LevelListView: View {
                             HStack {
                                 Text("Level \(summary.level)")
                                 Spacer()
-                                Text("\(summary.wordCount) words")
-                                    .foregroundStyle(.secondary)
+                                VStack(alignment: .trailing, spacing: 2) {
+                                    Text("\(summary.wordCount) words")
+                                        .foregroundStyle(.secondary)
+                                    if summary.waitingCount > 0 {
+                                        Text("\(summary.waitingCount) waiting")
+                                            .font(.caption)
+                                            .foregroundStyle(LaoshuTheme.accent)
+                                    }
+                                }
                             }
                         }
                     }
@@ -35,7 +42,11 @@ struct LevelListView: View {
             }
             .navigationTitle("Laoshu")
         }
-        .task {
+        // D26: `SessionEngine` isn't `@Observable`, so nothing tells this
+        // view its counts are stale after a session or a day rollover.
+        // `.onAppear` fires again every time this view comes back to the
+        // top of the stack, unlike `.task`, which would only ever run once.
+        .onAppear {
             loadSummaries()
         }
     }
