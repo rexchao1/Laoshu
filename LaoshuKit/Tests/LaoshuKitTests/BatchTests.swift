@@ -96,6 +96,77 @@ private func localDate(_ year: Int, _ month: Int, _ day: Int) -> LocalDate {
     }
 }
 
+@Test func testReplayBatchAutoCompletesAnOverdueFirstLookAndLeavesTheSecondDue() throws {
+    let createdOn = localDate(2026, 1, 1)
+    let today = localDate(2026, 1, 10) // first look (1/2) and second look (1/9) both passed; gap on the second is 1 day.
+
+    let batch = BatchScheduler.replayBatch(level: 1, createdOn: createdOn, today: today)
+
+    #expect(batch.lookNumber == 1)
+    #expect(batch.nextLookOn == localDate(2026, 1, 9))
+    #expect(batch.isRetired == false)
+}
+
+@Test func testReplayBatchLeavesAFutureFirstLookAlone() throws {
+    let createdOn = localDate(2026, 1, 1)
+    let today = localDate(2026, 1, 1) // before the first look is even due.
+
+    let batch = BatchScheduler.replayBatch(level: 1, createdOn: createdOn, today: today)
+
+    #expect(batch.lookNumber == 0)
+    #expect(batch.nextLookOn == localDate(2026, 1, 2))
+    #expect(batch.isRetired == false)
+}
+
+/// The strict boundary: a look due today has not been taken yet, so replay
+/// must leave it alone rather than treat it as already taken.
+@Test func testReplayBatchLeavesAFirstLookDueTodayUntaken() throws {
+    let createdOn = localDate(2026, 1, 1)
+    let today = localDate(2026, 1, 2) // exactly the first look's due date.
+
+    let batch = BatchScheduler.replayBatch(level: 1, createdOn: createdOn, today: today)
+
+    #expect(batch.lookNumber == 0)
+    #expect(batch.nextLookOn == localDate(2026, 1, 2))
+    #expect(batch.isRetired == false)
+    #expect(batch.isDue(on: today) == true)
+}
+
+@Test func testReplayBatchWindsForwardOnceTheFirstLookIsStrictlyInThePast() throws {
+    let createdOn = localDate(2026, 1, 1)
+    let today = localDate(2026, 1, 3) // the day after the first look's due date.
+
+    let batch = BatchScheduler.replayBatch(level: 1, createdOn: createdOn, today: today)
+
+    #expect(batch.lookNumber == 1)
+    #expect(batch.nextLookOn == localDate(2026, 1, 9))
+}
+
+@Test func testReplayBatchRetiresASecondLookMoreThanSevenDaysBehind() throws {
+    let createdOn = localDate(2026, 1, 1)
+    // First look due 1/2, second look due 1/9. Eight days behind on the
+    // second look is one more than the seven-day grace.
+    let today = localDate(2026, 1, 17)
+
+    let batch = BatchScheduler.replayBatch(level: 1, createdOn: createdOn, today: today)
+
+    #expect(batch.isRetired == true)
+    #expect(batch.lookNumber == 2) // retired batches carry look number 2, whether the
+    // second look was taken or given up on, so the row shape matches the one
+    // normal operation writes.
+}
+
+@Test func testReplayBatchDoesNotRetireASecondLookExactlySevenDaysBehind() throws {
+    let createdOn = localDate(2026, 1, 1)
+    // Second look due 1/9; exactly seven days behind is still within grace.
+    let today = localDate(2026, 1, 16)
+
+    let batch = BatchScheduler.replayBatch(level: 1, createdOn: createdOn, today: today)
+
+    #expect(batch.isRetired == false)
+    #expect(batch.nextLookOn == localDate(2026, 1, 9))
+}
+
 @Test func testBatchStoreCreatesAndAdvancesAPersistedBatch() throws {
     let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
     let store = BatchStore(dbQueue: dbQueue)
