@@ -53,7 +53,7 @@ struct CardView: View {
             .disabled(!voiceAvailable)
             .accessibilityLabel("Play pronunciation")
         case .meaning:
-            Text(card.word.definition)
+            Text(card.word.gloss)
                 .font(.system(size: 26, weight: .medium))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)

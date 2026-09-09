@@ -70,7 +70,7 @@ struct LevelBrowseView: View {
                     .foregroundStyle(.secondary)
             }
 
-            Text(word.definition)
+            Text(word.gloss)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.trailing)

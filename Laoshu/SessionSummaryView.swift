@@ -35,7 +35,7 @@ struct SessionSummaryView: View {
                         HStack {
                             Text(word.pinyin)
                                 .fontWeight(.medium)
-                            Text(word.definition)
+                            Text(word.gloss)
                                 .foregroundStyle(.secondary)
                         }
                     }
