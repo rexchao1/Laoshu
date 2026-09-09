@@ -643,3 +643,212 @@ private func localDate(_ year: Int, _ month: Int, _ day: Int) -> LocalDate {
     #expect(bonus.nextBatchReturnOn == localDate(2026, 1, 9))
     #expect(bonus.hasUnseenWordsRemaining == false)
 }
+
+// MARK: - Reading back the words already met in a level
+
+/// A snapshot of every row in the tables a swipe or a batch write could
+/// touch, for asserting `browse` leaves them untouched.
+private struct WriteSnapshot: Equatable {
+    let review: [Row]
+    let batch: [Row]
+    let batchWord: [Row]
+    let placement: [Row]
+
+    init(_ dbQueue: DatabaseQueue) throws {
+        review = try dbQueue.read { try Row.fetchAll($0, sql: "SELECT * FROM review ORDER BY rowid;") }
+        batch = try dbQueue.read { try Row.fetchAll($0, sql: "SELECT * FROM batch ORDER BY id;") }
+        batchWord = try dbQueue.read { try Row.fetchAll($0, sql: "SELECT * FROM batch_word ORDER BY batch_id, word_index;") }
+        placement = try dbQueue.read { try Row.fetchAll($0, sql: "SELECT * FROM placement ORDER BY id;") }
+    }
+
+    static func == (lhs: WriteSnapshot, rhs: WriteSnapshot) -> Bool {
+        lhs.review == rhs.review && lhs.batch == rhs.batch
+            && lhs.batchWord == rhs.batchWord && lhs.placement == rhs.placement
+    }
+}
+
+@Test func testBrowseListsEveryWordInEveryBatchOfTheLevel() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 10)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    try store.createBatch(level: 1, wordIndices: [1, 2, 3], today: day0)
+    try store.createBatch(level: 1, wordIndices: [4, 5], today: day0)
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+    let result = try engine.browse(level: 1)
+
+    #expect(Set(result.words.map(\.wordIndex)) == Set([1, 2, 3, 4, 5]))
+    #expect(result.emptyReason == nil)
+}
+
+@Test func testBrowseIncludesWordsFromRetiredBatches() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 5)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    let created = try store.createBatch(level: 1, wordIndices: [1, 2, 3], today: day0)
+    let batchID = try #require(created.id)
+
+    let day1 = provider(at: date(2026, 1, 2))
+    try store.recordLook(batchID: batchID, today: day1)
+    let day8 = provider(at: date(2026, 1, 9))
+    try store.recordLook(batchID: batchID, today: day8) // retires
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+    let result = try engine.browse(level: 1)
+
+    #expect(Set(result.words.map(\.wordIndex)) == Set([1, 2, 3]))
+}
+
+@Test func testBrowseExcludesWordsBelongingToNoBatch() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    try store.createBatch(level: 1, wordIndices: [1, 2, 3], today: day0)
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+    let result = try engine.browse(level: 1)
+
+    #expect(Set(result.words.map(\.wordIndex)) == Set([1, 2, 3]))
+}
+
+@Test func testBrowseExcludesOtherLevels() throws {
+    let dbQueue = try TestFixtures.makeDatabase(levelCounts: [1: 5, 2: 5])
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    try store.createBatch(level: 1, wordIndices: [1, 2], today: day0)
+    try store.createBatch(level: 2, wordIndices: [6, 7], today: day0)
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+    let result = try engine.browse(level: 1)
+
+    #expect(Set(result.words.map(\.wordIndex)) == Set([1, 2]))
+}
+
+@Test func testBrowseOrdersSameDayBatchesByIDDescending() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 10)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    try store.createBatch(level: 1, wordIndices: [1, 2], today: day0)
+    let newer = try store.createBatch(level: 1, wordIndices: [3, 4], today: day0)
+    #expect(newer.createdOn == localDate(2026, 1, 1))
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+    let result = try engine.browse(level: 1)
+
+    #expect(result.words.map(\.wordIndex) == [3, 4, 1, 2])
+}
+
+@Test func testBrowseOrdersBatchesByDateDescending() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 10)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    let day1 = provider(at: date(2026, 1, 2))
+    try store.createBatch(level: 1, wordIndices: [1, 2], today: day0)
+    try store.createBatch(level: 1, wordIndices: [3, 4], today: day1)
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+    let result = try engine.browse(level: 1)
+
+    #expect(result.words.map(\.wordIndex) == [3, 4, 1, 2])
+}
+
+@Test func testBrowseOrdersWithinABatchByWordIndexAscending() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 10)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    try store.createBatch(level: 1, wordIndices: [5, 1, 3], today: day0)
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+    let result = try engine.browse(level: 1)
+
+    #expect(result.words.map(\.wordIndex) == [1, 3, 5])
+}
+
+@Test func testBrowseOnALevelWithNoBatchesCarriesTheReason() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 5)
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+
+    let result = try engine.browse(level: 1)
+
+    #expect(result.words.isEmpty)
+    #expect(result.emptyReason == .levelHasNoBatches)
+}
+
+@Test func testBrowseWritesNothing() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 10)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    try store.createBatch(level: 1, wordIndices: [1, 2, 3], today: day0)
+
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue)
+    let before = try WriteSnapshot(dbQueue)
+
+    _ = try engine.browse(level: 1)
+
+    let after = try WriteSnapshot(dbQueue)
+    #expect(before == after)
+}
+
+@Test func testBrowseDoesNotSpendTheDaysAllowance() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 20)
+    let day0 = provider(at: date(2026, 1, 1))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day0)
+
+    _ = try engine.browse(level: 1)
+
+    let session = try engine.startSession(level: 1)
+    #expect(session.drawnCount == 8)
+}
+
+@Test func testBrowseDoesNotAdvanceADueBatch() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 10)
+    let store = BatchStore(dbQueue: dbQueue)
+    let day0 = provider(at: date(2026, 1, 1))
+    let created = try store.createBatch(level: 1, wordIndices: [1, 2, 3], today: day0)
+    let batchID = try #require(created.id)
+
+    let day1 = provider(at: date(2026, 1, 2))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day1)
+    _ = try engine.browse(level: 1)
+
+    let untouched = try #require(try store.fetchBatch(id: batchID))
+    #expect(untouched.nextLookOn == localDate(2026, 1, 2))
+    #expect(untouched.lookNumber == 0)
+}
+
+@Test func testBrowseListsAllEightWordsOfAnAbandonedSessionsBatch() throws {
+    // Exactly eight words in the level, so the pool the session draws from
+    // and the eight it draws are the same set regardless of shuffle order —
+    // letting the test know the full drawn set without draining the queue.
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let day0 = provider(at: date(2026, 1, 1))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: day0)
+
+    let session = try engine.startSession(level: 1)
+    #expect(session.drawnCount == 8)
+    try session.swipe(.right) // one swipe writes the batch; the rest is abandoned
+
+    let result = try engine.browse(level: 1)
+    #expect(Set(result.words.map(\.wordIndex)) == Set(1...8))
+    #expect(result.words.count == 8)
+}
+
+@Test func testBrowseReadsADatabaseWrittenByThePreviousVersion() throws {
+    let (directory, catalogueURL) = try TestFixtures.makeCatalogue(levelCounts: [1: 8])
+    let reviewLogURL = directory.appendingPathComponent("review.sqlite")
+
+    try TestFixtures.makeCheckpoint2ReviewLog(
+        at: reviewLogURL,
+        batches: [
+            (level: 1, createdOn: localDate(2026, 1, 1), nextLookOn: nil, lookNumber: 2, wordIndices: [1, 2, 3]),
+        ]
+    )
+
+    let today = provider(at: date(2026, 1, 3))
+    let dbQueue = try LaoshuDatabase.open(catalogueURL: catalogueURL, reviewLogURL: reviewLogURL, today: today)
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: today)
+
+    let result = try engine.browse(level: 1)
+
+    #expect(Set(result.words.map(\.wordIndex)) == Set([1, 2, 3]))
+}
