@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Compiles the iPhone app for the simulator, the compile gate for Laoshu/.
+# Needs Xcode, not just the command line tools. Output goes to DerivedData/
+# in this repository (ignored by git). First build takes minutes, later ones seconds.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+: "${DEVELOPER_DIR:=/Applications/Xcode.app/Contents/Developer}"
+export DEVELOPER_DIR
+exec xcodebuild -scheme Laoshu -sdk iphonesimulator \
+  -destination 'generic/platform=iOS Simulator' \
+  -derivedDataPath DerivedData build CODE_SIGNING_ALLOWED=NO -quiet "$@"

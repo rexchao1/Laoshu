@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Everything scripts/check runs, then the simulator compile of the app. Needs Xcode.
+# Run before a commit that touches Laoshu/ or anything the app compiles against.
+set -uo pipefail
+cd "$(dirname "$0")/.."
+scripts/check; rc=$?
+if scripts/build; then echo "ok    app build       scripts/build"; else echo "FAIL  app build       scripts/build"; rc=1; fi
+exit "$rc"

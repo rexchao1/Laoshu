@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Captures the booted simulator's screen as a PNG and prints the path.
+#   scripts/screenshot                 -> screenshots/<timestamp>.png (ignored by git)
+#   scripts/screenshot before.png
+# Needs a simulator booted by scripts/run.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+out="${1:-screenshots/$(date +%Y%m%d-%H%M%S).png}"
+mkdir -p "$(dirname "$out")"
+xcrun simctl io booted screenshot "$out" >/dev/null
+echo "$out"

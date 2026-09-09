@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Runs the LaoshuKit test suite. Narrow it with a filter:
+#   scripts/test --filter StreakTests
+# Needs the Swift toolchain only, no Xcode. Warm runs take a few seconds.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+exec swift test --package-path LaoshuKit "$@"

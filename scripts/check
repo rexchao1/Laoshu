@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# The routine check: kit tests, the gloss rules, the measurements file, and the
+# shipped database's shape. Needs swift, python3, sqlite3. No Xcode.
+# About 10 seconds warm; a cold swift build adds a minute or two.
+# Prints one line per step and exits 1 if any step failed.
+set -uo pipefail
+cd "$(dirname "$0")/.."
+fail=0
+log="$(mktemp "${TMPDIR:-/tmp}/laoshu-check.XXXXXX")"
+step() {
+  local name="$1"; shift
+  if "$@" >"$log" 2>&1; then echo "ok    $name"
+  else echo "FAIL  $name"; tail -20 "$log" | sed 's/^/      /'; fail=1; fi
+}
+db_shape() {
+  local db=data/laoshu.sqlite levels bad
+  levels="$(sqlite3 "$db" "select group_concat(level || ':' || n, ' ') from (select level, count(*) n from word group by level order by level)")"
+  [ "$levels" = "1:300 2:200 3:500 4:1000 5:1600 6:1800" ] || { echo "level counts are $levels"; return 1; }
+  bad="$(sqlite3 "$db" "select count(*) from word where definition = '' or definition is null")"
+  [ "$bad" = 0 ] || { echo "$bad words have an empty definition"; return 1; }
+  bad="$(sqlite3 "$db" "select count(*) from word where hanzi glob '*[0-9]'")"
+  [ "$bad" = 0 ] || { echo "$bad words carry a digit in their hanzi"; return 1; }
+  bad="$(sqlite3 "$db" "select count(*) from (select word_index from word group by word_index having count(*) > 1)")"
+  [ "$bad" = 0 ] || { echo "$bad duplicated word_index values"; return 1; }
+}
+step "kit tests          swift test --package-path LaoshuKit" swift test --package-path LaoshuKit
+step "gloss rules        python3 docs/check_glosses.py" python3 docs/check_glosses.py
+step "measurements       docs/measure.py matches docs/measurements.md" bash -c 'python3 docs/measure.py | diff - docs/measurements.md'
+step "database shape     data/laoshu.sqlite" db_shape
+step "bundled database   Laoshu/laoshu.sqlite equals data/laoshu.sqlite" cmp data/laoshu.sqlite Laoshu/laoshu.sqlite
+rm -f "$log"
+exit "$fail"

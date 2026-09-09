@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Builds the app, boots a simulator, installs the app and launches it.
+#   scripts/run            launch on the default simulator (iPhone 17)
+#   SIM="iPhone 17e" scripts/run
+#   scripts/run --reset    uninstall first, so the review log (all progress) starts empty
+# The catalogue ships inside the app; nothing else needs seeding. Progress is written to
+# the simulator's Application Support and survives relaunches until --reset.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+: "${DEVELOPER_DIR:=/Applications/Xcode.app/Contents/Developer}"
+export DEVELOPER_DIR
+SIM="${SIM:-iPhone 17}"
+export SIM
+BUNDLE=com.rexchao.laoshu
+reset=0
+[ "${1:-}" = "--reset" ] && reset=1
+
+xcodebuild -scheme Laoshu -sdk iphonesimulator \
+  -destination "platform=iOS Simulator,name=$SIM" \
+  -derivedDataPath DerivedData build CODE_SIGNING_ALLOWED=NO -quiet
+app=DerivedData/Build/Products/Debug-iphonesimulator/Laoshu.app
+[ -d "$app" ] || { echo "scripts/run: build produced no $app" >&2; exit 1; }
+
+udid="$(xcrun simctl list devices available -j | python3 -c '
+import json, os, sys
+name = os.environ["SIM"]
+found = [d for devs in json.load(sys.stdin)["devices"].values() for d in devs if d["name"] == name]
+if not found:
+    sys.exit("scripts/run: no available simulator named %r; see xcrun simctl list devices available" % name)
+print(found[0]["udid"])')"
+
+xcrun simctl bootstatus "$udid" -b >/dev/null
+open -a Simulator --args -CurrentDeviceUDID "$udid"
+if [ "$reset" -eq 1 ]; then xcrun simctl uninstall "$udid" "$BUNDLE" 2>/dev/null || true; fi
+xcrun simctl install "$udid" "$app"
+xcrun simctl launch "$udid" "$BUNDLE" >/dev/null
+echo "Laoshu running on $SIM ($udid)"
