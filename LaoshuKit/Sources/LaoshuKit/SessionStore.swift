@@ -202,6 +202,22 @@ public struct SessionStore: Sendable {
         )
     }
 
+    /// Records a left swipe that did not settle the card: `wordIndex` stays
+    /// pending (`outcome` untouched, still null), only `left_swipe_count`
+    /// moves. Position is left for `rewritePendingPositions` to set.
+    public func recordLeftSwipe(sessionID: Int64, wordIndex: Int, leftSwipeCount: Int) throws {
+        try dbQueue.write { db in
+            try Self.recordLeftSwipe(db, sessionID: sessionID, wordIndex: wordIndex, leftSwipeCount: leftSwipeCount)
+        }
+    }
+
+    static func recordLeftSwipe(_ db: Database, sessionID: Int64, wordIndex: Int, leftSwipeCount: Int) throws {
+        try db.execute(
+            sql: "UPDATE session_card SET left_swipe_count = ? WHERE session_id = ? AND word_index = ?;",
+            arguments: [leftSwipeCount, sessionID, wordIndex]
+        )
+    }
+
     /// Rewrites `sessionID`'s pending queue to `order`, position `0` first.
     /// Every still-pending card not named in `order` is dropped from the
     /// queue (position set to `nil`) — a caller passes the full queue it
