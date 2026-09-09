@@ -171,6 +171,44 @@ public enum LaoshuDatabase {
                 """)
         }
 
+        // D26: the two tables a study session is kept in, so closing the app
+        // mid-session no longer loses the queue. `session_one_live_per_level`
+        // makes a second live session on the same level a failed write
+        // rather than two queues racing (D5b's reasoning applied to the
+        // session itself); `session_card_one_card_per_position` does the
+        // same for two cards claiming the same place in one session's queue.
+        migrator.registerMigration("v7_session") { db in
+            try db.execute(sql: """
+                CREATE TABLE session (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    level INTEGER NOT NULL,
+                    created_on TEXT NOT NULL,
+                    direction TEXT NOT NULL CHECK (direction IN ('receptive', 'reverse')),
+                    speak_on_flip INTEGER NOT NULL CHECK (speak_on_flip IN (0, 1)),
+                    new_words_batch_id INTEGER REFERENCES batch (id),
+                    status TEXT NOT NULL CHECK (status IN ('live', 'done', 'abandoned'))
+                );
+                """)
+            try db.execute(sql: """
+                CREATE UNIQUE INDEX session_one_live_per_level ON session (level) WHERE status = 'live';
+                """)
+            try db.execute(sql: """
+                CREATE TABLE session_card (
+                    session_id INTEGER NOT NULL REFERENCES session (id),
+                    word_index INTEGER NOT NULL,
+                    position INTEGER,
+                    left_swipe_count INTEGER NOT NULL DEFAULT 0,
+                    outcome TEXT CHECK (outcome IN ('finished', 'parked')),
+                    settled_order INTEGER,
+                    PRIMARY KEY (session_id, word_index)
+                );
+                """)
+            try db.execute(sql: """
+                CREATE UNIQUE INDEX session_card_one_card_per_position
+                    ON session_card (session_id, position) WHERE position IS NOT NULL;
+                """)
+        }
+
         return migrator
     }
 
