@@ -100,6 +100,90 @@ enum TestFixtures {
             }
         }
     }
+
+    /// Builds a review log on exactly the schema checkpoint 2 shipped —
+    /// `review`, `batch`, `batch_word` — with the given batch (and its
+    /// words) already on the ladder, and the three migrations that produce
+    /// that schema recorded in `grdb_migrations` exactly as a real upgrading
+    /// phone has them.
+    ///
+    /// The definitions here are copied by hand from checkpoint 2's shipped
+    /// migrator rather than obtained by calling into `LaoshuDatabase`'s own
+    /// (now placement-aware) migrator: a fixture built by the migrator under
+    /// test would already have the placement table and a seeded row before
+    /// the test ever opens it for real, proving nothing about the upgrade.
+    /// This is the exact defect that shipped in checkpoint 2 (see commit
+    /// 6b1b765) — a migration test whose fixture is built by the migrator
+    /// under test proves nothing about upgrades.
+    static func makeCheckpoint2ReviewLog(
+        at reviewLogURL: URL,
+        batches: [(level: Int, createdOn: LocalDate, nextLookOn: LocalDate?, lookNumber: Int, wordIndices: [Int])] = [],
+        reviewRows: [(wordIndex: Int, reviewedAt: Date, grade: Grade)] = []
+    ) throws {
+        var migrator = DatabaseMigrator()
+        migrator.registerMigration("v1_review_log") { db in
+            try db.execute(sql: """
+                CREATE TABLE IF NOT EXISTS review (
+                    word_index INTEGER NOT NULL,
+                    reviewed_at REAL NOT NULL,
+                    grade TEXT NOT NULL
+                );
+                """)
+            try db.execute(sql: "CREATE INDEX IF NOT EXISTS review_word_index ON review(word_index);")
+        }
+        migrator.registerMigration("v2_batch_tables") { db in
+            try db.execute(sql: """
+                CREATE TABLE batch (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    level INTEGER NOT NULL,
+                    created_on TEXT NOT NULL,
+                    next_look_on TEXT,
+                    look_number INTEGER NOT NULL
+                );
+                """)
+            try db.execute(sql: "CREATE INDEX batch_next_look_on ON batch(next_look_on);")
+            try db.execute(sql: """
+                CREATE TABLE batch_word (
+                    batch_id INTEGER NOT NULL REFERENCES batch(id),
+                    word_index INTEGER NOT NULL,
+                    PRIMARY KEY (batch_id, word_index)
+                );
+                """)
+        }
+        migrator.registerMigration("v3_replay_review_log_into_batches") { _ in
+            // Nothing to replay: this fixture writes batch rows directly
+            // below, standing in for whatever the real replay produced.
+        }
+
+        let dbQueue = try DatabaseQueue(path: reviewLogURL.path)
+        try migrator.migrate(dbQueue)
+
+        try dbQueue.write { db in
+            for row in reviewRows {
+                try db.execute(
+                    sql: "INSERT INTO review (word_index, reviewed_at, grade) VALUES (?, ?, ?);",
+                    arguments: [row.wordIndex, row.reviewedAt.timeIntervalSince1970, row.grade.rawValue]
+                )
+            }
+            for batch in batches {
+                try db.execute(
+                    sql: """
+                    INSERT INTO batch (level, created_on, next_look_on, look_number)
+                    VALUES (?, ?, ?, ?);
+                    """,
+                    arguments: [batch.level, batch.createdOn, batch.nextLookOn, batch.lookNumber]
+                )
+                let id = db.lastInsertedRowID
+                for wordIndex in batch.wordIndices {
+                    try db.execute(
+                        sql: "INSERT INTO batch_word (batch_id, word_index) VALUES (?, ?);",
+                        arguments: [id, wordIndex]
+                    )
+                }
+            }
+        }
+        try dbQueue.close()
+    }
 }
 
 /// A deterministic generator so a shuffled draw (D17a) is reproducible in

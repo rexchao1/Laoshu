@@ -143,12 +143,18 @@ public struct BatchStore: Sendable {
     }
 
     /// Whether any level's daily allowance of eight new words has already
-    /// been spent — a batch created today, on any level (D7).
+    /// been spent — a batch created today, on any level, that has not
+    /// retired (D7, D6). `BatchScheduler.createBatch` always sets
+    /// `next_look_on`, and `Batch.lookTaken` only nulls it on the second
+    /// look, at least eight days later, so this exclusion cannot change the
+    /// answer for any batch a study session actually created — only for a
+    /// batch retired some other way, which must not still be spending
+    /// today's allowance.
     public func hasBatchCreatedToday(today: TodayProvider) throws -> Bool {
         try dbQueue.read { db in
             try Int.fetchOne(
                 db,
-                sql: "SELECT 1 FROM batch WHERE created_on = ? LIMIT 1;",
+                sql: "SELECT 1 FROM batch WHERE created_on = ? AND next_look_on IS NOT NULL LIMIT 1;",
                 arguments: [today.today()]
             ) != nil
         }
