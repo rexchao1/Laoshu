@@ -200,3 +200,45 @@ private func fetchBatches(_ dbQueue: DatabaseQueue) throws -> [BatchRow] {
     #expect(!seen.contains(1))
     #expect(!seen.contains(2))
 }
+
+/// Checkpoint 1 created the review log with bare `CREATE TABLE IF NOT
+/// EXISTS` and recorded nothing, so a phone upgrading to checkpoint 2 has
+/// the `review` table but no `grdb_migrations` row saying v1 is done. The
+/// migrator therefore runs v1 against a database that already has the
+/// table. Before this was fixed, opening on such a phone threw "table
+/// review already exists" and the app could not start at all.
+@Test func testOpeningADatabaseBuiltBeforeMigrationsExistedSucceeds() throws {
+    let (directory, catalogueURL) = try TestFixtures.makeCatalogue(levelCounts: [1: 5])
+    let reviewLogURL = directory.appendingPathComponent("review.sqlite")
+
+    // Exactly what checkpoint 1 left behind: the schema, no migration table.
+    let legacy = try DatabaseQueue(path: reviewLogURL.path)
+    try legacy.write { db in
+        try db.execute(sql: """
+            CREATE TABLE IF NOT EXISTS review (
+                word_index INTEGER NOT NULL,
+                reviewed_at REAL NOT NULL,
+                grade TEXT NOT NULL
+            );
+            """)
+        try db.execute(sql: "CREATE INDEX IF NOT EXISTS review_word_index ON review(word_index);")
+        try db.execute(
+            sql: "INSERT INTO review (word_index, reviewed_at, grade) VALUES (?, ?, ?);",
+            arguments: [1, date(2026, 1, 1).timeIntervalSince1970, Grade.good.rawValue]
+        )
+    }
+    try legacy.close()
+
+    let today = provider(at: date(2026, 1, 2))
+    let dbQueue = try LaoshuDatabase.open(
+        catalogueURL: catalogueURL, reviewLogURL: reviewLogURL, today: today
+    )
+
+    // The old row survived, and the replay put it on the ladder.
+    let reviewCount = try dbQueue.read { try Int.fetchOne($0, sql: "SELECT count(*) FROM review") }
+    #expect(reviewCount == 1)
+
+    let batches = try fetchBatches(dbQueue)
+    #expect(batches.count == 1)
+    #expect(batches[0].createdOn == localDate(2026, 1, 1))
+}

@@ -62,15 +62,22 @@ public enum LaoshuDatabase {
     private static func migrator(today: TodayProvider) -> DatabaseMigrator {
         var migrator = DatabaseMigrator()
 
+        // `IF NOT EXISTS`, unlike every later migration, because a phone
+        // upgrading from checkpoint 1 already has these two objects: that
+        // version created them with bare `CREATE TABLE IF NOT EXISTS` and
+        // recorded nothing, so there is no `grdb_migrations` row saying v1
+        // is done and GRDB will run it. The definitions here are character
+        // for character the ones checkpoint 1 shipped, so a database that
+        // already has them is left exactly as a fresh one ends up.
         migrator.registerMigration("v1_review_log") { db in
             try db.execute(sql: """
-                CREATE TABLE review (
+                CREATE TABLE IF NOT EXISTS review (
                     word_index INTEGER NOT NULL,
                     reviewed_at REAL NOT NULL,
                     grade TEXT NOT NULL
                 );
                 """)
-            try db.execute(sql: "CREATE INDEX review_word_index ON review(word_index);")
+            try db.execute(sql: "CREATE INDEX IF NOT EXISTS review_word_index ON review(word_index);")
         }
 
         migrator.registerMigration("v2_batch_tables") { db in

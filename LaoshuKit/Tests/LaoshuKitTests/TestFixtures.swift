@@ -76,20 +76,21 @@ enum TestFixtures {
         at reviewLogURL: URL,
         rows: [(wordIndex: Int, reviewedAt: Date, grade: Grade)]
     ) throws {
-        var migrator = DatabaseMigrator()
-        migrator.registerMigration("v1_review_log") { db in
+        // Built the way checkpoint 1 built it: bare statements, run
+        // directly, with no `DatabaseMigrator` and so no `grdb_migrations`
+        // table. Going through a migrator here would stamp v1 as applied
+        // and hide the upgrade this fixture exists to reproduce.
+        let dbQueue = try DatabaseQueue(path: reviewLogURL.path)
+        try dbQueue.write { db in
             try db.execute(sql: """
-                CREATE TABLE review (
+                CREATE TABLE IF NOT EXISTS review (
                     word_index INTEGER NOT NULL,
                     reviewed_at REAL NOT NULL,
                     grade TEXT NOT NULL
                 );
                 """)
-            try db.execute(sql: "CREATE INDEX review_word_index ON review(word_index);")
+            try db.execute(sql: "CREATE INDEX IF NOT EXISTS review_word_index ON review(word_index);")
         }
-
-        let dbQueue = try DatabaseQueue(path: reviewLogURL.path)
-        try migrator.migrate(dbQueue)
         try dbQueue.write { db in
             for row in rows {
                 try db.execute(
