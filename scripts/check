@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# The routine check: import boundaries, kit tests, the gloss rules, the
-# measurements file, and the shipped database's shape. Needs swift, python3, sqlite3. No Xcode.
+# The routine check: import boundaries, documents nothing points at, kit tests,
+# the gloss rules, the measurements file, and the shipped database's shape. Needs swift, python3, sqlite3. No Xcode.
 # About 10 seconds warm; a cold swift build adds a minute or two.
 # Prints one line per step and exits 1 if any step failed.
 set -uo pipefail
@@ -24,6 +24,7 @@ db_shape() {
   [ "$bad" = 0 ] || { echo "$bad duplicated word_index values"; return 1; }
 }
 step "import boundaries  scripts/check-imports --self-test" scripts/check-imports --self-test
+step "docs reachable     scripts/check-docs.py --self-test" python3 scripts/check-docs.py --self-test
 step "kit tests          swift test --package-path LaoshuKit" swift test --package-path LaoshuKit
 step "gloss rules        python3 docs/check_glosses.py" python3 docs/check_glosses.py
 step "measurements       docs/measure.py matches docs/measurements.md" bash -c 'python3 docs/measure.py | diff - docs/measurements.md'

@@ -65,6 +65,7 @@ The one rule that shapes everything: a rule a test can check lives in `LaoshuKit
 | A rule about study, placement, progress, or storage | A test in `LaoshuKit/Tests/`, and a doc comment on the type it constrains |
 | Why a checkpoint was decided the way it was | `docs/decisions/checkpoint-NN.md`, one file per checkpoint, never rewritten |
 | A boundary or domain change | `docs/ARCHITECTURE.md`, updated in place |
+| A new document under `docs/` | Created with the line in `AGENTS.md` that says when to read it, in the same commit. `scripts/check-docs.py` fails on a document nothing points at |
 | Work that spans sessions | One file in `docs/plans/active/`, moved to `docs/plans/completed/` with a Result when done |
 | A measurement a decision cites | `docs/measure.py`, so it regenerates |
 | Ordinary completed work | The commit message |
