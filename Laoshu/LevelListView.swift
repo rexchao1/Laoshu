@@ -34,49 +34,47 @@ struct LevelListView: View {
                     ScrollView {
                         LazyVStack(spacing: 14) {
                             ForEach(summaries, id: \.level) { summary in
-                                HStack {
-                                    Button {
-                                        path.append(.study(summary.level))
-                                    } label: {
-                                        HStack {
-                                            Text("Level \(summary.level)")
-                                                .font(.body.weight(.semibold))
-                                            Spacer()
-                                            VStack(alignment: .trailing, spacing: 2) {
-                                                Text("\(summary.wordCount) words")
-                                                    .foregroundStyle(.secondary)
-                                                if summary.waitingCount > 0 {
-                                                    Text("\(summary.waitingCount) waiting")
-                                                        .font(.caption)
-                                                        .foregroundStyle(LaoshuTheme.accent)
-                                                }
+                                // Browsing a level's words is secondary to
+                                // studying it, so it lives on a long press
+                                // instead of a second button crowding the
+                                // row with its own tap target and its own
+                                // accent-coloured glyph.
+                                Button {
+                                    path.append(.study(summary.level))
+                                } label: {
+                                    HStack {
+                                        Text("Level \(summary.level)")
+                                            .font(.body.weight(.semibold))
+                                        Spacer()
+                                        VStack(alignment: .trailing, spacing: 2) {
+                                            Text("\(summary.wordCount) words")
+                                                .foregroundStyle(.secondary)
+                                            if summary.waitingCount > 0 {
+                                                Text("\(summary.waitingCount) waiting")
+                                                    .font(.caption)
+                                                    .foregroundStyle(LaoshuTheme.accent)
                                             }
                                         }
-                                        .contentShape(Rectangle())
                                     }
-                                    .buttonStyle(PressableRowStyle())
-
+                                    .padding(16)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: LaoshuTheme.cornerRadius, style: .continuous)
+                                            .fill(LaoshuTheme.cardBackground)
+                                            .shadow(color: .black.opacity(0.08), radius: 12, y: 6)
+                                    )
+                                    .contentShape(Rectangle())
+                                }
+                                .buttonStyle(PressableRowStyle())
+                                .contextMenu {
                                     Button {
                                         path.append(.browse(summary.level))
                                     } label: {
-                                        // `list.bullet` because this opens a list of
-                                        // words, and the accent because every other
-                                        // coloured thing on this screen is that green
-                                        // (D28). A borderless button tints itself
-                                        // system blue otherwise, which is the only
-                                        // blue in the app.
-                                        Image(systemName: "list.bullet")
-                                            .foregroundStyle(LaoshuTheme.accent)
+                                        Label("Browse words", systemImage: "list.bullet")
                                     }
-                                    .buttonStyle(.borderless)
-                                    .accessibilityLabel("Browse level \(summary.level)")
                                 }
-                                .padding(16)
-                                .background(
-                                    RoundedRectangle(cornerRadius: LaoshuTheme.cornerRadius, style: .continuous)
-                                        .fill(LaoshuTheme.cardBackground)
-                                        .shadow(color: .black.opacity(0.08), radius: 12, y: 6)
-                                )
+                                .accessibilityAction(named: "Browse words") {
+                                    path.append(.browse(summary.level))
+                                }
                             }
                         }
                         .padding(16)
@@ -109,12 +107,17 @@ struct LevelListView: View {
                                 // its icon alone, even under
                                 // `.labelStyle(.titleAndIcon)`, which hid the
                                 // number this checkpoint exists to show.
+                                //
+                                // `chart.bar` rather than `flame`: this button
+                                // opens the whole Progress screen, not just
+                                // the streak, and a flame reads as "streak"
+                                // alone rather than "your progress".
                                 HStack(spacing: 4) {
-                                    Image(systemName: "flame")
+                                    Image(systemName: "chart.bar")
                                     Text("\(streak.days)")
                                 }
                             } else {
-                                Image(systemName: "flame")
+                                Image(systemName: "chart.bar")
                             }
                         }
                         .accessibilityLabel(progressAccessibilityLabel)
