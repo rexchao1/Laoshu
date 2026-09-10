@@ -11,6 +11,7 @@ struct ProgressBar: View {
                 Capsule().fill(LaoshuTheme.progressTrack)
                 Capsule().fill(LaoshuTheme.accent)
                     .frame(width: geometry.size.width * min(max(progress, 0), 1))
+                    .animation(.easeOut(duration: 0.3), value: progress)
             }
         }
     }

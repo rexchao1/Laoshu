@@ -16,4 +16,7 @@ enum LaoshuTheme {
     static let progressTrack = Color("ProgressTrack")
 
     static let accent = Color(red: 0.20, green: 0.68, blue: 0.42)
+
+    /// The one corner radius every card and raised row in the app shares.
+    static let cornerRadius: CGFloat = 20
 }

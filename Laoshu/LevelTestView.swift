@@ -67,9 +67,12 @@ struct LevelTestView: View {
             CardView(
                 card: card,
                 voiceAvailable: speaker.voiceAvailable,
+                dragAmount: dragOffset.width / swipeThreshold,
                 onFlip: {
                     let isFirstReveal = !card.isFlipped && !card.hasBeenRevealed
-                    test.flipCurrentCard()
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        test.flipCurrentCard()
+                    }
                     if isFirstReveal && test.speakOnFlip {
                         speaker.speak(card.word.hanzi, voiceIdentifier: voiceIdentifier, rate: speechRate)
                     }
@@ -81,7 +84,9 @@ struct LevelTestView: View {
             .offset(dragOffset)
             .rotationEffect(.degrees(Double(dragOffset.width / 20)))
             .gesture(dragGesture(test: test))
-            .animation(.interactiveSpring(), value: dragOffset)
+            .animation(.interactiveSpring(response: 0.35, dampingFraction: 0.82), value: dragOffset)
+            .sensoryFeedback(.selection, trigger: card.isFlipped)
+            .sensoryFeedback(.impact(weight: .light), trigger: card.word.hanzi)
 
             VStack(spacing: 6) {
                 if let swipeError {

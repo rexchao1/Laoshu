@@ -31,46 +31,56 @@ struct LevelListView: View {
                 if let loadError {
                     DatabaseErrorView(message: loadError)
                 } else {
-                    List(summaries, id: \.level) { summary in
-                        HStack {
-                            Button {
-                                path.append(.study(summary.level))
-                            } label: {
+                    ScrollView {
+                        LazyVStack(spacing: 14) {
+                            ForEach(summaries, id: \.level) { summary in
                                 HStack {
-                                    Text("Level \(summary.level)")
-                                    Spacer()
-                                    VStack(alignment: .trailing, spacing: 2) {
-                                        Text("\(summary.wordCount) words")
-                                            .foregroundStyle(.secondary)
-                                        if summary.waitingCount > 0 {
-                                            Text("\(summary.waitingCount) waiting")
-                                                .font(.caption)
-                                                .foregroundStyle(LaoshuTheme.accent)
+                                    Button {
+                                        path.append(.study(summary.level))
+                                    } label: {
+                                        HStack {
+                                            Text("Level \(summary.level)")
+                                                .font(.body.weight(.semibold))
+                                            Spacer()
+                                            VStack(alignment: .trailing, spacing: 2) {
+                                                Text("\(summary.wordCount) words")
+                                                    .foregroundStyle(.secondary)
+                                                if summary.waitingCount > 0 {
+                                                    Text("\(summary.waitingCount) waiting")
+                                                        .font(.caption)
+                                                        .foregroundStyle(LaoshuTheme.accent)
+                                                }
+                                            }
                                         }
+                                        .contentShape(Rectangle())
                                     }
-                                }
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
+                                    .buttonStyle(.plain)
 
-                            Button {
-                                path.append(.browse(summary.level))
-                            } label: {
-                                // `list.bullet` because this opens a list of
-                                // words, and the accent because every other
-                                // coloured thing on this screen is that green
-                                // (D28). A borderless button tints itself
-                                // system blue otherwise, which is the only
-                                // blue in the app.
-                                Image(systemName: "list.bullet")
-                                    .foregroundStyle(LaoshuTheme.accent)
+                                    Button {
+                                        path.append(.browse(summary.level))
+                                    } label: {
+                                        // `list.bullet` because this opens a list of
+                                        // words, and the accent because every other
+                                        // coloured thing on this screen is that green
+                                        // (D28). A borderless button tints itself
+                                        // system blue otherwise, which is the only
+                                        // blue in the app.
+                                        Image(systemName: "list.bullet")
+                                            .foregroundStyle(LaoshuTheme.accent)
+                                    }
+                                    .buttonStyle(.borderless)
+                                    .accessibilityLabel("Browse level \(summary.level)")
+                                }
+                                .padding(16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: LaoshuTheme.cornerRadius, style: .continuous)
+                                        .fill(LaoshuTheme.cardBackground)
+                                        .shadow(color: .black.opacity(0.08), radius: 12, y: 6)
+                                )
                             }
-                            .buttonStyle(.borderless)
-                            .accessibilityLabel("Browse level \(summary.level)")
                         }
+                        .padding(16)
                     }
-                    .listStyle(.plain)
-                    .scrollContentBackground(.hidden)
                     .background(LaoshuTheme.background)
                     .navigationDestination(for: LevelDestination.self) { destination in
                         switch destination {

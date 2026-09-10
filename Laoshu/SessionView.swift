@@ -79,13 +79,16 @@ struct SessionView: View {
             CardView(
                 card: card,
                 voiceAvailable: speaker.voiceAvailable,
+                dragAmount: dragOffset.width / swipeThreshold,
                 onFlip: {
                     // Auto-play belongs to the reveal, not to every turn of
                     // the card (D7a). `card` is this presentation's state
                     // before the flip, so both flags being false means this
                     // tap is the first look at the meaning.
                     let isFirstReveal = !card.isFlipped && !card.hasBeenRevealed
-                    session.flipCurrentCard()
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        session.flipCurrentCard()
+                    }
                     if isFirstReveal && session.speakOnFlip {
                         speaker.speak(card.word.hanzi, voiceIdentifier: voiceIdentifier, rate: speechRate)
                     }
@@ -97,7 +100,9 @@ struct SessionView: View {
             .offset(dragOffset)
             .rotationEffect(.degrees(Double(dragOffset.width / 20)))
             .gesture(dragGesture(session: session))
-            .animation(.interactiveSpring(), value: dragOffset)
+            .animation(.interactiveSpring(response: 0.35, dampingFraction: 0.82), value: dragOffset)
+            .sensoryFeedback(.selection, trigger: card.isFlipped)
+            .sensoryFeedback(.impact(weight: .light), trigger: card.word.hanzi)
 
             VStack(spacing: 6) {
                 if let swipeError {
