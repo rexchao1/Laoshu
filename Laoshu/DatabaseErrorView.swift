@@ -8,9 +8,7 @@ struct DatabaseErrorView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.largeTitle)
-                .foregroundStyle(.secondary)
+            IconBadge(systemName: "exclamationmark.triangle", tint: .secondary)
             Text("Couldn't open the word list")
                 .font(.headline)
             Text(message)

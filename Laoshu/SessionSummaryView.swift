@@ -12,6 +12,9 @@ struct SessionSummaryView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
+            IconBadge(systemName: "checkmark.circle.fill")
+                .frame(maxWidth: .infinity, alignment: .center)
+
             Text("Session complete")
                 .font(.title2.weight(.semibold))
 

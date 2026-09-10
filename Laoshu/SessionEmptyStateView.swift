@@ -16,9 +16,7 @@ struct SessionEmptyStateView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            Image(systemName: iconName)
-                .font(.largeTitle)
-                .foregroundStyle(LaoshuTheme.accent)
+            IconBadge(systemName: iconName)
 
             Text(headline)
                 .font(.title3.weight(.semibold))

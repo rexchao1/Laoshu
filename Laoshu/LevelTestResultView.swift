@@ -11,9 +11,7 @@ struct LevelTestResultView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Image(systemName: result.passed ? "checkmark.seal.fill" : "seal")
-                .font(.largeTitle)
-                .foregroundStyle(LaoshuTheme.accent)
+            IconBadge(systemName: result.passed ? "checkmark.seal.fill" : "seal")
 
             Text(result.passed ? "Passed" : "Not this time")
                 .font(.title2.weight(.semibold))

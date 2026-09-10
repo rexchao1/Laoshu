@@ -54,7 +54,7 @@ struct LevelListView: View {
                                         }
                                         .contentShape(Rectangle())
                                     }
-                                    .buttonStyle(.plain)
+                                    .buttonStyle(PressableRowStyle())
 
                                     Button {
                                         path.append(.browse(summary.level))
@@ -124,7 +124,11 @@ struct LevelListView: View {
                     Button {
                         showPlacementTest = true
                     } label: {
-                        Image(systemName: "checklist")
+                        // `graduationcap` rather than `checklist`: the level
+                        // row's own Browse button already uses a list glyph
+                        // (`list.bullet`), and a second list-shaped icon here
+                        // read as the same feature.
+                        Image(systemName: "graduationcap")
                     }
                     .accessibilityLabel("Take placement test")
                 }
@@ -219,5 +223,16 @@ struct LevelListView: View {
         case 1: return "Progress, 1 day studied"
         case let n: return "Progress, \(n) days studied"
         }
+    }
+}
+
+/// A level row dims and shrinks slightly while pressed, so tapping it feels
+/// like pressing something rather than just triggering navigation.
+private struct PressableRowStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .opacity(configuration.isPressed ? 0.7 : 1)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
 }

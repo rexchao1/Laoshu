@@ -19,6 +19,9 @@ struct PlacementResultView: View {
         VStack(alignment: .leading, spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
+                    IconBadge(systemName: "checkmark.circle.fill")
+                        .frame(maxWidth: .infinity, alignment: .center)
+
                     Text("Placement complete")
                         .font(.title2.weight(.semibold))
 
