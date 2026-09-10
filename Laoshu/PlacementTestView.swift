@@ -64,11 +64,6 @@ struct PlacementTestView: View {
 
     private func testBody(session: PlacementSession, word: Word) -> some View {
         VStack(spacing: 20) {
-            ProgressBar(progress: Double(session.wordsAnswered) / Double(PlacementTest.wordCeiling))
-                .frame(height: 6)
-                .padding(.horizontal)
-                .padding(.top, 8)
-
             Spacer()
 
             PlacementCardView(word: word, dragAmount: dragOffset.width / swipeThreshold)
