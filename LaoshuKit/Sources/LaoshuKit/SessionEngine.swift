@@ -22,9 +22,10 @@ public enum CardFace: Sendable, Equatable {
 /// `false` whenever the card goes back into the queue after a left swipe.
 ///
 /// D26a: flipping is free in both directions, so `isFlipped` says only which
-/// face is showing right now. What gates a swipe is `hasBeenRevealed`, which
-/// turns true on the first flip to the back and stays true until a requeue.
-/// The two differ as soon as the card is flipped back to re-read the pinyin.
+/// face is showing right now. `hasBeenRevealed` turns true on the first flip
+/// to the back and stays true until a requeue; the view uses it to decide
+/// whether a flip is the first look at the answer (and so should speak it),
+/// not to gate a swipe, which is free at any point, flipped or not.
 public struct Card: Sendable, Equatable {
     public let word: Word
 

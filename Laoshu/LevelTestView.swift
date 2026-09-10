@@ -80,7 +80,7 @@ struct LevelTestView: View {
             )
             .offset(dragOffset)
             .rotationEffect(.degrees(Double(dragOffset.width / 20)))
-            .gesture(dragGesture(test: test, card: card))
+            .gesture(dragGesture(test: test))
             .animation(.interactiveSpring(), value: dragOffset)
 
             VStack(spacing: 6) {
@@ -139,19 +139,14 @@ struct LevelTestView: View {
         }
     }
 
-    /// Gated on a reveal exactly like a study session's card (D26, D26a in
-    /// `SessionView`): no grading a card whose answer was never shown.
-    private func dragGesture(test: LevelTest, card: Card) -> some Gesture {
+    /// A swipe grades the card whether or not it has been flipped, same as
+    /// `SessionView`'s drag gesture.
+    private func dragGesture(test: LevelTest) -> some Gesture {
         DragGesture()
             .onChanged { value in
-                guard card.hasBeenRevealed else { return }
                 dragOffset = value.translation
             }
             .onEnded { value in
-                guard card.hasBeenRevealed else {
-                    dragOffset = .zero
-                    return
-                }
                 if value.translation.width > swipeThreshold {
                     dragOffset = .zero
                     record(test: test, .right)

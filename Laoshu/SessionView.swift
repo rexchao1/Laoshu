@@ -96,7 +96,7 @@ struct SessionView: View {
             )
             .offset(dragOffset)
             .rotationEffect(.degrees(Double(dragOffset.width / 20)))
-            .gesture(dragGesture(session: session, card: card))
+            .gesture(dragGesture(session: session))
             .animation(.interactiveSpring(), value: dragOffset)
 
             VStack(spacing: 6) {
@@ -204,23 +204,15 @@ struct SessionView: View {
         }
     }
 
-    /// Ignores the gesture entirely until the meaning has been shown once
-    /// (D26, D26a): no movement, no advance, no write. The gate is
-    /// `hasBeenRevealed` rather than `isFlipped`, so flipping back to re-read
-    /// the pinyin does not take away the ability to grade a word already
-    /// seen, while a card whose answer was never shown still cannot be
-    /// graded.
-    private func dragGesture(session: Session, card: Card) -> some Gesture {
+    /// A swipe grades the card whether or not it has been flipped: the
+    /// player may already know the answer from the prompt alone and swipe
+    /// straight through, so the gesture is never gated on `hasBeenRevealed`.
+    private func dragGesture(session: Session) -> some Gesture {
         DragGesture()
             .onChanged { value in
-                guard card.hasBeenRevealed else { return }
                 dragOffset = value.translation
             }
             .onEnded { value in
-                guard card.hasBeenRevealed else {
-                    dragOffset = .zero
-                    return
-                }
                 if value.translation.width > swipeThreshold {
                     dragOffset = .zero
                     record(session: session, .right)
