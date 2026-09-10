@@ -29,6 +29,7 @@ struct SessionView: View {
             } else if let session {
                 if let card = session.currentCard {
                     sessionBody(session: session, card: card)
+                        .transition(.opacity)
                 } else if session.emptyReason != nil {
                     SessionEmptyStateView(
                         session: session,
@@ -36,8 +37,10 @@ struct SessionView: View {
                         onDrawMore: drawMore,
                         onTakeLevelTest: { showLevelTest = true }
                     )
+                    .transition(.opacity)
                 } else {
                     SessionSummaryView(session: session, onDrawMore: drawMore)
+                        .transition(.opacity)
                 }
             } else {
                 ProgressView()
@@ -202,7 +205,9 @@ struct SessionView: View {
     private func record(session: Session, _ direction: SwipeDirection) {
         do {
             swipeError = nil
-            try session.swipe(direction)
+            try withAnimation(.easeInOut(duration: 0.25)) {
+                try session.swipe(direction)
+            }
             showsResumedNotice = false
         } catch {
             swipeError = "That swipe was not saved. \(error.localizedDescription)"

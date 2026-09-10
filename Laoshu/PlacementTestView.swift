@@ -36,8 +36,10 @@ struct PlacementTestView: View {
                             knownWords: session.knownWords,
                             onDone: { onFinished(recommendedLevel) }
                         )
+                        .transition(.opacity)
                     } else if let word = session.currentWord {
                         testBody(session: session, word: word)
+                            .transition(.opacity)
                     } else {
                         ProgressView()
                     }
@@ -69,11 +71,12 @@ struct PlacementTestView: View {
 
             Spacer()
 
-            PlacementCardView(word: word)
+            PlacementCardView(word: word, dragAmount: dragOffset.width / swipeThreshold)
                 .offset(dragOffset)
                 .rotationEffect(.degrees(Double(dragOffset.width / 20)))
                 .gesture(dragGesture(session: session))
-                .animation(.interactiveSpring(), value: dragOffset)
+                .animation(.interactiveSpring(response: 0.35, dampingFraction: 0.82), value: dragOffset)
+                .sensoryFeedback(.impact(weight: .light), trigger: word.wordIndex)
 
             VStack(spacing: 6) {
                 if let swipeError {
@@ -110,7 +113,9 @@ struct PlacementTestView: View {
     private func record(session: PlacementSession, _ answer: PlacementAnswer) {
         do {
             swipeError = nil
-            try session.answer(answer)
+            try withAnimation(.easeInOut(duration: 0.25)) {
+                try session.answer(answer)
+            }
         } catch {
             swipeError = "That answer was not saved. \(error.localizedDescription)"
         }

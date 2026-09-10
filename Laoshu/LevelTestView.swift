@@ -30,8 +30,10 @@ struct LevelTestView: View {
                 } else if let test {
                     if let result = test.result {
                         LevelTestResultView(result: result, onDone: onDone)
+                            .transition(.opacity)
                     } else if let card = test.currentCard {
                         testBody(test: test, card: card)
+                            .transition(.opacity)
                     } else {
                         ProgressView()
                     }
@@ -138,7 +140,9 @@ struct LevelTestView: View {
     private func record(test: LevelTest, _ direction: SwipeDirection) {
         do {
             swipeError = nil
-            try test.answer(direction)
+            try withAnimation(.easeInOut(duration: 0.25)) {
+                try test.answer(direction)
+            }
         } catch {
             swipeError = "That answer was not saved. \(error.localizedDescription)"
         }
