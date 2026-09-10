@@ -92,9 +92,7 @@ struct SettingsScreen: View {
                         }
                     }
                 }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
-                .background(LaoshuTheme.background)
+                .listStyle(.insetGrouped)
             }
         }
         .navigationTitle("Settings")
