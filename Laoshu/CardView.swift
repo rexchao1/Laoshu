@@ -24,7 +24,7 @@ struct CardView: View {
         .frame(maxWidth: .infinity, minHeight: 260)
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(.white)
+                .fill(LaoshuTheme.cardBackground)
                 .shadow(color: .black.opacity(0.12), radius: 14, y: 8)
         )
         .contentShape(Rectangle())

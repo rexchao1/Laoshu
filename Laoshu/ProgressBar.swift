@@ -8,7 +8,7 @@ struct ProgressBar: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
-                Capsule().fill(Color.black.opacity(0.08))
+                Capsule().fill(LaoshuTheme.progressTrack)
                 Capsule().fill(LaoshuTheme.accent)
                     .frame(width: geometry.size.width * min(max(progress, 0), 1))
             }
