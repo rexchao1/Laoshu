@@ -438,13 +438,13 @@ private func localDate(_ year: Int, _ month: Int, _ day: Int) -> LocalDate {
     #expect(first == second)
 }
 
-@Test func testSessionCapsDueBatchesAtThreeAndCarriesTheRestOver() throws {
+@Test func testMissedDaysSkipOverdueLooksInsteadOfPilingThemIntoTheSession() throws {
     let dbQueue = try TestFixtures.makeDatabase(wordCount: 10)
     let store = BatchStore(dbQueue: dbQueue)
 
-    // Five batches, each due a day later than the last, so all five are
-    // overdue by the time the session draws — the backlog route line 10
-    // exists for — and `next_look_on` breaks the tie deterministically.
+    // Five batches, each due a day later than the last. By the 20th every
+    // look is in the past — the pile a missed-day catch-up would dump into
+    // one session.
     let batchA = try store.createBatch(level: 1, wordIndices: [1, 2], today: provider(at: date(2026, 1, 1)))
     let batchB = try store.createBatch(level: 1, wordIndices: [3, 4], today: provider(at: date(2026, 1, 2)))
     let batchC = try store.createBatch(level: 1, wordIndices: [5, 6], today: provider(at: date(2026, 1, 3)))
@@ -455,25 +455,55 @@ private func localDate(_ year: Int, _ month: Int, _ day: Int) -> LocalDate {
     let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: farLater)
     let session = try engine.startSession(level: 1)
 
-    // Only the three oldest-due batches' six words are drawn; nothing is
-    // left unseen to draw as new on top of them.
-    #expect(session.drawnCount == 6)
+    // Nothing is due today and nothing is unseen, so the session is empty
+    // rather than holding the five overdue batches.
+    #expect(session.drawnCount == 0)
+    #expect(session.emptyReason == .waitingOnLadder)
+    #expect(session.nextBatchReturnOn == localDate(2026, 1, 27))
+    #expect(try store.dueBatches(level: 1, today: farLater).isEmpty)
+
+    // Each missed first look was taken as of today, so the second look is
+    // seven days out rather than still sitting due.
+    for batch in [batchA, batchB, batchC, batchD, batchE] {
+        let batchID = try #require(batch.id)
+        let fetched = try #require(try store.fetchBatch(id: batchID))
+        #expect(fetched.lookNumber == 1)
+        #expect(fetched.nextLookOn == localDate(2026, 1, 27))
+    }
+}
+
+@Test func testMissedDaysDoNotAddExtraNewWordsOnTopOfTheDailyAllowance() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 30)
+    let store = BatchStore(dbQueue: dbQueue)
+    try store.createBatch(level: 1, wordIndices: [1, 2, 3], today: provider(at: date(2026, 1, 1)))
+
+    // Three days after the first look was due: a catch-up would add the
+    // overdue three plus several days of new words. A day is still eight
+    // new ones, and the overdue look is skipped rather than drawn.
+    let later = provider(at: date(2026, 1, 5))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: later)
+    let session = try engine.startSession(level: 1)
+
+    #expect(session.drawnCount == 8)
     var seen: [Int] = []
     while let card = session.currentCard {
         seen.append(card.word.wordIndex)
         try session.swipe(.right)
     }
-    #expect(Set(seen) == Set([1, 2, 3, 4, 5, 6]))
+    #expect(Set(seen).isDisjoint(with: [1, 2, 3]))
+    #expect(Set(seen).count == 8)
+}
 
-    // D and E were never touched: still due, still on their first look,
-    // ready to be picked up by a later session.
-    let stillDue = try store.dueBatches(level: 1, today: farLater)
-    #expect(stillDue.map(\.id) == [batchD.id, batchE.id])
-    #expect(stillDue.allSatisfy { $0.lookNumber == 0 })
+@Test func testLevelSummariesDoNotCountOverdueBatchesAsWaiting() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 20)
+    let store = BatchStore(dbQueue: dbQueue)
+    try store.createBatch(level: 1, wordIndices: [1, 2, 3], today: provider(at: date(2026, 1, 1)))
 
-    // A, B and C actually advanced.
-    let noLongerDue = try store.dueBatches(level: 1, today: farLater).map(\.id)
-    #expect(![batchA.id, batchB.id, batchC.id].contains { noLongerDue.contains($0) })
+    let later = provider(at: date(2026, 1, 5))
+    let engine = TestFixtures.makeEngine(dbQueue: dbQueue, today: later)
+    let summaries = try engine.levelSummaries()
+
+    #expect(summaries.first { $0.level == 1 }?.waitingCount == 0)
 }
 
 @Test func testWordParkedByThreeLeftSwipesIsNeverDrawnAsNewAgain() throws {

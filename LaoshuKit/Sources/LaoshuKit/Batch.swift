@@ -21,11 +21,13 @@ public struct Batch: Sendable, Equatable {
 
     public var isRetired: Bool { nextLookOn == nil }
 
-    /// Whether this batch is up on `today` — due once, not before, and never
-    /// again once it has retired.
+    /// Whether this batch is up on `today` — due that day, not the days
+    /// after if the look was missed, and never again once it has retired.
+    /// Missed looks are skipped by `BatchStore.dropMissedLooks` rather than
+    /// left due so they cannot pile into a later session.
     public func isDue(on today: LocalDate) -> Bool {
         guard let nextLookOn else { return false }
-        return nextLookOn <= today
+        return nextLookOn == today
     }
 
     /// Advances the ladder after a look actually taken on `today` (D2). D4:

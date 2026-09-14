@@ -379,8 +379,8 @@ public final class Session {
 /// A level as it appears on the level list: its number, how many words the
 /// catalogue holds for it regardless of review state (D3), and how many of
 /// those are waiting today — held by a batch of that level whose look is due
-/// on or before today. `waitingCount` never counts the eight new words a
-/// session would add.
+/// today. Missed looks from earlier days are not waiting. `waitingCount`
+/// never counts the eight new words a session would add.
 public struct LevelSummary: Sendable, Equatable {
     public let level: Int
     public let wordCount: Int
@@ -413,19 +413,6 @@ public struct BrowseResult: Sendable, Equatable {
 
 /// Decides which words come next and hands out sessions.
 public final class SessionEngine {
-    /// Route line 10: the most due batches one session draws from a level.
-    /// A steady-state day is due at most two — yesterday's new batch at its
-    /// first look, and a batch from eight days ago at its second — so this
-    /// never touches ordinary use. A longer absence can leave many more due
-    /// at once (checkpoint 2 D8's example: a week away backlogs seven
-    /// batches, 56 words, on top of the day's eight new ones); capping the
-    /// draw at three spreads that across a few sessions instead of one,
-    /// picking the oldest-due batches first since `BatchStore.dueBatches`
-    /// already orders that way. The batches left uncapped are not touched in
-    /// any way — not advanced, not marked — so they stay exactly as due as
-    /// they were and the next session's draw picks them up the same way.
-    static let maxDueBatchesPerSession = 3
-
     private let dbQueue: DatabaseQueue
     public let reviewLog: ReviewLog
     private let batchStore: BatchStore
@@ -456,6 +443,7 @@ public final class SessionEngine {
     /// rollover or a session held elsewhere can change the answer between
     /// calls.
     public func levelSummaries() throws -> [LevelSummary] {
+        try batchStore.dropMissedLooks(today: today)
         let now = today.today()
         return try dbQueue.read { db in
             let counts = try Row.fetchAll(
@@ -468,7 +456,7 @@ public final class SessionEngine {
                 SELECT b.level AS level, COUNT(*) AS waiting_count
                 FROM batch b
                 JOIN batch_word bw ON bw.batch_id = b.id
-                WHERE b.next_look_on IS NOT NULL AND b.next_look_on <= ?
+                WHERE b.next_look_on IS NOT NULL AND b.next_look_on = ?
                 GROUP BY b.level;
                 """,
                 arguments: [now]
@@ -487,13 +475,13 @@ public final class SessionEngine {
         }
     }
 
-    /// Composes a session on `level`: the oldest `maxDueBatchesPerSession`
-    /// batches on `level` whose look is due on or before today, plus up to
-    /// eight new words if the day's allowance hasn't been spent by another
-    /// level (D5, D6, D7), all shuffled together into one pool (D6) with the
-    /// injectable generator (D17a). Any due batches past the cap are left
-    /// alone rather than drawn, so a backlog is spread across sessions
-    /// instead of dumped into one.
+    /// Composes a session on `level`: every batch on `level` whose look is
+    /// due today, plus up to eight new words if the day's allowance hasn't
+    /// been spent by another level (D5, D6, D7), all shuffled together into
+    /// one pool (D6) with the injectable generator (D17a). Looks missed on
+    /// earlier days are skipped rather than drawn, so a gap does not pile
+    /// extra words onto today. Extra new words still come only from
+    /// `startBonusSession`.
     ///
     /// A word counts as introduced once it belongs to any batch, not once a
     /// review row exists (D14) — a word parked by three left swipes is in
@@ -515,7 +503,8 @@ public final class SessionEngine {
             try sessionStore.setStatus(sessionID: liveID, status: .abandoned)
         }
 
-        let dueBatches = try batchStore.dueBatches(level: level, today: today).prefix(Self.maxDueBatchesPerSession)
+        try batchStore.dropMissedLooks(today: today)
+        let dueBatches = try batchStore.dueBatches(level: level, today: today)
         let dueBatchIDs = dueBatches.compactMap(\.id)
         let dueWordIndices = try batchStore.wordIndices(batchIDs: dueBatchIDs)
 
@@ -635,6 +624,7 @@ public final class SessionEngine {
     /// resumable session is never destroyed for a draw that hands back
     /// nothing.
     public func startBonusSession(level: Int) throws -> Session {
+        try batchStore.dropMissedLooks(today: today)
         let preferences = try preferenceStore.preferences()
         let unseenPool = try batchStore.unseenWordIndices(level: level)
         let newWordIndices = Array(unseenPool.shuffled(using: &rng).prefix(preferences.newWordsPerDay))

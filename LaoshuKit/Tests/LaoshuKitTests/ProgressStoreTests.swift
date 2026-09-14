@@ -103,8 +103,9 @@ private func progress(for level: Int, in all: [LevelProgress]) throws -> LevelPr
     #expect(level1.learnedCount + level1.inProgressCount + level1.leftCount == level1.wordCount)
 }
 
-/// A batch whose look is overdue reads waiting (D13).
-@Test func testBatchWhoseLookIsOverdueReadsWaiting() throws {
+/// A batch whose look is overdue is still in progress, but it is not
+/// waiting: missed days do not pile those words onto today.
+@Test func testBatchWhoseLookIsOverdueDoesNotReadWaiting() throws {
     let dbQueue = try TestFixtures.makeDatabase(wordCount: 5, level: 1)
     let day0 = provider(at: date(2026, 1, 1))
     let wellPast = provider(at: date(2026, 3, 1))
@@ -113,7 +114,7 @@ private func progress(for level: Int, in all: [LevelProgress]) throws -> LevelPr
     let all = try ProgressStore(dbQueue: dbQueue, today: wellPast).progress()
     let level1 = try progress(for: 1, in: all)
 
-    #expect(level1.waitingCount == 1)
+    #expect(level1.waitingCount == 0)
     #expect(level1.inProgressCount == 1)
     #expect(level1.learnedCount + level1.inProgressCount + level1.leftCount == level1.wordCount)
 }

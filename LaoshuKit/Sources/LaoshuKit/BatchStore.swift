@@ -150,8 +150,41 @@ public struct BatchStore: Sendable {
         try dbQueue.read { db in try Self.fetchBatch(db, id: id) }
     }
 
+    /// Looks whose due date is already behind `today` are skipped, not
+    /// queued. A missed first look is taken as of today so the second look
+    /// falls seven days out; a missed second look retires the batch. Looks
+    /// due today are left alone.
+    public func dropMissedLooks(today: TodayProvider) throws {
+        try dbQueue.write { db in
+            try Self.dropMissedLooks(db, today: today)
+        }
+    }
+
+    /// The raw update, scoped to a `Database` already inside a transaction.
+    static func dropMissedLooks(_ db: Database, today: TodayProvider) throws {
+        let now = today.today()
+        let overdue = try Row.fetchAll(
+            db,
+            sql: """
+            SELECT id, level, created_on, next_look_on, look_number
+            FROM batch
+            WHERE next_look_on IS NOT NULL AND next_look_on < ?;
+            """,
+            arguments: [now]
+        ).map(Self.batch(from:))
+
+        for batch in overdue {
+            guard let id = batch.id else { continue }
+            let advanced = batch.lookTaken(on: now)
+            try db.execute(
+                sql: "UPDATE batch SET next_look_on = ?, look_number = ? WHERE id = ?;",
+                arguments: [advanced.nextLookOn, advanced.lookNumber, id]
+            )
+        }
+    }
+
     /// Every batch due on `today`, across all levels: not retired, and its
-    /// next look is on or before today.
+    /// next look is today. Looks missed on earlier days are not due.
     public func dueBatches(today: TodayProvider) throws -> [Batch] {
         let now = today.today()
         return try dbQueue.read { db in
@@ -160,7 +193,7 @@ public struct BatchStore: Sendable {
                 sql: """
                 SELECT id, level, created_on, next_look_on, look_number
                 FROM batch
-                WHERE next_look_on IS NOT NULL AND next_look_on <= ?
+                WHERE next_look_on IS NOT NULL AND next_look_on = ?
                 ORDER BY next_look_on ASC;
                 """,
                 arguments: [now]
@@ -169,7 +202,8 @@ public struct BatchStore: Sendable {
     }
 
     /// Every batch due on `today` on `level` — what a session's draw holds
-    /// in full alongside the day's new words (D6).
+    /// in full alongside the day's new words (D6). Looks missed on earlier
+    /// days are not due.
     public func dueBatches(level: Int, today: TodayProvider) throws -> [Batch] {
         let now = today.today()
         return try dbQueue.read { db in
@@ -178,7 +212,7 @@ public struct BatchStore: Sendable {
                 sql: """
                 SELECT id, level, created_on, next_look_on, look_number
                 FROM batch
-                WHERE level = ? AND next_look_on IS NOT NULL AND next_look_on <= ?
+                WHERE level = ? AND next_look_on IS NOT NULL AND next_look_on = ?
                 ORDER BY next_look_on ASC;
                 """,
                 arguments: [level, now]

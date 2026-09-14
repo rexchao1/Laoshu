@@ -34,6 +34,14 @@ private func localDate(_ year: Int, _ month: Int, _ day: Int) -> LocalDate {
     #expect(batch.isDue(on: day1) == true)
 }
 
+@Test func testBatchIsNotDueOnADayAfterItsLookWasMissed() throws {
+    let batch = BatchScheduler.createBatch(level: 1, today: provider(at: date(2026, 1, 1)))
+
+    #expect(batch.isDue(on: localDate(2026, 1, 2)) == true)
+    #expect(batch.isDue(on: localDate(2026, 1, 3)) == false)
+    #expect(batch.isDue(on: localDate(2026, 1, 10)) == false)
+}
+
 @Test func testBatchIsNotUpAgainUntilDayEightAfterAnOnTimeFirstLook() throws {
     let day1 = localDate(2026, 1, 2)
     let batch = BatchScheduler.createBatch(level: 1, today: provider(at: date(2026, 1, 1)))
@@ -270,4 +278,48 @@ private func localDate(_ year: Int, _ month: Int, _ day: Int) -> LocalDate {
     let day8 = provider(at: date(2026, 1, 9))
     try store.recordLook(batchID: batchID, today: day8)
     #expect(try store.hasActiveBatch(level: 1) == false)
+}
+
+@Test func testDropMissedLooksAdvancesOverdueFirstLooksAndLeavesTodayAlone() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let store = BatchStore(dbQueue: dbQueue)
+
+    let overdue = try store.createBatch(level: 1, wordIndices: [1], today: provider(at: date(2026, 1, 1)))
+    let dueToday = try store.createBatch(level: 1, wordIndices: [2], today: provider(at: date(2026, 1, 4)))
+    let today = provider(at: date(2026, 1, 5))
+
+    try store.dropMissedLooks(today: today)
+
+    let overdueID = try #require(overdue.id)
+    let skipped = try #require(try store.fetchBatch(id: overdueID))
+    #expect(skipped.lookNumber == 1)
+    #expect(skipped.nextLookOn == localDate(2026, 1, 12))
+
+    let dueTodayID = try #require(dueToday.id)
+    let stillDue = try #require(try store.fetchBatch(id: dueTodayID))
+    #expect(stillDue.lookNumber == 0)
+    #expect(stillDue.nextLookOn == localDate(2026, 1, 5))
+    #expect(try store.dueBatches(today: today).map(\.id) == [dueToday.id])
+}
+
+@Test func testDropMissedLooksRetiresAnOverdueSecondLook() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let store = BatchStore(dbQueue: dbQueue)
+    let created = try store.createBatch(level: 1, wordIndices: [1], today: provider(at: date(2026, 1, 1)))
+    let batchID = try #require(created.id)
+    try store.recordLook(batchID: batchID, today: provider(at: date(2026, 1, 2)))
+
+    try store.dropMissedLooks(today: provider(at: date(2026, 1, 20)))
+
+    let fetched = try #require(try store.fetchBatch(id: batchID))
+    #expect(fetched.isRetired == true)
+}
+
+@Test func testDueBatchesOnALaterDayDoNotIncludeAMissedLook() throws {
+    let dbQueue = try TestFixtures.makeDatabase(wordCount: 8)
+    let store = BatchStore(dbQueue: dbQueue)
+    try store.createBatch(level: 1, wordIndices: [1], today: provider(at: date(2026, 1, 1)))
+
+    #expect(try store.dueBatches(today: provider(at: date(2026, 1, 2))).count == 1)
+    #expect(try store.dueBatches(today: provider(at: date(2026, 1, 3))).isEmpty)
 }

@@ -51,8 +51,8 @@ public struct ProgressStore: Sendable {
     /// `Batch.retiredForStaleness` wrote that NULL, and regardless of how
     /// many other retired batches also carry the word (D16). D12: a word
     /// with no batch at all is left. D13: waiting counts a word once, over
-    /// batches whose look is due on or before today. D14: waiting is a
-    /// subset of in progress, never added to it.
+    /// batches whose look is due today. Missed looks from earlier days are
+    /// not waiting. D14: waiting is a subset of in progress, never added to it.
     public func progress() throws -> [LevelProgress] {
         let now = today.today()
         return try dbQueue.read { db in
@@ -68,7 +68,7 @@ public struct ProgressStore: Sendable {
                     b.level AS level,
                     bw.word_index AS word_index,
                     MAX(CASE WHEN b.next_look_on IS NOT NULL THEN 1 ELSE 0 END) AS has_active,
-                    MAX(CASE WHEN b.next_look_on IS NOT NULL AND b.next_look_on <= ? THEN 1 ELSE 0 END) AS is_waiting
+                    MAX(CASE WHEN b.next_look_on IS NOT NULL AND b.next_look_on = ? THEN 1 ELSE 0 END) AS is_waiting
                 FROM batch_word bw
                 JOIN batch b ON b.id = bw.batch_id
                 GROUP BY b.level, bw.word_index;
